@@ -19,6 +19,7 @@ export function TripResults({
       (t) =>
         t.origin === search.from &&
         t.destination === search.to &&
+        t.seatCount >= search.adults &&
         dateInIndia(t.departureAt) === search.date,
     )
     .sort((a, b) =>

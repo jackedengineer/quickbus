@@ -94,10 +94,8 @@ function Home() {
   const { session, trips, today } = Route.useLoaderData(),
     search = Route.useSearch(),
     navigate = Route.useNavigate();
-  const [accountOpen, setAccountOpen] = useState(Boolean(search.authError)),
-    [selectedTrip, setSelectedTrip] = useState<Trip | null>(
-      () => trips.find((t) => t.id === search.trip) ?? null,
-    );
+  const [accountOpen, setAccountOpen] = useState(Boolean(search.authError));
+  const selectedTrip = trips.find((trip) => trip.id === search.trip) ?? null;
   useEffect(() => {
     const refresh = () => {
       if (document.visibilityState === 'visible') void router.invalidate();
@@ -131,7 +129,6 @@ function Home() {
     adults: search.adults ?? 1,
   };
   const show = (view: PageSearch['view']) => {
-    setSelectedTrip(null);
     void navigate({
       search: { ...search, view, trip: undefined, seats: undefined },
     });
@@ -178,7 +175,7 @@ function Home() {
               <div className="hero-content">
                 <h1>Book bus tickets online</h1>
                 <SearchForm
-                  key={`home-${values.date}`}
+                  key={`home-${values.from}-${values.to}-${values.date}-${values.adults}`}
                   initial={values}
                   trips={trips}
                   onSearch={doSearch}
@@ -195,7 +192,7 @@ function Home() {
             <div className="results-search">
               <SearchForm
                 autoSearch
-                key={`${values.from}-${values.to}-${values.date}`}
+                key={`${values.from}-${values.to}-${values.date}-${values.adults}`}
                 initial={values}
                 trips={trips}
                 onSearch={doSearch}
@@ -206,7 +203,11 @@ function Home() {
                 trips={trips}
                 search={values}
                 onDay={(date) => doSearch({ ...values, date })}
-                onSelect={setSelectedTrip}
+                onSelect={(trip) =>
+                  void navigate({
+                    search: { ...search, trip: trip.id, seats: undefined },
+                  })
+                }
               />
             </div>
           </>
@@ -225,6 +226,7 @@ function Home() {
       <SiteFooter />
       {selectedTrip && !accountOpen && (
         <SeatPicker
+          key={selectedTrip.id}
           trip={selectedTrip}
           adults={values.adults}
           signedIn={Boolean(session.user)}
@@ -241,13 +243,12 @@ function Home() {
             setAccountOpen(true);
           }}
           onClose={() => {
-            setSelectedTrip(null);
             void navigate({
               search: { ...search, trip: undefined, seats: undefined },
+              replace: true,
             });
           }}
           onReserved={() => {
-            setSelectedTrip(null);
             show('bookings');
           }}
         />
