@@ -2,3 +2,7 @@ packages:
   - apps/*
   - packages/*
 strictDepBuilds: true
+# Miniflare pins an affected Undici version; keep its major-version API intact.
+# https://github.com/advisories/GHSA-xjj6-f33q-929c
+overrides:
+  miniflare>undici: 7.30.1
