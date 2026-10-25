@@ -118,11 +118,13 @@ function Home() {
     };
   }, [router]);
   useEffect(() => {
-    if (session.user && search.authError)
+    if (session.user && search.authError) {
+      setAccountOpen(false);
       void navigate({
         search: { ...search, authError: undefined },
         replace: true,
       });
+    }
   }, [session.user, search, navigate]);
   const values: SearchValues = {
     from: search.from ?? 'Bengaluru',
