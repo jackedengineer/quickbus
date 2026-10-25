@@ -47,10 +47,7 @@ export function TripResults({
           );
         })}
       </div>
-      <div className="results-tools">
-        <h1>
-          {matches.length} {matches.length === 1 ? 'result' : 'results'}
-        </h1>
+      <div className="results-sort">
         <label>
           Sort by{' '}
           <select value={order} onChange={(e) => setOrder(e.target.value)}>
@@ -58,6 +55,11 @@ export function TripResults({
             <option value="price">Lowest price</option>
           </select>
         </label>
+      </div>
+      <div className="results-tools">
+        <h1>
+          {matches.length} {matches.length === 1 ? 'result' : 'results'}
+        </h1>
       </div>
       {matches.length ? (
         matches.map((trip) => {
@@ -67,27 +69,37 @@ export function TripResults({
           return (
             <article className="trip-card" key={trip.id}>
               <div className="trip-overview">
-                <div>
-                  <strong>{time(trip.departureAt)}</strong>
-                  <span>{trip.origin}</span>
+                <div className="trip-journey">
+                  <div className="trip-departure">
+                    <div className="departure-time">
+                      <strong>{time(trip.departureAt)}</strong>
+                      <div className="trip-duration">
+                        <span>
+                          {Math.floor(duration / 60)}:
+                          {String(duration % 60).padStart(2, '0')} hrs
+                        </span>
+                      </div>
+                    </div>
+                    <span>{trip.origin}</span>
+                  </div>
+                  <div className="trip-arrival">
+                    <strong>
+                      {time(trip.arrivalAt)}
+                      {dateInIndia(trip.arrivalAt) !==
+                        dateInIndia(trip.departureAt) && <sup>+1 day</sup>}
+                    </strong>
+                    <span>{trip.destination}</span>
+                  </div>
                 </div>
-                <div className="trip-duration">
-                  <span>
-                    {Math.floor(duration / 60)}:
-                    {String(duration % 60).padStart(2, '0')} hrs
+                <strong
+                  className="trip-price"
+                  aria-label={`${money(trip.fareMinor)} per adult`}
+                >
+                  <span aria-hidden="true">
+                    {money(trip.fareMinor).slice(0, -3)}
+                    <sup>.{money(trip.fareMinor).slice(-2)}</sup>
                   </span>
-                </div>
-                <div>
-                  <strong>
-                    {time(trip.arrivalAt)}
-                    {dateInIndia(trip.arrivalAt) !==
-                      dateInIndia(trip.departureAt) && <sup>+1 day</sup>}
-                  </strong>
-                  <span>{trip.destination}</span>
-                </div>
-                <strong className="trip-price">
-                  {money(trip.fareMinor)}
-                  <small>per adult</small>
+                  <small aria-hidden="true">per adult</small>
                 </strong>
               </div>
               <p className="operator">{trip.operatorName} | AC Seater (2+2)</p>

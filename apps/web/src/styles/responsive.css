@@ -206,10 +206,10 @@
   .results-tools {
     flex-wrap: wrap;
   }
-  .results-tools label {
+  .results-sort label {
     font-size: 12px;
   }
-  .results-tools select {
+  .results-sort select {
     font-size: 12px;
   }
   .date-switcher button {
@@ -220,23 +220,32 @@
     padding: 12px;
   }
   .trip-overview {
-    grid-template-columns: 1fr 0.7fr 1fr;
-    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .trip-journey {
+    flex-basis: 100%;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 8px;
   }
   .trip-overview strong {
     font-size: 15px;
     line-height: 20px;
   }
-  .trip-overview > div > span {
+  .trip-departure > span,
+  .trip-arrival > span {
     font-size: 14px;
+    line-height: 24px;
   }
   .trip-duration {
     font-size: 12px;
+    line-height: 20px;
+  }
+  .trip-duration:before {
+    top: 10px;
   }
   .trip-price {
-    grid-column: 1 / -1;
     margin-top: 12px;
-    font-size: 22px !important;
+    font-size: 22.08px !important;
     text-align: left;
   }
   .trip-price small {
@@ -256,7 +265,7 @@
   }
   .trip-bottom > button {
     gap: 4px;
-    padding: 8px;
+    padding: 5px 8px;
   }
   .direct-pill {
     font-size: 12px;
@@ -445,5 +454,16 @@
   }
   .trip-type {
     margin-bottom: 18px;
+  }
+}
+
+@media (max-width: 767px) {
+  .trip-price sup {
+    font-size: 12px;
+    top: -6px;
+    margin: 0;
+  }
+  .results-sort {
+    margin-bottom: 24px;
   }
 }
