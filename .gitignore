@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.output/
+.tanstack/
+.turbo/
+.cache/
+.env
+.env.*
+!.env.example
+coverage/
+test-results/
+playwright-report/
+artifacts/local/
+*.log
+*.pem
+*.key
+.DS_Store
