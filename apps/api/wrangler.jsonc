@@ -1,0 +1,11 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "quickbus-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-25",
+  "observability": { "enabled": true },
+  "vars": {
+    "APP_ORIGIN": "http://localhost:3000",
+    "DEPLOYMENT_ENV": "development"
+  }
+}

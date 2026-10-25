@@ -11,6 +11,10 @@ coverage/
 test-results/
 playwright-report/
 artifacts/local/
+.dev.vars*
+.wrangler/
+worker-configuration.d.ts
+routeTree.gen.ts
 *.log
 *.pem
 *.key
