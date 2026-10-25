@@ -1,6 +1,6 @@
 import { drizzleAdapter } from '@better-auth/drizzle-adapter';
-import type { Database } from '@quickbus/db';
-import * as authSchema from '@quickbus/db/auth-schema';
+import type { Database } from '@kwikbus/db';
+import * as authSchema from '@kwikbus/db/auth-schema';
 import { betterAuth } from 'better-auth';
 import { magicLink, twoFactor } from 'better-auth/plugins';
 
@@ -13,7 +13,7 @@ export type AuthEnvironment = {
 
 export function createAuth(db: Database, environment: AuthEnvironment) {
   return betterAuth({
-    appName: 'QuickBus',
+    appName: 'KwikBus',
     baseURL: environment.APP_ORIGIN,
     secret: environment.AUTH_SECRET,
     trustedOrigins: [environment.APP_ORIGIN],
@@ -44,10 +44,10 @@ export function createAuth(db: Database, environment: AuthEnvironment) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              From: { Email: 'hello@quickbus.test', Name: 'QuickBus' },
+              From: { Email: 'hello@quickbus.test', Name: 'KwikBus' },
               To: [{ Email: email }],
-              Subject: 'Your QuickBus sign-in link',
-              Text: `Sign in to QuickBus: ${url}\nThis link expires in ten minutes and works once.`,
+              Subject: 'Your KwikBus sign-in link',
+              Text: `Sign in to KwikBus: ${url}\nThis link expires in ten minutes and works once.`,
             }),
           });
           if (!response.ok)

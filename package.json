@@ -1,5 +1,5 @@
 {
-  "name": "quickbus",
+  "name": "kwikbus",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.34.5",
@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "node scripts/dev.mjs",
     "build": "turbo build",
-    "check": "pnpm --filter @quickbus/web build && biome check . && tsc --noEmit",
+    "check": "pnpm --filter @kwikbus/web build && biome check . && tsc --noEmit",
     "format": "biome check --write .",
     "test": "pnpm test:integration",
     "test:integration": "node --env-file=.env node_modules/vitest/vitest.mjs run tests/integration",
@@ -17,8 +17,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node --env-file=.env --import tsx scripts/migrate.ts",
     "db:seed": "node --env-file=.env --import tsx scripts/seed.ts",
-    "cf:check": "pnpm --filter @quickbus/api build",
-    "dev:peer": "wrangler dev -c apps/api/wrangler.jsonc --name quickbus-api-peer --port 8788 --inspector-port 9235 --ip 127.0.0.1 --persist-to .wrangler/api-peer-state"
+    "cf:check": "pnpm --filter @kwikbus/api build",
+    "dev:peer": "wrangler dev -c apps/api/wrangler.jsonc --name kwikbus-api-peer --port 8788 --inspector-port 9235 --ip 127.0.0.1 --persist-to .wrangler/api-peer-state"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.3",

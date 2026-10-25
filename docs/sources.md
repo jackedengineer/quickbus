@@ -1,6 +1,6 @@
-# QuickBus research sources
+# KwikBus research sources
 
-Accessed **25 October 2026**. Official documentation supports technology capabilities and provider contracts. Product scope, policy, architecture, timing estimates, and performance targets are QuickBus design choices. Recheck documentation when pinning versions; a rolling “latest” page is not a version lock.
+Accessed **25 October 2026**. Official documentation supports technology capabilities and provider contracts. Product scope, policy, architecture, timing estimates, and performance targets are KwikBus design choices. Recheck documentation when pinning versions; a rolling “latest” page is not a version lock.
 
 ## Product reference material
 

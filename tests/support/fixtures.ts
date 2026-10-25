@@ -50,7 +50,7 @@ export async function createTrip(
 ) {
   const id = randomUUID();
   await client.query(
-    `INSERT INTO trips(id,origin,destination,operator_name,departure_at,arrival_at,sales_close_at) VALUES ($1,'Bengaluru','Hyderabad','QuickBus Preview',now()+interval '1 day',now()+interval '32 hours',now()+interval '23 hours')`,
+    `INSERT INTO trips(id,origin,destination,operator_name,departure_at,arrival_at,sales_close_at) VALUES ($1,'Bengaluru','Hyderabad','KwikBus Preview',now()+interval '1 day',now()+interval '32 hours',now()+interval '23 hours')`,
     [id],
   );
   await client.query(

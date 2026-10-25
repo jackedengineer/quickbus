@@ -25,8 +25,8 @@ export function SiteHeader({
     <>
       <header className={compact ? 'site-header compact' : 'site-header'}>
         <div className="header-inner">
-          <a className="brand" href="/" aria-label="QuickBus home">
-            QUICKBUS
+          <a className="brand" href="/" aria-label="KwikBus home">
+            KWIKBUS
           </a>
           <button
             type="button"
@@ -125,7 +125,7 @@ export function LandingContent({
 }) {
   return (
     <>
-      <section className="benefits" aria-label="Travel with QuickBus">
+      <section className="benefits" aria-label="Travel with KwikBus">
         {(
           [
             {
@@ -160,7 +160,7 @@ export function LandingContent({
         ))}
       </section>
       <section className="landing-copy content-width">
-        <h2>Online bus booking with QuickBus</h2>
+        <h2>Online bus booking with KwikBus</h2>
         <p>
           Choose a route, find a journey and pick the seats that suit you. See
           the full fare before you reserve, with all your journeys in one place.
@@ -220,7 +220,7 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="content-width">
-        <strong>QUICKBUS</strong>
+        <strong>KWIKBUS</strong>
         <span>Portfolio development preview · No live tickets or payments</span>
         <small>Independent project. Interface study based on FlixBus.</small>
       </div>

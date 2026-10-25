@@ -1,12 +1,12 @@
 {
-  "name": "@quickbus/api",
+  "name": "@kwikbus/api",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "wrangler deploy --dry-run --outdir dist"
   },
   "dependencies": {
-    "@quickbus/backend": "workspace:*",
-    "@quickbus/db": "workspace:*"
+    "@kwikbus/backend": "workspace:*",
+    "@kwikbus/db": "workspace:*"
   }
 }

@@ -1,4 +1,4 @@
-# QuickBus API contract
+# KwikBus API contract
 
 ## Common contract
 

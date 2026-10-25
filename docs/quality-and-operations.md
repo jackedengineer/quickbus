@@ -1,4 +1,4 @@
-# QuickBus quality and operations
+# KwikBus quality and operations
 
 ## Release definition
 

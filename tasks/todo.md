@@ -1,4 +1,4 @@
-# QuickBus task backlog
+# KwikBus task backlog
 
 Implementation has started. Items remain unchecked until their full acceptance criteria have evidence. Cloudflare Workers is now required (ADR 010); payment task T02 is deferred until the seat-concurrency proof passes. Each task targets one focused session. Paths in future tasks are planned; the repository and evidence documents identify landed files. Keep a task to roughly 2–5 implementation/test files; split it further if scaffolding or integration expands that scope. Gates are review points, not permission requests embedded in application flows.
 

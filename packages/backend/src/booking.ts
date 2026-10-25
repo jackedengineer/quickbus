@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import type { Database, Transaction } from '@quickbus/db';
-import { sql } from '@quickbus/db/schema';
+import type { Database, Transaction } from '@kwikbus/db';
+import { sql } from '@kwikbus/db/schema';
 
 type Result = { status: number; body: Record<string, unknown> };
 export type HoldInput = {

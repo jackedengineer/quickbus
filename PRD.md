@@ -1,4 +1,4 @@
-# QuickBus product requirements
+# KwikBus product requirements
 
 **Version:** proposal 1 · **Date:** 25 October 2026 · **Owner:** portfolio developer
 
@@ -15,7 +15,7 @@ The portfolio claim should be specific: “I built and tested a booking system t
 - **Administrator:** creates a small inventory, publishes trips, stops sales, cancels trips, and resolves payment exceptions.
 - **Reviewer:** uses seeded data and sandbox checkout, then inspects reproducible tests, architecture decisions, and operational evidence.
 
-QuickBus is the authoritative seller of its curated inventory. Operator names are catalog records, not independently integrated suppliers. No external aggregator can sell these seats in v1. Adding a real supplier would invalidate local-only availability guarantees and requires a separate integration design.
+KwikBus is the authoritative seller of its curated inventory. Operator names are catalog records, not independently integrated suppliers. No external aggregator can sell these seats in v1. Adding a real supplier would invalidate local-only availability guarantees and requires a separate integration design.
 
 ## Scope
 
@@ -116,4 +116,4 @@ Product telemetry may count search → seat view → hold → payment initiated 
 
 ## Visual acceptance update — 25 October 2026
 
-FlixBus India is the selected visual reference following the user's implementation instruction. Target pixel-level fidelity for implemented surfaces using frozen reference states and matching viewport sizes; each page needs a browser comparison before being marked visually complete. Keep QuickBus branding, implemented feature scope, accessible interactions, and truthful fares/status. See [UI reference and evidence](docs/ui-reference.md). This changes the visual direction, not the inventory, authentication, or payment invariants.
+FlixBus India is the selected visual reference following the user's implementation instruction. Target pixel-level fidelity for implemented surfaces using frozen reference states and matching viewport sizes; each page needs a browser comparison before being marked visually complete. Keep KwikBus branding, implemented feature scope, accessible interactions, and truthful fares/status. See [UI reference and evidence](docs/ui-reference.md). This changes the visual direction, not the inventory, authentication, or payment invariants.

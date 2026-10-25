@@ -1,8 +1,8 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
-  "name": "quickbus-web",
+  "name": "kwikbus",
   "main": "@tanstack/react-start/server-entry",
   "compatibility_date": "2026-10-25",
   "observability": { "enabled": true },
-  "services": [{ "binding": "API", "service": "quickbus-api" }]
+  "services": [{ "binding": "API", "service": "kwikbus-api" }]
 }

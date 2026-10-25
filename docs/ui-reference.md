@@ -4,11 +4,11 @@ The user selected a fidelity goal: use one mature competitor as the visual refer
 
 ## Visual baseline
 
-The first observed desktop home variant, before campaign cards loaded, is the baseline for the implemented home shell. FlixBus later displayed a festive-code panel and campaign cards. Those dynamic promotions, its phone service, native-app offers, and live tracking are not implemented features in QuickBus.
+The first observed desktop home variant, before campaign cards loaded, is the baseline for the implemented home shell. FlixBus later displayed a festive-code panel and campaign cards. Those dynamic promotions, its phone service, native-app offers, and live tracking are not implemented features in KwikBus.
 
-At a 1280px viewport the implemented shell has the measured reference dimensions: 60px header; 1170px content width starting at x=55; 34px/40.8px bold heading at y=288; search panel at y=340.8, width 1170 and height 160; benefits strip at y=580. The reference brand color is `#97d700`, with Roboto 400/500/700. Tablet uses the second navigation row and floating search labels. At less than 600px the reference hides the image; QuickBus follows this behavior.
+At a 1280px viewport the implemented shell has the measured reference dimensions: 60px header; 1170px content width starting at x=55; 34px/40.8px bold heading at y=288; search panel at y=340.8, width 1170 and height 160; benefits strip at y=580. The reference brand color is `#97d700`, with Roboto 400/500/700. Tablet uses the second navigation row and floating search labels. At less than 600px the reference hides the image; KwikBus follows this behavior.
 
-The closed search layout, search/date/passenger controls, trip-card hierarchy, and right-edge drawer use the reference geometry and styling. QuickBus branding, a small actual timetable, adult-only one-way scope, custom SVG icons, and truthful development copy are deliberate differences. Round trips are visibly disabled. Payment, tracking, promotions, and other absent services are not represented by active controls. This is not a claim of pixel parity for every FlixBus page or state. Each future page needs its own captured reference and comparison.
+The closed search layout, search/date/passenger controls, trip-card hierarchy, and right-edge drawer use the reference geometry and styling. KwikBus branding, a small actual timetable, adult-only one-way scope, custom SVG icons, and truthful development copy are deliberate differences. Round trips are visibly disabled. Payment, tracking, promotions, and other absent services are not represented by active controls. This is not a claim of pixel parity for every FlixBus page or state. Each future page needs its own captured reference and comparison.
 
 ## Implemented interactions
 
@@ -32,4 +32,4 @@ The hero photographs are reference assets downloaded from the inspected public F
 - [Tablet hero](https://cdn-cf.cms.flixbus.com/drupal-assets/2026-05/promo-hero-tablet.avif)
 - [Mobile hero](https://cdn-cf.cms.flixbus.com/drupal-assets/2026-05/promo-hero-mobile.avif)
 
-These photographs are not claimed as QuickBus-owned artwork. The footer identifies the independent interface study. Before public portfolio publication, resolve permission or replace the branded photograph with an owned/licensed equivalent. Roboto files came from the reference's [Honeycomb font stylesheet](https://honeycomb.flixbus.com/dist/17.4.1/css/honeycomb-fonts.css); the font license is included beside the files. The QuickBus wordmark and SVG interface paths are local code.
+These photographs are not claimed as KwikBus-owned artwork. The footer identifies the independent interface study. Before public portfolio publication, resolve permission or replace the branded photograph with an owned/licensed equivalent. Roboto files came from the reference's [Honeycomb font stylesheet](https://honeycomb.flixbus.com/dist/17.4.1/css/honeycomb-fonts.css); the font license is included beside the files. The KwikBus wordmark and SVG interface paths are local code.

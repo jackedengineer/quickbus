@@ -1,5 +1,5 @@
 {
-  "name": "@quickbus/backend",
+  "name": "@kwikbus/backend",
   "private": true,
   "type": "module",
   "exports": {
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "1.7.12",
-    "@quickbus/db": "workspace:*",
+    "@kwikbus/db": "workspace:*",
     "better-auth": "1.7.12",
     "express": "5.3.0",
     "zod": "4.6.7"

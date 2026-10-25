@@ -13,7 +13,7 @@ export const Route = createRootRoute({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'QuickBus · Book your next journey' },
+      { title: 'KwikBus · Book your next journey' },
     ],
     links: [{ rel: 'stylesheet', href: stylesheet }],
   }),
@@ -27,7 +27,7 @@ export const Route = createRootRoute({
   notFoundComponent: () => (
     <main id="main" className="empty-state">
       <h1>Page not found</h1>
-      <a href="/">Back to QuickBus</a>
+      <a href="/">Back to KwikBus</a>
     </main>
   ),
   component: Outlet,

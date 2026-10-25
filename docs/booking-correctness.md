@@ -2,7 +2,7 @@
 
 ## Guarantees and limits
 
-The design protects these properties within QuickBus's authoritative inventory:
+The design protects these properties within KwikBus's authoritative inventory:
 
 1. A seat has at most one current allocation for a trip.
 2. A party receives all requested seats or none.

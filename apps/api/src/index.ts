@@ -1,8 +1,8 @@
 // Official Node HTTP adapter: https://developers.cloudflare.com/workers/tutorials/deploy-an-express-app/
 import { httpServerHandler } from 'cloudflare:node';
-import { createApp } from '@quickbus/backend/app';
-import { type AppEnvironment, requestContext } from '@quickbus/backend/context';
-import { createDatabase } from '@quickbus/db';
+import { createApp } from '@kwikbus/backend/app';
+import { type AppEnvironment, requestContext } from '@kwikbus/backend/context';
+import { createDatabase } from '@kwikbus/db';
 
 const app = createApp();
 app.listen(3001);

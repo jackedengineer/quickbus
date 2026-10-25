@@ -27,7 +27,7 @@ const children = [
     ],
     { stdio: 'inherit' },
   ),
-  spawn('pnpm', ['--filter', '@quickbus/web', 'dev'], { stdio: 'inherit' }),
+  spawn('pnpm', ['--filter', '@kwikbus/web', 'dev'], { stdio: 'inherit' }),
 ];
 function stop() {
   for (const child of children) child.kill('SIGTERM');

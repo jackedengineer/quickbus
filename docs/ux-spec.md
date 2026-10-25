@@ -1,8 +1,8 @@
-# QuickBus UX specification
+# KwikBus UX specification
 
 ## Design approach
 
-The user's implementation update selects FlixBus India as the visual reference, with pixel-level layout fidelity as the target for each implemented surface. Use captured states and fixed viewport comparisons for typography, color, spacing, field geometry, result cards, and drawers. Retain QuickBus branding and truthful feature copy. The current study, exact measured geometry, temporary reference-photograph provenance, and remaining differences are recorded in [ui-reference.md](ui-reference.md). Commercial services outside v1 must not become active controls merely to match a screenshot. The critical journey should work at 320 px, tablet widths, desktop, 200% zoom, and keyboard-only input; record which checks were actually performed.
+The user's implementation update selects FlixBus India as the visual reference, with pixel-level layout fidelity as the target for each implemented surface. Use captured states and fixed viewport comparisons for typography, color, spacing, field geometry, result cards, and drawers. Retain KwikBus branding and truthful feature copy. The current study, exact measured geometry, temporary reference-photograph provenance, and remaining differences are recorded in [ui-reference.md](ui-reference.md). Commercial services outside v1 must not become active controls merely to match a screenshot. The critical journey should work at 320 px, tablet widths, desktop, 200% zoom, and keyboard-only input; record which checks were actually performed.
 
 ## Pages and behavior
 
@@ -53,7 +53,7 @@ On reload, fetch the current booking and remaining time. A backgrounded tab does
 | Cancelled, refund pending | “Booking cancelled. Your refund is being processed.” | Refund status |
 | Review required | “This payment needs review. Your reference is …” | Show safe reference and actual support route |
 
-Do not tell the user “you were not charged” merely because a request timed out. Do not expose raw gateway codes as the only explanation. Provider-owned bank authentication cannot be redesigned by QuickBus, but the surrounding recovery experience can be clear and durable.
+Do not tell the user “you were not charged” merely because a request timed out. Do not expose raw gateway codes as the only explanation. Provider-owned bank authentication cannot be redesigned by KwikBus, but the surrounding recovery experience can be clear and durable.
 
 Reopening an already issued checkout is permitted only after a provider fetch establishes that it is unused and resumable. If that cannot be proved, show pending/review rather than relaunching. An actual failed payment uses a new checkout attempt/order after the failure checks; an HTTP retry of the preparation command reuses its original local attempt.
 

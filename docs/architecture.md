@@ -1,4 +1,4 @@
-# QuickBus architecture
+# KwikBus architecture
 
 ## Architectural choice
 

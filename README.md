@@ -1,4 +1,4 @@
-# QuickBus
+# KwikBus
 
 A small bus-booking portfolio application built around correct seat ownership, retry behavior, and failure recovery.
 
@@ -16,7 +16,7 @@ docker run -d --name quickbus-mailpit -p 127.0.0.1:8025:8025 axllent/mailpit:v1.
 pnpm dev
 ```
 
-If the local inbox container already exists, use `docker start quickbus-mailpit` instead of creating it again. Open [QuickBus](http://localhost:3000); the local inbox is at [Mailpit](http://localhost:8025). Seed adds future Bengaluru/Hyderabad journeys idempotently without deleting reservations. Rerun it when the demo timetable ages out.
+If the local inbox container already exists, use `docker start quickbus-mailpit` instead of creating it again. Open [KwikBus](http://localhost:3000); the local inbox is at [Mailpit](http://localhost:8025). Seed adds future Bengaluru/Hyderabad journeys idempotently without deleting reservations. Rerun it when the demo timetable ages out.
 
 `pnpm dev` writes only runtime variables to ignored `apps/api/.dev.vars`, starts Express in Wrangler on port 8787, and starts the web Worker on port 3000. The migration owner URL is never copied to the Worker. Ctrl+C stops both processes.
 
@@ -62,3 +62,7 @@ The contention harness creates only synthetic fixtures, waits for concurrent req
 - PostgreSQL is the inventory authority. Every trip mutation takes its trip-row lock; allocation uniqueness is enforced in the database. Expiry uses database time read after the lock.
 - The hold and its idempotency response commit together. A party receives every requested seat or no seats. There is no external provider call inside that transaction.
 - Email must be verified before a hold. The first slice stops at an unpaid reservation. Future payment ambiguity, reconciliation, and refund recovery follow the documented protocol before any checkout is exposed.
+
+## Application identity
+
+The application is **KwikBus**. The intended production domain is `kwikbus.in`; domain registration and sender verification are pending. Cloudflare services use `kwikbus` (web) and `kwikbus-api` (private backend). Existing database identifiers and historical evidence retain their original names until a safe migration is needed.

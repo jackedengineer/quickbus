@@ -1,4 +1,4 @@
-# QuickBus capability map
+# KwikBus capability map
 
 Proposed boundaries for the first release. IDs are stable and are used in the PRD and task backlog. This is a design for review, not an approved implementation contract.
 

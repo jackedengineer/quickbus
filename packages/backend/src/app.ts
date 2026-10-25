@@ -1,4 +1,4 @@
-import { sql } from '@quickbus/db/schema';
+import { sql } from '@kwikbus/db/schema';
 import { fromNodeHeaders, toNodeHandler } from 'better-auth/node';
 import express from 'express';
 import { z } from 'zod';

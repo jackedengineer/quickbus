@@ -18,11 +18,11 @@ import { TripResults } from '../features/trip-results';
 const getInitialData = createServerFn({ method: 'GET' }).handler(async () => {
   const [sessionResponse, tripsResponse] = await Promise.all([
     apiFetch(
-      new Request('http://quickbus.internal/api/v1/session', {
+      new Request('http://kwikbus.internal/api/v1/session', {
         headers: { cookie: getRequest().headers.get('cookie') ?? '' },
       }),
     ),
-    apiFetch(new Request('http://quickbus.internal/api/v1/trips')),
+    apiFetch(new Request('http://kwikbus.internal/api/v1/trips')),
   ]);
   if (!sessionResponse.ok || !tripsResponse.ok)
     throw new Error('Journeys are temporarily unavailable.');

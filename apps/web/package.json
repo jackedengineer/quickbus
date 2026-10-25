@@ -1,5 +1,5 @@
 {
-  "name": "@quickbus/web",
+  "name": "@kwikbus/web",
   "private": true,
   "type": "module",
   "scripts": {

@@ -1,4 +1,4 @@
-# QuickBus architecture decisions
+# KwikBus architecture decisions
 
 All decisions are proposed as of 25 October 2026. Change the PRD, schema/protocol, and affected tests together if one is revised.
 
@@ -16,7 +16,7 @@ All decisions are proposed as of 25 October 2026. Change the PRD, schema/protoco
 
 **Reason:** A simple unique allocation key gives a clear anti-oversell guard. Explicit selection avoids introducing an automatic assignment algorithm in v1.
 
-**Cost:** QuickBus cannot resell a seat over non-overlapping intermediate segments. Supporting this later requires a new occupancy model and migration.
+**Cost:** KwikBus cannot resell a seat over non-overlapping intermediate segments. Supporting this later requires a new occupancy model and migration.
 
 ## ADR 003 — Serialize mutations per trip
 
@@ -86,6 +86,6 @@ Use request-scoped Neon WebSocket pools and Drizzle interactive transactions. No
 
 **Status:** accepted from the user's implementation instruction, 25 October 2026.
 
-Use the live FlixBus India UI as the reference for the small set of implemented QuickBus pages. Compare captured states at fixed widths and match typography, spacing, color, field geometry and interaction hierarchy. Keep QuickBus branding and honest development/feature copy; do not add commercial systems to populate an otherwise matching layout. Reference assets and intentional differences are documented in [ui-reference.md](ui-reference.md).
+Use the live FlixBus India UI as the reference for the small set of implemented KwikBus pages. Compare captured states at fixed widths and match typography, spacing, color, field geometry and interaction hierarchy. Keep KwikBus branding and honest development/feature copy; do not add commercial systems to populate an otherwise matching layout. Reference assets and intentional differences are documented in [ui-reference.md](ui-reference.md).
 
 This supersedes the earlier generic visual direction in the UX spec. It does not change the seat-concurrency gate, introduce payments, or certify uncaptured pages as pixel-perfect.

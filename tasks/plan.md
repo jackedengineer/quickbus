@@ -1,4 +1,4 @@
-# QuickBus implementation plan
+# KwikBus implementation plan
 
 ## Delivery strategy
 

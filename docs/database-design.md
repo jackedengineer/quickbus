@@ -1,4 +1,4 @@
-# QuickBus relational database design
+# KwikBus relational database design
 
 ## Modeling principles
 

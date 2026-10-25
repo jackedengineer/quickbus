@@ -23,13 +23,13 @@ try {
       );
       const departure = start.rows[0].departure;
       const existing = await client.query(
-        `SELECT id FROM trips WHERE operator_name='QuickBus Demo' AND origin=$1 AND destination=$2 AND departure_at=$3`,
+        `SELECT id FROM trips WHERE operator_name='KwikBus Demo' AND origin=$1 AND destination=$2 AND departure_at=$3`,
         [origin, destination, departure],
       );
       if (existing.rowCount) continue;
       const id = randomUUID();
       await client.query(
-        `INSERT INTO trips(id,origin,destination,operator_name,departure_at,arrival_at,sales_close_at) VALUES($1,$2,$3,'QuickBus Demo',$4::timestamptz,$4::timestamptz+interval '10 hours',$4::timestamptz-interval '30 minutes')`,
+        `INSERT INTO trips(id,origin,destination,operator_name,departure_at,arrival_at,sales_close_at) VALUES($1,$2,$3,'KwikBus Demo',$4::timestamptz,$4::timestamptz+interval '10 hours',$4::timestamptz-interval '30 minutes')`,
         [id, origin, destination, departure],
       );
       await client.query(
