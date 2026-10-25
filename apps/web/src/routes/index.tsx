@@ -1,6 +1,6 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
-import { getRequest } from '@tanstack/react-start/server';
+import { appendResponseHeader, getRequest } from '@tanstack/react-start/server';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../api.server';
 import { Legal } from '../features/legal';
@@ -27,6 +27,8 @@ const getInitialData = createServerFn({ method: 'GET' }).handler(async () => {
   ]);
   if (!sessionResponse.ok || !tripsResponse.ok)
     throw new Error('Journeys are temporarily unavailable.');
+  for (const cookie of sessionResponse.headers.getSetCookie())
+    appendResponseHeader('Set-Cookie', cookie);
   return {
     session: (await sessionResponse.json()) as Session,
     trips: ((await tripsResponse.json()) as { trips: Trip[] }).trips,

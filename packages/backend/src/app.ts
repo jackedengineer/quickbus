@@ -12,6 +12,22 @@ import {
 } from './booking';
 import { context } from './context';
 
+async function readSession(
+  request: express.Request,
+  response: express.Response,
+) {
+  const { db, environment } = context();
+  const result = await createAuth(db, environment).api.getSession({
+    headers: fromNodeHeaders(request.headers),
+    returnHeaders: true,
+  });
+  // Better Auth can renew or clear a session while reading it. Preserve those
+  // cookie headers through Express, the service binding, and Start SSR.
+  for (const cookie of result.headers.getSetCookie())
+    response.append('Set-Cookie', cookie);
+  return result.response;
+}
+
 export function createApp() {
   const app = express();
   app.disable('x-powered-by');
@@ -55,10 +71,8 @@ export function createApp() {
     return toNodeHandler(createAuth(db, environment))(request, response);
   });
   app.get('/api/v1/session', async (request, response) => {
-    const { db, environment } = context();
-    const session = await createAuth(db, environment).api.getSession({
-      headers: fromNodeHeaders(request.headers),
-    });
+    const { environment } = context();
+    const session = await readSession(request, response);
     response.json({
       localMailbox: environment.DEPLOYMENT_ENV === 'local',
       emailEnabled: emailSignInEnabled(environment),
@@ -88,7 +102,7 @@ export function createApp() {
   app.use(
     ['/api/v1/holds', '/api/v1/bookings'],
     async (request, response, next) => {
-      const { db, environment } = context();
+      const { environment } = context();
       if (
         request.method === 'POST' &&
         request.headers.origin !== environment.APP_ORIGIN
@@ -96,9 +110,7 @@ export function createApp() {
         response.status(403).json({ code: 'ORIGIN_REJECTED' });
         return;
       }
-      const session = await createAuth(db, environment).api.getSession({
-        headers: fromNodeHeaders(request.headers),
-      });
+      const session = await readSession(request, response);
       if (!session?.user.emailVerified) {
         response.status(401).json({ code: 'SIGN_IN_REQUIRED' });
         return;
