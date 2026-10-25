@@ -5,7 +5,7 @@ const environment = await readFile('.env', 'utf8');
 const runtimeEnvironment = environment
   .split('\n')
   .filter((line) =>
-    /^(DATABASE_URL|AUTH_SECRET|APP_ORIGIN|MAILPIT_URL|DEPLOYMENT_ENV)=/.test(
+    /^(DATABASE_URL|AUTH_SECRET|APP_ORIGIN|MAILPIT_URL|DEPLOYMENT_ENV|GOOGLE_CLIENT_ID|GOOGLE_CLIENT_SECRET|RESEND_API_KEY|EMAIL_FROM)=/.test(
       line,
     ),
   )

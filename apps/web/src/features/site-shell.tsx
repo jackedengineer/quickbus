@@ -108,7 +108,12 @@ export function SiteHeader({
                 <SignOut />
               </>
             ) : (
-              <SignIn localMailbox={session.localMailbox} />
+              <SignIn
+                localMailbox={session.localMailbox}
+                googleEnabled={session.googleEnabled}
+                emailEnabled={session.emailEnabled}
+                onSuccess={() => setAccountOpen(false)}
+              />
             )}
           </div>
         </Dialog>
@@ -223,6 +228,11 @@ export function SiteFooter() {
         <strong>KWIKBUS</strong>
         <span>Portfolio development preview · No live tickets or payments</span>
         <small>Independent project. Interface study based on FlixBus.</small>
+        <div className="footer-legal">
+          <a href="/?view=privacy">Privacy</a>
+          <a href="/?view=terms">Terms</a>
+          <span>V0 · Unpaid seat reservations</span>
+        </div>
       </div>
     </footer>
   );

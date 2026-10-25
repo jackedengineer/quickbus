@@ -1,8 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useRouter } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { getRequest } from '@tanstack/react-start/server';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { apiFetch } from '../api.server';
+import { Legal } from '../features/legal';
 import { dateInIndia, type Session, type Trip } from '../features/models';
 import { MyBookings } from '../features/reservations';
 import { SearchForm, type SearchValues } from '../features/search';
@@ -33,7 +34,8 @@ const getInitialData = createServerFn({ method: 'GET' }).handler(async () => {
   };
 });
 type PageSearch = {
-  view?: 'results' | 'bookings' | 'help';
+  view?: 'results' | 'bookings' | 'help' | 'privacy' | 'terms';
+  authError?: boolean;
   from?: string;
   to?: string;
   date?: string;
@@ -43,9 +45,13 @@ type PageSearch = {
 };
 export const Route = createFileRoute('/')({
   validateSearch: (input: Record<string, unknown>): PageSearch => ({
-    view: ['results', 'bookings', 'help'].includes(String(input.view))
+    view: ['results', 'bookings', 'help', 'privacy', 'terms'].includes(
+      String(input.view),
+    )
       ? (input.view as PageSearch['view'])
       : undefined,
+    authError:
+      input.authError === true || input.authError === 'true' ? true : undefined,
     from:
       typeof input.from === 'string' && input.from.length < 100
         ? input.from
@@ -84,13 +90,31 @@ export const Route = createFileRoute('/')({
   component: Home,
 });
 function Home() {
+  const router = useRouter();
   const { session, trips, today } = Route.useLoaderData(),
     search = Route.useSearch(),
     navigate = Route.useNavigate();
-  const [accountOpen, setAccountOpen] = useState(false),
+  const [accountOpen, setAccountOpen] = useState(Boolean(search.authError)),
     [selectedTrip, setSelectedTrip] = useState<Trip | null>(
       () => trips.find((t) => t.id === search.trip) ?? null,
     );
+  useEffect(() => {
+    const refresh = () => {
+      if (document.visibilityState === 'visible') void router.invalidate();
+    };
+    const channel = new BroadcastChannel('kwikbus:session');
+    channel.onmessage = refresh;
+    const announce = () => channel.postMessage('changed');
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refresh);
+    window.addEventListener('kwikbus:session', announce);
+    return () => {
+      channel.close();
+      window.removeEventListener('focus', refresh);
+      document.removeEventListener('visibilitychange', refresh);
+      window.removeEventListener('kwikbus:session', announce);
+    };
+  }, [router]);
   const values: SearchValues = {
     from: search.from ?? 'Bengaluru',
     to: search.to ?? 'Hyderabad',
@@ -117,6 +141,11 @@ function Home() {
         setAccountOpen={setAccountOpen}
       />
       <main id="main">
+        {search.authError && (
+          <p className="auth-return-error content-width" role="alert">
+            Google sign-in wasn’t completed. Please try again or use email.
+          </p>
+        )}
         {!search.view ? (
           <>
             <section className="hero">
@@ -174,9 +203,12 @@ function Home() {
           </>
         ) : search.view === 'bookings' ? (
           <MyBookings
+            key={session.user?.id ?? 'guest'}
             signedIn={Boolean(session.user)}
             onSignIn={() => setAccountOpen(true)}
           />
+        ) : search.view === 'privacy' || search.view === 'terms' ? (
+          <Legal kind={search.view} />
         ) : (
           <Help />
         )}
@@ -189,6 +221,7 @@ function Home() {
           signedIn={Boolean(session.user)}
           initialSelected={search.seats?.split(',')}
           onSignIn={async (seats) => {
+            await router.invalidate();
             await navigate({
               search: {
                 ...search,

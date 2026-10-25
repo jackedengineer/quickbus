@@ -2,7 +2,7 @@ import { sql } from '@kwikbus/db/schema';
 import { fromNodeHeaders, toNodeHandler } from 'better-auth/node';
 import express from 'express';
 import { z } from 'zod';
-import { createAuth } from './auth';
+import { createAuth, emailSignInEnabled } from './auth';
 import {
   getBookings,
   holdSeats,
@@ -33,6 +33,25 @@ export function createApp() {
   // Auth must see the original body stream: https://better-auth.com/docs/integrations/express
   app.all('/api/auth/*splat', (request, response) => {
     const { db, environment } = context();
+    // Expose only the passwordless customer surface. In particular the OTP
+    // plugin's password reset and OTP-inspection endpoints stay unreachable.
+    const allowed = new Set([
+      'POST /api/auth/email-otp/send-verification-otp',
+      'POST /api/auth/sign-in/email-otp',
+      'POST /api/auth/sign-in/social',
+      'POST /api/auth/sign-out',
+      'GET /api/auth/callback/google',
+      'GET /api/auth/error',
+    ]);
+    if (!allowed.has(`${request.method} ${request.path}`))
+      return response.status(404).json({ code: 'NOT_FOUND' });
+    if (request.path.includes('email-otp') && !emailSignInEnabled(environment))
+      return response.status(503).json({ code: 'EMAIL_SIGN_IN_UNAVAILABLE' });
+    if (
+      request.method === 'POST' &&
+      request.headers.origin !== environment.APP_ORIGIN
+    )
+      return response.status(403).json({ code: 'ORIGIN_REJECTED' });
     return toNodeHandler(createAuth(db, environment))(request, response);
   });
   app.get('/api/v1/session', async (request, response) => {
@@ -42,6 +61,10 @@ export function createApp() {
     });
     response.json({
       localMailbox: environment.DEPLOYMENT_ENV === 'local',
+      emailEnabled: emailSignInEnabled(environment),
+      googleEnabled: Boolean(
+        environment.GOOGLE_CLIENT_ID && environment.GOOGLE_CLIENT_SECRET,
+      ),
       user: session
         ? {
             id: session.user.id,

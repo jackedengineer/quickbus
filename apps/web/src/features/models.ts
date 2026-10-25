@@ -1,5 +1,7 @@
 export type Session = {
   localMailbox: boolean;
+  googleEnabled: boolean;
+  emailEnabled: boolean;
   user: { id: string; email: string; emailVerified: boolean } | null;
 };
 export type Trip = {
