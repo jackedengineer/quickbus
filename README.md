@@ -1,10 +1,46 @@
-# QuickBus planning pack
+# QuickBus
 
-Build a small bus-booking application whose strongest feature is that reservations, payments, cancellations, and recovery behave correctly under contention and failure.
+A small bus-booking portfolio application built around correct seat ownership, retry behavior, and failure recovery.
 
-**Status:** proposed specification, prepared 25 October 2026. The workspace was empty when reviewed. Application code, migrations, load tests, and deployments do not exist yet. The documents define the implementation and its release gates; they do not certify a running system as production-ready.
+**Working development slice:** TanStack Start and Express run in Cloudflare Workers through a service binding, using request-scoped Neon PostgreSQL/Drizzle transactions. Verified-email sign-in, a seeded timetable, a FlixBus-based responsive search UI, seat selection, temporary holds, and release are implemented. The two-instance contention proof runs against real Neon. Payments remain disabled. Admin MFA and the remaining Phase 0/provider work are still open; this is not a production launch.
 
-The requested stack is retained: **TanStack Start, Node.js/Express, TypeScript, pnpm/Turborepo, Neon PostgreSQL, and Drizzle ORM**. Defaults accepted in this conversation: India/INR, one developer working part-time, curated inventory, and Razorpay test mode. Feature and policy details below are recommendations for review.
+## Run locally
+
+Use Node 24.14.0 and pnpm 10.34.5. Copy `.env.example` to an ignored `.env` and configure a **dedicated development** Neon database. `DATABASE_URL` uses a pooled DML-only application role; `MIGRATION_DATABASE_URL` uses the direct owner/migration connection. Set a random secret of at least 32 bytes. Keep credentials out of Git and chat.
+
+```sh
+pnpm install --frozen-lockfile --ignore-scripts
+pnpm db:migrate
+pnpm db:seed
+docker run -d --name quickbus-mailpit -p 127.0.0.1:8025:8025 axllent/mailpit:v1.27.8
+pnpm dev
+```
+
+If the local inbox container already exists, use `docker start quickbus-mailpit` instead of creating it again. Open [QuickBus](http://localhost:3000); the local inbox is at [Mailpit](http://localhost:8025). Seed adds future Bengaluru/Hyderabad journeys idempotently without deleting reservations. Rerun it when the demo timetable ages out.
+
+`pnpm dev` writes only runtime variables to ignored `apps/api/.dev.vars`, starts Express in Wrangler on port 8787, and starts the web Worker on port 3000. The migration owner URL is never copied to the Worker. Ctrl+C stops both processes.
+
+`pnpm check` first builds the web target to generate its ignored route types, then runs lint and strict TypeScript. It therefore works on a fresh checkout before a dev server has generated routes.
+
+For the second API instance and correctness checks:
+
+```sh
+pnpm dev:peer
+# In another terminal while both APIs and the web app are running:
+pnpm test:integration
+pnpm test:contention
+pnpm check
+pnpm build
+```
+
+The contention harness creates only synthetic fixtures, waits for concurrent requests to settle, audits the database independently, and cleans up its own rows. It uses the direct owner connection for fixture setup and a trip-scoped fault trigger; HTTP requests still pass through normal authentication and the restricted runtime role. It refuses to run without explicit local fixture flags. Run it against a disposable development database, never production. While it runs, synthetic trips may briefly appear in the development timetable.
+
+## Implementation evidence
+
+- [Cloudflare/Neon compatibility and remaining release gates](docs/compatibility.md)
+- [Reservation correctness evidence and reproducible commands](docs/reservation-proof.md)
+- [FlixBus visual reference, browser verification, and asset provenance](docs/ui-reference.md)
+- [Task status](tasks/todo.md)
 
 ## Read in this order
 
@@ -20,19 +56,9 @@ The requested stack is retained: **TanStack Start, Node.js/Express, TypeScript, 
 10. [Implementation plan](tasks/plan.md) and [task backlog](tasks/todo.md): ordered vertical slices and verification checkpoints.
 11. [Decision records](docs/decisions.md) and [primary sources](docs/sources.md).
 
-## The central decisions
+## Architecture decisions
 
-- One modular backend and one database, with an API process and a durable worker. Keep the reservation/payment workflow within one transactional boundary.
-- PostgreSQL owns seat allocation. A unique key prevents two live claims for a seat; short transactions serialize mutations for the same trip.
-- A ten-minute hold has one immutable server deadline. Payment outcomes arriving after release cause a refund, never displacement of another booking.
-- Provider calls happen outside database transactions. Durable intents, webhook inbox records, an outbox, and reconciliation bridge the failure windows.
-- Browse publicly; verify email before creating a hold. Build one direct-trip seater layout, explicit seat choice, payment, ticket retrieval, full cancellation/refund, and essential administration.
-- Demonstrate correctness with reproducible evidence: contended last-seat tests, duplicate webhooks, delayed captures, worker crashes, and a restore exercise.
-
-Start with the booking-concurrency proof and the framework/provider compatibility spikes. A visually complete clone is a poor foundation if its inventory and money flows are unreliable.
-
-## Review decisions before implementation
-
-The highest-impact choices are full-trip inventory, verified-email checkout, explicit seat selection, a strict hold deadline, and the proposed cancellation policy. Read the PRD and decision records together before changing them: each affects the database and recovery protocols.
-
-No commands in these documents are existing project scripts. Commands in the plan describe the interface to add during scaffolding.
+- One modular backend on Workers; separate Start web Worker connected by a service binding. Node is local tooling and compatibility APIs, not a persistent production server.
+- PostgreSQL is the inventory authority. Every trip mutation takes its trip-row lock; allocation uniqueness is enforced in the database. Expiry uses database time read after the lock.
+- The hold and its idempotency response commit together. A party receives every requested seat or no seats. There is no external provider call inside that transaction.
+- Email must be verified before a hold. The first slice stops at an unpaid reservation. Future payment ambiguity, reconciliation, and refund recovery follow the documented protocol before any checkout is exposed.

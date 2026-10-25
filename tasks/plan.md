@@ -7,9 +7,9 @@ Implementation update: Cloudflare Workers is the required backend runtime. Follo
 
 Build the smallest complete system that can sell a seat correctly, then prove it can recover failures. Retain the requested TanStack Start/Express/Turborepo/Neon/Drizzle stack. Use the [PRD](../PRD.md) for scope and the [correctness protocol](../docs/booking-correctness.md) as the transaction contract.
 
-The first technical proof is the contended hold against a real PostgreSQL database, before polished checkout or a full admin UI. The first end-to-end release candidate includes payment reconciliation and refund recovery; those are required scope, not post-launch enhancements.
+The first technical proof is the contended hold against a real PostgreSQL database, before payment checkout or a full admin UI. The first end-to-end release candidate includes payment reconciliation and refund recovery; those are required scope, not post-launch enhancements.
 
-**Task source of truth:** [todo.md](todo.md). All implementation items are initially unchecked. No application work has been completed by producing this plan.
+**Task source of truth:** [todo.md](todo.md). T01 and the workspace foundation have implementation evidence. Other items remain unchecked until their complete acceptance criteria pass; the reservation/UI slice was brought forward to prove the core risk.
 
 ## Sequence and rough effort
 
@@ -57,7 +57,7 @@ Stop a particular integration from advancing if its guarantee is unknown. Keep b
 
 ## Proposed command interface
 
-These commands must be added during scaffolding; they do not exist yet:
+The README lists commands that currently exist. The full target command interface is:
 
 ```sh
 pnpm install --frozen-lockfile

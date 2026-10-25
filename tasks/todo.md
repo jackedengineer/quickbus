@@ -1,12 +1,16 @@
 # QuickBus task backlog
 
-Implementation has started. Items remain unchecked until their full acceptance criteria have evidence. Cloudflare Workers is now required (ADR 010); payment task T02 is deferred until the seat-concurrency proof passes. Each task targets one focused session. The listed paths are planned locations, not existing code. Keep a task to roughly 2–5 implementation/test files; split it further if scaffolding or integration expands that scope. Gates are review points, not permission requests embedded in application flows.
+Implementation has started. Items remain unchecked until their full acceptance criteria have evidence. Cloudflare Workers is now required (ADR 010); payment task T02 is deferred until the seat-concurrency proof passes. Each task targets one focused session. Paths in future tasks are planned; the repository and evidence documents identify landed files. Keep a task to roughly 2–5 implementation/test files; split it further if scaffolding or integration expands that scope. Gates are review points, not permission requests embedded in application flows.
 
 Commands refer to the [proposed command interface](plan.md). Before those scripts exist, a spike records its exact reproducible commands and output. Every later task also runs `pnpm check` and the affected build; focused verification is listed below.
 
+## Current slice evidence
+
+See [compatibility](../docs/compatibility.md), [reservation proof](../docs/reservation-proof.md), and [UI/browser reference](../docs/ui-reference.md). The real Neon/Workers seat proof and a usable search/reserve/release UI were brought forward. T03 has verified email, hashed/single-use links, and SSR isolation; fresh admin MFA remains open. T02 remains unimplemented. Later reservation/search items remain unchecked because catalog publication, stop snapshots, telemetry, and full acceptance have not all landed. The UI reference is now FlixBus, with per-page visual comparison required.
+
 ## Phase 0 — Verify the assumptions
 
-- [ ] **T01 — Framework, driver, and deployment compatibility spike**
+- [x] **T01 — Framework, driver, and deployment compatibility spike**
   - Accept: pin a compatible stable version matrix; demonstrate Start and Express in Workers through a service binding, with a request-scoped Neon WebSocket/Drizzle transaction. Record pooled/direct URL use without secrets.
   - Verify: reproducible smoke commands, SSR response, transaction rollback and lock timeout evidence.
   - Depends: none. Targets: a disposable spike and `docs/compatibility.md`; retain findings, not a second app architecture. Size: M.
@@ -25,7 +29,7 @@ Commands refer to the [proposed command interface](plan.md). Before those script
 
 ## Phase 1 — Find a departure
 
-- [ ] **T04 — Workspace task graph**
+- [x] **T04 — Workspace task graph**
   - Accept: pnpm workspace and Turbo graph expose dev/check/build commands with explicit package exports and strict TS; lockfile and runtime version are pinned.
   - Verify: clean install and a task-graph/build smoke test.
   - Depends: T01. Targets: root package/workspace/Turbo/TS/runtime configuration, split scaffolder output as needed. Size: M.
