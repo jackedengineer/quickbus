@@ -177,7 +177,7 @@ function Home() {
               <div className="hero-content">
                 <h1>Book bus tickets online</h1>
                 <SearchForm
-                  key={`home-${values.from}-${values.to}-${values.date}-${values.adults}`}
+                  key={`home-${values.from}-${values.to}-${values.date}`}
                   initial={values}
                   trips={trips}
                   onSearch={doSearch}
@@ -194,7 +194,7 @@ function Home() {
             <div className="results-search">
               <SearchForm
                 autoSearch
-                key={`${values.from}-${values.to}-${values.date}-${values.adults}`}
+                key={`${values.from}-${values.to}-${values.date}`}
                 initial={values}
                 trips={trips}
                 onSearch={doSearch}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CityInput } from './city-input';
 import { Icon } from './icon';
 import { day, type Trip } from './models';
@@ -20,6 +20,14 @@ export function SearchForm({
   onSearch: (values: SearchValues) => void;
 }) {
   const [values, setValues] = useState(initial);
+  const initialAdults = initial.adults;
+  useEffect(() => {
+    setValues((previous) =>
+      previous.adults === initialAdults
+        ? previous
+        : { ...previous, adults: initialAdults },
+    );
+  }, [initialAdults]);
   const cities = [
     ...new Set(trips.flatMap((t) => [t.origin, t.destination])),
   ].sort();
