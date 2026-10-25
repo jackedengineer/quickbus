@@ -1,0 +1,87 @@
+{
+  "timestamp": "2026-10-25T12:15:27.086Z",
+  "runtimeRole": "quickbus_runtime",
+  "implementationSha256": "98b9decd304d517f1f615968f07685db52e6a8f3301ef4d5253382c6af308962",
+  "implementationFiles": [
+    "apps/api/src/index.ts",
+    "apps/api/src/environment.ts",
+    "apps/api/wrangler.jsonc",
+    "packages/backend/src/app.ts",
+    "packages/backend/src/auth.ts",
+    "packages/backend/src/email.ts",
+    "packages/backend/src/booking.ts",
+    "packages/backend/src/context.ts",
+    "packages/db/src/client.ts",
+    "packages/db/src/booking-schema.ts",
+    "packages/db/src/auth-schema.ts",
+    "pnpm-lock.yaml"
+  ],
+  "runtime": "Two separate Wrangler/workerd API instances",
+  "database": "Neon PostgreSQL 18, pooled WebSocket transactions",
+  "scenarios": [
+    {
+      "name": "100 customers race for the last seat across two instances",
+      "winners": 1,
+      "conflicts": 99,
+      "allocations": 1,
+      "initialBusy": 91,
+      "initialUnavailable": 8,
+      "recovery": "Same-key retries after burst, no new holds",
+      "dependencyRetries": 0,
+      "elapsedMs": 69244
+    },
+    {
+      "name": "12 concurrent same-key requests",
+      "responses": 12,
+      "bookings": 1,
+      "events": 1,
+      "allocations": 2
+    },
+    {
+      "name": "Overlapping two-seat parties",
+      "winners": 1,
+      "conflicts": 1,
+      "partialParties": 0
+    },
+    {
+      "name": "Lazy expiry without scheduler",
+      "oldBooking": "EXPIRED",
+      "replacement": "HELD",
+      "allocations": 1,
+      "unrequestedOldSeatReleased": true
+    },
+    {
+      "name": "Sales deadline crossed while waiting for trip lock",
+      "response": "SALES_CLOSED",
+      "allocations": 0
+    },
+    {
+      "name": "Bounded lock timeout and safe same-key retry",
+      "first": "RESOURCE_BUSY",
+      "retry": 201,
+      "allocations": 1
+    },
+    {
+      "name": "Same customer, different keys and seats across two instances",
+      "bookings": 1,
+      "allocations": 1,
+      "secondResponse": "ACTIVE_HOLD_EXISTS"
+    },
+    {
+      "name": "Injected allocation failure after booking and items writes",
+      "rolledBack": [
+        "booking",
+        "items",
+        "allocations",
+        "event",
+        "idempotency claim"
+      ],
+      "sameKeyRetry": 201
+    },
+    {
+      "name": "Independent invariant audit across every scenario",
+      "missing_allocations": 0,
+      "terminal_allocations": 0
+    }
+  ]
+}

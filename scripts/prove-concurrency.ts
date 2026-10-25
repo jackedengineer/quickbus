@@ -12,8 +12,11 @@ import {
 const endpoints = ['http://localhost:8787', 'http://localhost:8788'];
 const implementationFiles = [
   'apps/api/src/index.ts',
+  'apps/api/src/environment.ts',
+  'apps/api/wrangler.jsonc',
   'packages/backend/src/app.ts',
   'packages/backend/src/auth.ts',
+  'packages/backend/src/email.ts',
   'packages/backend/src/booking.ts',
   'packages/backend/src/context.ts',
   'packages/db/src/client.ts',
