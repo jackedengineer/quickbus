@@ -203,11 +203,6 @@ function Home() {
                 trips={trips}
                 search={values}
                 onDay={(date) => doSearch({ ...values, date })}
-                onSelect={(trip) =>
-                  void navigate({
-                    search: { ...search, trip: trip.id, seats: undefined },
-                  })
-                }
               />
             </div>
           </>

@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
 import { Icon } from './icon';
 import { dateInIndia, day, money, type Trip, time } from './models';
@@ -6,12 +7,10 @@ export function TripResults({
   trips,
   search,
   onDay,
-  onSelect,
 }: {
   trips: Trip[];
   search: SearchValues;
   onDay: (date: string) => void;
-  onSelect: (trip: Trip) => void;
 }) {
   const [order, setOrder] = useState('departure');
   const matches = trips
@@ -112,10 +111,14 @@ export function TripResults({
                   <Icon name="seat" size={19} />
                   {trip.seatCount} seats total
                 </span>
-                <button type="button" onClick={() => onSelect(trip)}>
+                <Link
+                  className="continue-button"
+                  to="/"
+                  search={{ view: 'results', ...search, trip: trip.id }}
+                >
                   Continue
                   <Icon name="chevron" size={24} />
-                </button>
+                </Link>
               </div>
             </article>
           );

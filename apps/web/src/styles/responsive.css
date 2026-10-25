@@ -263,7 +263,7 @@
   .seat-count {
     font-size: 11px;
   }
-  .trip-bottom > button {
+  .trip-bottom > .continue-button {
     gap: 4px;
     padding: 5px 8px;
   }
