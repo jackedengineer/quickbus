@@ -73,3 +73,11 @@ All decisions are proposed as of 25 October 2026. Change the PRD, schema/protoco
 **Reason:** This demonstrates deployability, secrets, health, jobs, telemetry, and restore without an unnecessary infrastructure project.
 
 **Cost:** A single host is a failure domain. State that limitation, verify the pilot objective, and move images to managed replicated containers if actual requirements justify it.
+
+## ADR 010 — Cloudflare Workers deployment
+
+**Accepted constraint:** the user requires the backend to run on Cloudflare. This supersedes ADR 009’s container/VM topology and ADR 001’s persistent Node process assumption. Express remains, using Cloudflare’s Node HTTP adapter. Start is Worker-compatible and uses an API service binding.
+
+Use request-scoped Neon WebSocket pools and Drizzle interactive transactions. Node/pg direct connections remain for migration tooling. Background work uses scheduled/queue handlers with bounded batches and durable Postgres records, not polling loops or local files. The PostgreSQL trip lock and allocation constraints are unchanged.
+
+**Verification gate:** real browser use of the Workers runtime, Neon transaction/rollback tests, independent-worker contention, and a deploy dry-run must pass before payment work. See [Cloudflare Express](https://developers.cloudflare.com/workers/tutorials/deploy-an-express-app/) and [Neon edge lifecycle](https://neon.com/docs/serverless/serverless-driver#pool-and-client-usage-notes).

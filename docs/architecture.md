@@ -2,18 +2,18 @@
 
 ## Architectural choice
 
-Use a **modular monolith with two backend runtimes**: a synchronous Express API and a durable Node worker, sharing the same backend modules and Neon database. TanStack Start runs as the web server for rendering and UI routing. This gives clear ownership, atomic booking updates, and independent worker recovery without distributed transactions between services.
+Use a **modular monolith on Cloudflare Workers**: Express handles synchronous API requests through Cloudflare’s supported Node HTTP adapter. Scheduled/queue-triggered Worker handlers run bounded background work using the same backend modules and Neon database. TanStack Start renders the web interface in a separate Worker and calls the API through a service binding. There is no persistent Node server or background polling process in deployment. Node 24 is the local build/migration toolchain, not the production runtime. This runtime decision was specified by the user after the initial design.
 
 TanStack Start already provides server capabilities. Here, its server execution is limited to rendering, request-scoped API reads, and session propagation. Express remains the sole authority for business commands, authorization, prices, inventory, and provider integration. This preserves the requested backend rather than creating two competing implementations. See [Start's execution model](https://tanstack.com/start/latest/docs/framework/react/guide/execution-model).
 
 ```mermaid
 flowchart LR
-  browser[Browser] --> ingress[HTTPS ingress]
+  browser[Browser] --> ingress[Cloudflare HTTPS routing]
   ingress -->|pages and assets| web[TanStack Start]
   ingress -->|/api and /webhooks| api[Express API]
   web -->|request-scoped SSR reads| api
   api --> db[(Neon PostgreSQL)]
-  worker[Node worker] --> db
+  worker[Scheduled and queue handlers] --> db
   worker --> provider[Razorpay test mode]
   provider -->|signed webhooks| ingress
   worker --> email[Email provider]
@@ -22,15 +22,15 @@ flowchart LR
   web --> telemetry
 ```
 
-The arrows show data flow, not separate business services. API and worker use the same booking policies and repository functions.
+The arrows show data flow, not separate business services. API and scheduled/queue handlers use the same booking policies and repository functions. Service bindings keep API calls within Cloudflare; browser requests stay on one public origin.
 
 ## Stack and version policy
 
 - TypeScript in strict mode, ECMAScript modules, pnpm workspaces, Turborepo task graph.
 - TanStack Start/Router for rendering, typed routes, search parameters, and navigation. TanStack Query for server-state fetching and mutation lifecycle. No second global copy of booking state in a client store.
 - React form state and a schema-based form library when needed; shared Zod DTO validation. Accessible headless primitives and a small UI package; select styling libraries during the compatibility spike.
-- Express 5, Node 24 LTS as the initial runtime candidate. The official release page listed Node 24 as LTS and Node 26 as Current at research time; pin a maintained LTS patch when scaffolding. [Node release policy](https://nodejs.org/en/about/previous-releases).
-- Drizzle with `drizzle-orm/node-postgres` and a `pg.Pool` for interactive transactions. Neon pooled URL for application traffic; direct URL for migrations and backup tooling. Drizzle's documented driver choices support this serverful arrangement. [Drizzle and Neon](https://orm.drizzle.team/docs/connect-neon).
+- Express 5 on Workers through `cloudflare:node` `httpServerHandler`; Node 24 LTS for tooling only. The official release page listed Node 24 as LTS and Node 26 as Current at research time; pin a maintained LTS patch when scaffolding. [Node release policy](https://nodejs.org/en/about/previous-releases).
+- Drizzle with `drizzle-orm/neon-serverless` and `@neondatabase/serverless` WebSocket pools for interactive transactions. Create, use, and close a pool inside each Worker invocation; never share a connected pool across requests. Use a pooled Neon URL for runtime work and a direct URL with `pg` for migrations. The HTTP-only Neon driver cannot replace interactive booking transactions. [Drizzle and Neon](https://orm.drizzle.team/docs/connect-neon).
 - Better Auth with a Drizzle adapter and verified-email magic links, subject to the initial compatibility/security spike. Mount auth before general JSON parsing. [Express integration](https://better-auth.com/docs/integrations/express).
 - Vitest for policies/services, real PostgreSQL integration tests, Playwright for browser flows, and k6 for repeatable load/contention runs.
 - Postgres-backed inbox/outbox/job tables, structured JSON logs, OpenTelemetry, and a hosted error/metrics destination chosen at deployment.
@@ -43,7 +43,7 @@ Pin compatible stable releases in the lockfile. Record exact versions, Node patc
 apps/
   web/                     TanStack Start routes, features, query options, UI
   api/                     Express bootstrap, middleware order, HTTP lifecycle
-  worker/                  Job runners, schedules, shutdown, health heartbeat
+  jobs/                    Scheduled/queue Worker entrypoints; no persistent loop
 packages/
   backend/
     src/modules/
@@ -66,7 +66,7 @@ tasks/                     Build plan and task checklist
 infra/                     Containers, ingress, deployment configuration
 ```
 
-Create packages only as they become useful. Do not put source code into `apps/api` and import it from `apps/worker`; both consume `packages/backend`. Keep fixtures/test helpers out of runtime exports.
+Create packages only as they become useful. Do not put source code into `apps/api` and import it from `apps/jobs`; both consume `packages/backend`. Keep fixtures/test helpers out of runtime exports.
 
 Enforce dependency rules in lint/CI: web imports contracts/UI/config only; contracts imports no backend/DB code; backend modules use public module interfaces; no application imports another application. A repository is not modular merely because it has many folders.
 
@@ -99,13 +99,17 @@ Scheduled work includes expired-hold scans, payment reconciliation, refund recon
 
 ## Deployment and environment design
 
-The first deployment can use a small Linux VM running Docker Compose: Caddy for TLS/path routing, separate web/API/worker containers, and external Neon. This is a concrete, low-service-count topology with one public origin. Run non-root app containers, health checks, restart policies, bounded resources, and secrets supplied at runtime. The worker is never a public HTTP service.
+Cloudflare Workers is the required backend deployment target. Express uses `httpServerHandler`; `app.listen()` registers a virtual Node HTTP server for the adapter, not a public TCP listener. Verify the configured compatibility date against the pinned Wrangler/workerd version. See [Cloudflare Express support](https://developers.cloudflare.com/workers/tutorials/deploy-an-express-app/).
 
-This topology has a single-host failure domain. It can demonstrate disciplined deployment but does not justify a high-availability claim. If the availability objective or operating preference requires it, move the same three app images to managed containers with replicated web/API and managed ingress. The concurrency design must already pass a two-API-instance test before horizontal scaling.
+The web Worker uses the Cloudflare Vite adapter for Start, with an `API` service binding. `/api/*` routes proxy to the API Worker; SSR calls the same binding with only the required session/correlation headers. Web never imports the backend or database packages. This also exercises the production runtime in local development.
 
-Place compute near the chosen Neon region after a latency measurement. Use separate Neon projects/credentials for production and staging where available; disposable branches for previews contain synthetic data only. No preview may inherit live payment/email secrets or production customer data.
+Neon is in Singapore for this development project. Each API/scheduled/queue invocation opens a bounded WebSocket pool, executes its complete interactive transaction on the same checked-out client, and closes the pool before the invocation ends. Do not use global connected clients, filesystem persistence, process signals, or server-held timers for correctness. [Neon edge connection lifecycle](https://neon.com/docs/serverless/serverless-driver#pool-and-client-usage-notes).
 
-Build immutable images in CI, run one separately authorized migration job with the direct DB URL, deploy compatible API/worker/web versions, check health, then run a sandbox smoke journey. Roll back images for compatible schema changes; use forward repair for destructive data changes. Keep the last known-good release available.
+Use Cron Triggers to scan durable Postgres work in bounded batches. Add Cloudflare Queues for low-latency delivery where useful, keeping the outbox as the durable source of undispatched work and handlers idempotent. `waitUntil()` may finish bounded cleanup; it is not a replacement for a durable queue. Design for invocation CPU/subrequest/wall-time limits, with small batches and DB lock deadlines. No long-running provider polling loops.
+
+Wrangler secrets hold runtime credentials; migrations run in a separate Node CI job using the direct database URL. Keep test, preview, and live environments separate. The current development project is free/synthetic; its default branch name is not an indication that live commerce is enabled. Production DML-only role, email delivery, custom-domain routing, secret provisioning, and remote deployment remain release gates.
+
+Build and dry-run both Workers, run migrations once, deploy the API before the bound web Worker, and run browser smoke checks against the actual deployment. Retain rollback versions; use expand/contract migrations. Check Workers account limits and measured database latency before promising availability or throughput. Smart Placement/region hints are optimizations to evaluate after measuring; they do not replace database serialization.
 
 ## Alternatives and when to reconsider
 
@@ -114,7 +118,7 @@ Build immutable images in CI, run one separately authorized migration job with t
 | Trip-level serialization | Simple proof for multi-seat atomicity and lifecycle races | Measured same-trip lock latency exceeds budget |
 | Postgres job queue | Transactional handoff without another critical datastore | Queue volume or isolation needs measurably hurt OLTP |
 | Full-trip allocation | A small, comprehensible first release | Real need to sell A→B and B→C independently |
-| Separate Start and Express servers | Retains frontend framework and explicit backend ownership | Deployment evidence supports a simpler shared adapter |
+| Separate Start and Express Workers | Keeps SSR and business authorization distinct through a service binding | Measured simplification without duplicated business logic |
 | Fixed published fares | Stable accepted quote and easy reconciliation | Product requires dynamic price versions |
 | No Redis inventory lock | PostgreSQL already owns transactions and uniqueness | Cache/rate-limit needs may justify Redis, never as the only seat guard |
 

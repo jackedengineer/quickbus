@@ -2,6 +2,9 @@
 
 ## Delivery strategy
 
+Implementation update: Cloudflare Workers is the required backend runtime. Follow [ADR 010](../docs/decisions.md) and the updated architecture. T02 payment work is deferred until the real-Postgres/Workers concurrency proof passes; first execute T01 and the non-payment identity spike, bringing forward only the foundations needed to prove them. Browser usage is a required verification step for every usable slice.
+
+
 Build the smallest complete system that can sell a seat correctly, then prove it can recover failures. Retain the requested TanStack Start/Express/Turborepo/Neon/Drizzle stack. Use the [PRD](../PRD.md) for scope and the [correctness protocol](../docs/booking-correctness.md) as the transaction contract.
 
 The first technical proof is the contended hold against a real PostgreSQL database, before polished checkout or a full admin UI. The first end-to-end release candidate includes payment reconciliation and refund recovery; those are required scope, not post-launch enhancements.
@@ -45,8 +48,8 @@ Within each slice, implement migration/contract, transaction behavior, HTTP endp
 
 ## Earliest risk-reduction work
 
-1. Pin stable compatible versions; run Start SSR behind one-origin ingress with an Express-owned session. Confirm per-request cache isolation.
-2. Use `pg`/Drizzle against Neon to prove interactive transactions, row locking, timeouts, and pooled/direct connection separation.
+1. Pin stable compatible versions; run Start SSR and Express in Workers with a service binding and an Express-owned session. Confirm per-request cache isolation.
+2. Use request-scoped Neon WebSocket/Drizzle transactions in Workers to prove interactive transactions, row locking, timeouts, and pooled/direct connection separation.
 3. Prove Razorpay order creation and receipt lookup after a simulated lost response, failure-to-new-attempt behavior, capture verification, webhook validation, and same-key refund retry. Document any disagreement between guides and observed account behavior.
 4. Prove auth magic-link consumption under concurrent requests and explicit hashed-token configuration, then admin MFA. Verify email delivery; use a deterministic test mail adapter for CI.
 
@@ -97,11 +100,11 @@ pnpm db:seed
 | Integration/version drift | Complete spikes before scaffolding deep abstractions; pin versions and keep compatibility tests |
 | Provider account unavailable | Use a fake adapter for deterministic development, but require real sandbox evidence before release |
 | Scope growth from mature competitors | Hold the PRD exclusions; prioritize failure correctness over more commercial features |
-| Too much infrastructure work | Keep one database and a small container topology; no broker/Redis/Kubernetes prerequisite |
+| Too much infrastructure work | Keep one database and a small Worker/service-binding topology; no broker/Redis/Kubernetes prerequisite |
 | Hot-trip contention | Short transactions, explicit timeouts and busy responses, measured threshold before finer locks |
 | Email login friction | Verify before timed hold; preserve route/seats; test delivery and safe resend |
 | Refund/unknown cases treated as optional | Make reconciliation/admin exceptions part of the release gate |
-| Single-host outage | State the limitation, rehearse restore, move the same images if the objective demands redundancy |
+| Cloudflare or database outage | State the limitation, rehearse restore, rehearse recovery and validate provider/service objectives |
 
 ## Review checkpoints
 
