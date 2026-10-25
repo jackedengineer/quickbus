@@ -3,9 +3,24 @@
   "name": "kwikbus-api",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-25",
-  "observability": { "enabled": true },
+  "observability": {
+    "enabled": true,
+    "logs": { "enabled": true, "invocation_logs": false }
+  },
   "vars": {
     "APP_ORIGIN": "http://localhost:3000",
     "DEPLOYMENT_ENV": "development"
+  },
+  "env": {
+    "production": {
+      "name": "kwikbus-api",
+      "workers_dev": false,
+      "preview_urls": false,
+      "vars": {
+        "APP_ORIGIN": "https://kwikbus.ichiragbhugra.workers.dev",
+        "DEPLOYMENT_ENV": "production",
+        "EMAIL_FROM": "KwikBus <signin@kwikbus.in>"
+      }
+    }
   }
 }

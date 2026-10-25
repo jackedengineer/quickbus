@@ -1,8 +1,19 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "kwikbus",
-  "main": "@tanstack/react-start/server-entry",
+  "main": "src/server.ts",
   "compatibility_date": "2026-10-25",
-  "observability": { "enabled": true },
-  "services": [{ "binding": "API", "service": "kwikbus-api" }]
+  "observability": {
+    "enabled": true,
+    "logs": { "enabled": true, "invocation_logs": false }
+  },
+  "services": [{ "binding": "API", "service": "kwikbus-api" }],
+  "env": {
+    "production": {
+      "name": "kwikbus",
+      "workers_dev": true,
+      "preview_urls": false,
+      "services": [{ "binding": "API", "service": "kwikbus-api" }]
+    }
+  }
 }
