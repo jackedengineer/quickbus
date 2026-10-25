@@ -104,6 +104,8 @@ function Home() {
     };
     const channel = new BroadcastChannel('kwikbus:session');
     channel.onmessage = refresh;
+    // A fresh document after an OAuth callback must also refresh other tabs.
+    channel.postMessage('changed');
     const announce = () => channel.postMessage('changed');
     window.addEventListener('focus', refresh);
     document.addEventListener('visibilitychange', refresh);
@@ -115,6 +117,13 @@ function Home() {
       window.removeEventListener('kwikbus:session', announce);
     };
   }, [router]);
+  useEffect(() => {
+    if (session.user && search.authError)
+      void navigate({
+        search: { ...search, authError: undefined },
+        replace: true,
+      });
+  }, [session.user, search, navigate]);
   const values: SearchValues = {
     from: search.from ?? 'Bengaluru',
     to: search.to ?? 'Hyderabad',
