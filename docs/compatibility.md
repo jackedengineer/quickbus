@@ -1,6 +1,6 @@
 # Runtime compatibility proof — 25 October 2026
 
-This is a working development slice, not a production launch certification. The API and frontend run in Cloudflare's local Workers runtime; neither has been deployed to a public Cloudflare account.
+This records the original Phase 0 compatibility baseline. It is not a production launch certification. The subsequent [V0 preview release](release-v0.md) is now deployed on Cloudflare and replaces the original magic-link customer login with Google and email OTP. Historical measurements below remain evidence of that earlier slice.
 
 ## Pinned matrix
 

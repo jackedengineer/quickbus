@@ -1,0 +1,54 @@
+{
+  "release": "v0.0.1-preview",
+  "date": "2026-10-25",
+  "url": "https://kwikbus.ichiragbhugra.workers.dev/",
+  "web": {
+    "worker": "kwikbus",
+    "version": "33385869-d49e-4d9a-8961-5ed65980490e",
+    "sourceRevision": "c55d41c00a267d467e9547bfba96ed456992b6d1",
+    "deployedAt": "2026-10-25T12:33:44.846Z"
+  },
+  "api": {
+    "worker": "kwikbus-api",
+    "version": "a8247981-b275-4c9c-a8d7-377a6928fdc6",
+    "sourceRevision": "1395ac8dccb258244d3e862ea527988d4ce27873",
+    "deployedAt": "2026-10-25T12:17:21.032Z",
+    "publicEndpoint": false,
+    "contentionImplementationSha256": "98b9decd304d517f1f615968f07685db52e6a8f3301ef4d5253382c6af308962"
+  },
+  "authentication": {
+    "google": "published and verified on production",
+    "emailOtp": "verified locally; production disabled pending kwikbus.in sender verification",
+    "passwords": false
+  },
+  "publicSmokeChecks": {
+    "passwordEndpoint": 404,
+    "otpUntilDomainReady": 503,
+    "oversizedAuthBody": 413,
+    "apiWorkersDevEndpoint": 404,
+    "googleReservationReloadRelease": "passed for one seat and a two-seat party",
+    "recoveredGoogleReturn": "passed; selected party restored and account dialog closed"
+  },
+  "responsiveResultsWidths": [320, 390, 768, 1024, 1280],
+  "responsiveResultsHorizontalOverflow": false,
+  "mobileProof": "Real application in 390px browser frame; local email OTP and two-seat reservation/release; not a physical-device certification",
+  "rollbackWebVersion": "dfddb7a8-dfc1-4e2d-a988-91b2e8799030",
+  "limitations": [
+    "Demonstration inventory only; no payments or travel tickets",
+    "Public email OTP intentionally pending owned sender domain",
+    "Free Worker CPU budget; no production load SLO certified",
+    "Reference hero photograph provenance and permission/replacement remain documented in ui-reference.md"
+  ],
+  "screenshots": {
+    "home-desktop.png": "1de24e55aba96406f95c37b796d59ce5baa3ebe73f0f1dae8d11e515f303be7a",
+    "results-desktop.png": "2968215bbb57cbe052bf8fbe273ddc6244b366d3103bbd5448a4161ee5b1ecb4",
+    "party-hold-production.png": "46deb03c0e13eebfb05704b4ee0c056c6770cdab4250ff190bd85294965a14bc",
+    "party-release-production.png": "390add270c4738126fa6b05a5ba3e88673d63ceb7adf2be57e4ff8d78f05031c",
+    "home-mobile.png": "d978005dc4783d41cce63fa3911419e32a5f58a0093d66faefdacd919a0ee035",
+    "seats-mobile.png": "0e4be120727437a1a0cdeab4cd7c0a4c15f681ca03529cf9a2d1bc5023e8bfb3",
+    "email-otp-mobile.png": "3960da72394ee74f216a9dc33d9b790ad9ce14cf125428a483b735e9757fc636",
+    "party-hold-mobile.png": "ae7ca84395e2543c649f92e94ebb8a181e44d0ac4e583c57a90d14bc6389efe6",
+    "party-release-mobile.png": "cf3cddae3c5299536e7dfb1701162cba53370a6a5717dfc4686efc5d5edea78f",
+    "public-signin.png": "90da4a5c3479bb75a2657130b038c01dbeb0eecf6bed390b5a9a792b71378159"
+  }
+}

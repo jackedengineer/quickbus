@@ -2,7 +2,7 @@
 
 A small bus-booking portfolio application built around correct seat ownership, retry behavior, and failure recovery.
 
-**Working development slice:** TanStack Start and Express run in Cloudflare Workers through a service binding, using request-scoped Neon PostgreSQL/Drizzle transactions. Verified-email sign-in, a seeded timetable, a FlixBus-based responsive search UI, seat selection, temporary holds, and release are implemented. The two-instance contention proof runs against real Neon. Payments remain disabled. Admin MFA and the remaining Phase 0/provider work are still open; this is not a production launch.
+**Live V0 preview:** [Open KwikBus](https://kwikbus.ichiragbhugra.workers.dev/). TanStack Start and Express run on Cloudflare Workers with a private API service binding and Neon/Drizzle transactions. Google sign-in, responsive search, seat selection, reloadable unpaid holds and release are live. Email OTP works locally and is intentionally disabled publicly until `kwikbus.in` sender verification. No live tickets or payments. See the [release evidence and operations guide](docs/release-v0.md).
 
 ## Run locally
 
@@ -37,7 +37,9 @@ The contention harness creates only synthetic fixtures, waits for concurrent req
 
 ## Implementation evidence
 
-- [Cloudflare/Neon compatibility and remaining release gates](docs/compatibility.md)
+- [V0 preview, browser evidence and deployment runbook](docs/release-v0.md)
+- [Passwordless Google and email OTP](docs/authentication.md)
+- [Phase 0 Cloudflare/Neon compatibility and remaining release gates](docs/compatibility.md)
 - [Reservation correctness evidence and reproducible commands](docs/reservation-proof.md)
 - [FlixBus visual reference, browser verification, and asset provenance](docs/ui-reference.md)
 - [Task status](tasks/todo.md)

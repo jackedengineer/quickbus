@@ -89,3 +89,11 @@ Use request-scoped Neon WebSocket pools and Drizzle interactive transactions. No
 Use the live FlixBus India UI as the reference for the small set of implemented KwikBus pages. Compare captured states at fixed widths and match typography, spacing, color, field geometry and interaction hierarchy. Keep KwikBus branding and honest development/feature copy; do not add commercial systems to populate an otherwise matching layout. Reference assets and intentional differences are documented in [ui-reference.md](ui-reference.md).
 
 This supersedes the earlier generic visual direction in the UX spec. It does not change the seat-concurrency gate, introduce payments, or certify uncaptured pages as pixel-perfect.
+
+## ADR 012 — Passwordless customer identity and staged V0 publication
+
+**Status:** accepted from the user's implementation instructions, 25 October 2026.
+
+Use Better Auth with Google sign-in and email OTP; do not expose passwords, password reset, magic links or unused OTP inspection endpoints. V0 remains an unpaid reservation preview. Google is published on the temporary Workers domain. The user chose to wait for `kwikbus.in` before public OTP email rather than use another verified sender. Public email controls therefore stay disabled until real delivery is configured and verified.
+
+Use **KwikBus** in app and service/project branding. The canonical domain will be `kwikbus.in` after ownership and DNS setup. Preserve historical evidence and existing internal development identifiers rather than rewriting migrations/history. No admin surface is exposed; fresh admin MFA remains a gate for that later capability. See [authentication](authentication.md) and [V0 evidence](release-v0.md).

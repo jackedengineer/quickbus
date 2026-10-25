@@ -33,3 +33,7 @@ The hero photographs are reference assets downloaded from the inspected public F
 - [Mobile hero](https://cdn-cf.cms.flixbus.com/drupal-assets/2026-05/promo-hero-mobile.avif)
 
 These photographs are not claimed as KwikBus-owned artwork. The footer identifies the independent interface study. Before public portfolio publication, resolve permission or replace the branded photograph with an owned/licensed equivalent. Roboto files came from the reference's [Honeycomb font stylesheet](https://honeycomb.flixbus.com/dist/17.4.1/css/honeycomb-fonts.css); the font license is included beside the files. The KwikBus wordmark and SVG interface paths are local code.
+
+## V0 follow-up
+
+The [V0 release record](release-v0.md) adds measured 1280px result-card geometry, Google/email OTP dialogs, account and legal screens, URL-backed seat drawers, browser history checks and a complete two-adult flow in a 390px live browser frame. Public Google reservation/reload/release was exercised on Cloudflare. Current screenshots and remaining fidelity limits are recorded with the release, without changing the earlier baseline evidence.

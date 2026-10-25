@@ -6,7 +6,7 @@ Commands refer to the [proposed command interface](plan.md). Before those script
 
 ## Current slice evidence
 
-See [compatibility](../docs/compatibility.md), [reservation proof](../docs/reservation-proof.md), and [UI/browser reference](../docs/ui-reference.md). The real Neon/Workers seat proof and a usable search/reserve/release UI were brought forward. T03 has verified email, hashed/single-use links, and SSR isolation; fresh admin MFA remains open. T02 remains unimplemented. Later reservation/search items remain unchecked because catalog publication, stop snapshots, telemetry, and full acceptance have not all landed. The UI reference is now FlixBus, with per-page visual comparison required.
+See [compatibility](../docs/compatibility.md), [reservation proof](../docs/reservation-proof.md), and [UI/browser reference](../docs/ui-reference.md). The real Neon/Workers seat proof and a usable search/reserve/release UI were brought forward. The [V0 preview](../docs/release-v0.md) now has published Google login, locally verified hashed/single-use email OTP, SSR isolation and cookie renewal. Public OTP awaits the owned sender domain. Fresh admin MFA remains open for future admin routes. T02 remains unimplemented. Later reservation/search items remain unchecked because catalog publication, stop snapshots, telemetry, and full acceptance have not all landed. The UI reference is now FlixBus, with per-page visual comparison required.
 
 ## Phase 0 — Verify the assumptions
 
@@ -21,7 +21,7 @@ See [compatibility](../docs/compatibility.md), [reservation proof](../docs/reser
   - Depends: none. Targets: provider spike harness, fixtures, `docs/provider-contract.md`. Size: M.
 
 - [ ] **T03 — Identity and policy review**
-  - Accept: demonstrate verified-email login, explicit hashed magic-link storage and single-use behavior, admin MFA, and request-scoped session handling. Review scope/cutoffs and record accepted changes to the PRD/ADRs.
+  - Accept: demonstrate verified-email login, explicit hashed email OTP storage, Google login and single-use code behavior, admin MFA, and request-scoped session handling. Review scope/cutoffs and record accepted changes to the PRD/ADRs.
   - Verify: concurrent token redemption test and two-user SSR isolation check.
   - Depends: T01. Targets: auth spike, auth tests, PRD/decision updates. Size: M.
 
