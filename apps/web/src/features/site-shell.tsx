@@ -94,7 +94,8 @@ export function SiteHeader({
             {session.user ? (
               <>
                 <p>
-                  Signed in as <strong>{session.user.email}</strong>
+                  Signed in as{' '}
+                  <strong className="auth-email">{session.user.email}</strong>
                 </p>
                 <button
                   type="button"
