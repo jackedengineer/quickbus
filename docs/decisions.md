@@ -81,3 +81,11 @@ All decisions are proposed as of 25 October 2026. Change the PRD, schema/protoco
 Use request-scoped Neon WebSocket pools and Drizzle interactive transactions. Node/pg direct connections remain for migration tooling. Background work uses scheduled/queue handlers with bounded batches and durable Postgres records, not polling loops or local files. The PostgreSQL trip lock and allocation constraints are unchanged.
 
 **Verification gate:** real browser use of the Workers runtime, Neon transaction/rollback tests, independent-worker contention, and a deploy dry-run must pass before payment work. See [Cloudflare Express](https://developers.cloudflare.com/workers/tutorials/deploy-an-express-app/) and [Neon edge lifecycle](https://neon.com/docs/serverless/serverless-driver#pool-and-client-usage-notes).
+
+## ADR 011 — FlixBus as the visual reference
+
+**Status:** accepted from the user's implementation instruction, 25 October 2026.
+
+Use the live FlixBus India UI as the reference for the small set of implemented QuickBus pages. Compare captured states at fixed widths and match typography, spacing, color, field geometry and interaction hierarchy. Keep QuickBus branding and honest development/feature copy; do not add commercial systems to populate an otherwise matching layout. Reference assets and intentional differences are documented in [ui-reference.md](ui-reference.md).
+
+This supersedes the earlier generic visual direction in the UX spec. It does not change the seat-concurrency gate, introduce payments, or certify uncaptured pages as pixel-perfect.

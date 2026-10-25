@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "node scripts/dev.mjs",
     "build": "turbo build",
-    "check": "biome check . && tsc --noEmit",
+    "check": "pnpm --filter @quickbus/web build && biome check . && tsc --noEmit",
     "format": "biome check --write .",
     "test": "pnpm test:integration",
     "test:integration": "node --env-file=.env node_modules/vitest/vitest.mjs run tests/integration",

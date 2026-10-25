@@ -1,0 +1,157 @@
+@font-face {
+  font-family: Roboto;
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/roboto-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: Roboto;
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("/fonts/roboto-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: Roboto;
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("/fonts/roboto-700.woff2") format("woff2");
+}
+:root {
+  font-family: Roboto, Arial, sans-serif;
+  color: #353535;
+  background: #fff;
+  font-synthesis: none;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  --brand: #97d700;
+  --brand-hover: #89c500;
+  --brand-dark: #437b28;
+  --surface: #f7f7f7;
+  --border: #c8c8c8;
+  --muted: #646464;
+  --error: #a52a2a;
+  --ink: #353535;
+  --container: 1170px;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+a {
+  color: inherit;
+}
+button {
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: var(--brand);
+  min-height: 44px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: 500;
+  transition:
+    background-color 0.12s,
+    box-shadow 0.12s;
+}
+button:hover {
+  background: var(--brand-hover);
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+button:active:not(:disabled) {
+  box-shadow: inset 0 0 0 2px #0002;
+}
+button svg {
+  flex-shrink: 0;
+}
+button.secondary {
+  background: white;
+  border-color: var(--border);
+}
+button.secondary:hover {
+  background: var(--surface);
+}
+button.text-button {
+  background: transparent;
+  color: var(--brand-dark);
+  padding: 8px 0;
+  text-decoration: underline;
+}
+button.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 6px;
+  background: transparent;
+  border: 0;
+}
+button.icon-button:hover {
+  background: #0000000c;
+}
+.previous svg {
+  rotate: 180deg;
+}
+:focus-visible {
+  outline: 2px solid #006b9c;
+  outline-offset: 3px;
+}
+.skip {
+  position: fixed;
+  top: -100px;
+  left: 12px;
+  padding: 12px;
+  background: #fff;
+  z-index: 100;
+}
+.skip:focus {
+  top: 12px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.muted {
+  color: var(--muted);
+}
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+p {
+  line-height: 1.5;
+}
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+small {
+  font-size: 12px;
+}
+.content-width {
+  width: min(var(--container), calc(100% - 48px));
+  margin-inline: auto;
+}

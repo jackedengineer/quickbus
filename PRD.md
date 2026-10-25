@@ -113,3 +113,7 @@ Product telemetry may count search → seat view → hold → payment initiated 
 - Verify Razorpay account access, test-mode behavior, order recovery, refund idempotency, and capture configuration.
 - Choose host region and Neon compute/backup plan after budget and latency measurements. No vendor tier or price is committed here.
 - Validate email-login delivery and admin MFA configuration before the public demo. Provider onboarding is an implementation dependency, not an application feature.
+
+## Visual acceptance update — 25 October 2026
+
+FlixBus India is the selected visual reference following the user's implementation instruction. Target pixel-level fidelity for implemented surfaces using frozen reference states and matching viewport sizes; each page needs a browser comparison before being marked visually complete. Keep QuickBus branding, implemented feature scope, accessible interactions, and truthful fares/status. See [UI reference and evidence](docs/ui-reference.md). This changes the visual direction, not the inventory, authentication, or payment invariants.

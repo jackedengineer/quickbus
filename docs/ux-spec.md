@@ -2,7 +2,7 @@
 
 ## Design approach
 
-Use a distinct QuickBus identity with a restrained palette, clear type hierarchy, visible totals, and one primary next action. Borrow interaction patterns from the references, not their logos, proprietary assets, commercial claims, or full promotional layout. The critical journey should work at 360 px, tablet widths, desktop, 200% zoom, and keyboard-only input.
+The user's implementation update selects FlixBus India as the visual reference, with pixel-level layout fidelity as the target for each implemented surface. Use captured states and fixed viewport comparisons for typography, color, spacing, field geometry, result cards, and drawers. Retain QuickBus branding and truthful feature copy. The current study, exact measured geometry, temporary reference-photograph provenance, and remaining differences are recorded in [ui-reference.md](ui-reference.md). Commercial services outside v1 must not become active controls merely to match a screenshot. The critical journey should work at 320 px, tablet widths, desktop, 200% zoom, and keyboard-only input; record which checks were actually performed.
 
 ## Pages and behavior
 

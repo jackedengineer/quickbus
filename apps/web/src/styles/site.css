@@ -1,0 +1,147 @@
+.site-header {
+  height: 60px;
+  background: var(--brand);
+}
+.header-inner {
+  height: 100%;
+  max-width: 1182px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  gap: 72px;
+}
+.brand {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  color: white;
+  text-decoration: none;
+  line-height: 1;
+  white-space: nowrap;
+}
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+.main-nav > button {
+  background: transparent;
+  padding-inline: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.main-nav > button svg {
+  rotate: 90deg;
+}
+.header-widgets {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.language {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 14px;
+}
+.flag {
+  font-size: 20px;
+  line-height: 22px;
+}
+.account-button {
+  padding: 4px 0;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.account-button:hover,
+.main-nav > button:hover {
+  background: #00000008;
+}
+.mobile-menu {
+  display: none !important;
+}
+.hero {
+  height: 380px;
+  position: relative;
+  margin-bottom: 140px;
+}
+.hero-image-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    #fff0 29.73%,
+    #1a1a1a7c 78.77%,
+    #353535 100%
+  );
+}
+.hero-image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+.hero-image-container {
+  isolation: isolate;
+}
+.hero-content {
+  width: min(var(--container), calc(100% - 48px));
+  margin: auto;
+  padding-top: 228px;
+  position: relative;
+}
+.hero h1 {
+  font-size: 34px;
+  line-height: 1.2;
+  margin: 0 0 12px;
+  color: white;
+  text-shadow: 0 3px 6px #0003;
+  font-weight: 700;
+}
+.site-header.compact {
+  height: 60px;
+}
+.compact .header-inner {
+  position: relative;
+  display: block;
+}
+.compact .brand {
+  position: absolute;
+  left: 50%;
+  top: 15px;
+  transform: translateX(-50%);
+}
+.compact .header-widgets {
+  position: absolute;
+  right: 12px;
+  top: 5px;
+}
+.compact .main-nav,
+.compact .mobile-menu {
+  display: none !important;
+}
+
+.hero-image-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    #fff0 29.73%,
+    #1a1a1a7c 78.77%,
+    #353535 100%
+  );
+  pointer-events: none;
+}

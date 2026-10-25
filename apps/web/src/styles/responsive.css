@@ -1,0 +1,449 @@
+@media (max-width: 1199px) {
+  .header-inner {
+    gap: 24px;
+    padding-inline: 24px;
+  }
+  .hero {
+    height: auto;
+    min-height: 440px;
+    margin-bottom: 64px;
+  }
+  .hero-image-container {
+    height: 260px;
+  }
+  .hero-content {
+    width: 100%;
+    padding-top: 188px;
+  }
+  .hero h1 {
+    padding-inline: 24px;
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+  .search-form {
+    border-radius: 0;
+    padding: 24px;
+  }
+  .search-fields {
+    grid-template-columns: 1.5fr 1.5fr 1fr;
+  }
+  .route-fields {
+    grid-column: 1 / -1;
+  }
+  .field-control {
+    height: 44px;
+  }
+  .search-submit {
+    height: 44px;
+  }
+  .search-field > span {
+    font-size: 14px;
+  }
+  .swap {
+    margin-bottom: 6px;
+  }
+  .hero-content .search-form {
+    box-shadow: 0 4px 8px #0001;
+  }
+  .results-search {
+    padding-bottom: 28px;
+  }
+  .results-search .search-form {
+    padding: 0 24px;
+  }
+  .results-content,
+  .bookings-content,
+  .help-content {
+    width: calc(100% - 48px);
+  }
+  .benefits {
+    padding-inline: 24px;
+  }
+}
+@media (max-width: 767px) {
+  .site-header {
+    height: 60px;
+  }
+  .header-inner {
+    padding: 0 16px;
+    gap: 12px;
+  }
+  .brand {
+    font-size: 26px;
+    order: 1;
+    flex: 1;
+  }
+  .mobile-menu {
+    display: flex !important;
+    order: 0;
+  }
+  .header-widgets {
+    order: 2;
+    gap: 12px;
+  }
+  .account-button {
+    font-size: 11px;
+  }
+  .language {
+    display: none;
+  }
+  .main-nav {
+    display: none;
+  }
+  .main-nav.expanded {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background: var(--brand);
+    padding: 12px 16px;
+    z-index: 10;
+    box-shadow: 0 4px 8px #0002;
+  }
+  .hero {
+    min-height: 0;
+    margin-bottom: 0;
+  }
+  .hero-image-container {
+    height: 168px;
+  }
+  .hero-content {
+    padding-top: 114px;
+  }
+  .hero h1 {
+    font-size: 22px;
+    padding-inline: 16px;
+    line-height: 28px;
+    margin-bottom: 10px;
+  }
+  .search-form {
+    padding: 20px 16px 24px;
+  }
+  .trip-type {
+    margin-bottom: 20px;
+    gap: 24px;
+  }
+  .search-fields {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .route-fields {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .route-fields .search-field .field-control {
+    border: 1px solid #8b8b8b;
+    border-radius: 5px;
+  }
+  .route-fields .search-field:nth-child(2) > span {
+    padding: 0;
+  }
+  .swap {
+    left: auto;
+    right: 12px;
+    bottom: 54px;
+    transform: rotate(90deg);
+    margin: 0;
+  }
+  .date-field .icon-button {
+    min-width: 40px;
+  }
+  .search-submit {
+    min-height: 44px;
+  }
+  .passenger-field .popover {
+    left: 0;
+    right: 0;
+  }
+  .calendar {
+    width: min(310px, calc(100vw - 32px));
+  }
+  .benefits {
+    grid-template-columns: 1fr 1fr;
+    padding: 32px 16px;
+    gap: 32px 16px;
+  }
+  .benefits h2 {
+    font-size: 15px;
+  }
+  .benefits p {
+    font-size: 13px;
+  }
+  .content-width {
+    width: calc(100% - 32px);
+  }
+  .landing-copy {
+    padding-block: 32px;
+  }
+  .landing-copy h2 {
+    font-size: 22px;
+  }
+  .travel-links {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .travel-links > button:first-child {
+    justify-content: center;
+  }
+  .results-search {
+    padding: 0;
+  }
+  .results-search .search-form {
+    padding: 20px 16px 24px;
+  }
+  .results-background {
+    padding-top: 16px;
+  }
+  .results-content,
+  .bookings-content,
+  .help-content {
+    width: calc(100% - 24px);
+  }
+  .results-tools {
+    flex-wrap: wrap;
+  }
+  .results-tools label {
+    font-size: 12px;
+  }
+  .results-tools select {
+    font-size: 12px;
+  }
+  .date-switcher button {
+    padding: 10px 4px;
+    font-size: 13px;
+  }
+  .trip-card {
+    padding: 12px;
+  }
+  .trip-overview {
+    grid-template-columns: 1fr 0.7fr 1fr;
+    gap: 6px;
+  }
+  .trip-overview strong {
+    font-size: 15px;
+    line-height: 20px;
+  }
+  .trip-overview > div > span {
+    font-size: 14px;
+  }
+  .trip-duration {
+    font-size: 12px;
+  }
+  .trip-price {
+    grid-column: 1 / -1;
+    margin-top: 12px;
+    font-size: 22px !important;
+    text-align: left;
+  }
+  .trip-price small {
+    display: inline;
+    margin-left: 8px;
+  }
+  .trip-overview sup {
+    font-size: 8px;
+    margin-left: 2px;
+  }
+  .trip-bottom {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .seat-count {
+    font-size: 11px;
+  }
+  .trip-bottom > button {
+    gap: 4px;
+    padding: 8px;
+  }
+  .direct-pill {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  .operator {
+    margin-top: 12px;
+  }
+  .bookings-content,
+  .help-content {
+    margin-top: 24px;
+  }
+  .bookings-content h1,
+  .help-content h1 {
+    font-size: 24px;
+  }
+  .booking-card {
+    padding: 16px;
+  }
+  .site-footer {
+    padding: 24px 0;
+  }
+  .site-footer .content-width {
+    gap: 12px;
+  }
+  .site-footer span {
+    font-size: 12px;
+  }
+  .drawer {
+    width: min(420px, 100%);
+  }
+  .dialog-content {
+    padding: 20px;
+  }
+  .dialog-content form .form-row {
+    display: grid;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *:before,
+  *:after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+  .site-header {
+    height: 108px;
+  }
+  .header-inner {
+    position: relative;
+    display: block;
+    padding: 0;
+  }
+  .brand {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .header-widgets {
+    position: absolute;
+    right: 12px;
+    top: 5px;
+  }
+  .main-nav {
+    position: absolute;
+    top: 60px;
+    height: 48px;
+    left: 0;
+    right: 0;
+    justify-content: center;
+    background: #73c62c;
+  }
+  .hero-content {
+    padding-top: 160px;
+  }
+  .hero h1 {
+    font-size: 38px;
+    line-height: 45.6px;
+    padding-left: 15px;
+    margin-bottom: 15px;
+  }
+  .hero-image-container {
+    height: 220.6px;
+  }
+  .hero .search-form {
+    padding: 24px 12px 40px;
+  }
+  .hero .trip-type {
+    margin-bottom: 18px;
+  }
+  .hero .search-fields {
+    gap: 18px 6px;
+  }
+  .hero .search-field > span {
+    position: absolute;
+    top: -8px;
+    left: 8px;
+    background: #fff;
+    padding: 0 5px;
+    z-index: 1;
+    font-size: 14px;
+    line-height: 16px;
+    margin: 0;
+  }
+  .hero .search-field:nth-child(2) > span {
+    padding: 0 5px;
+  }
+  .hero .swap {
+    margin-bottom: 6px;
+  }
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+  .results-search .automatic .search-fields {
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 6px;
+  }
+  .results-search .search-field > span {
+    position: absolute;
+    top: -8px;
+    left: 8px;
+    background: white;
+    padding: 0 5px;
+    z-index: 1;
+    font-size: 14px;
+    line-height: 16px;
+    margin: 0;
+  }
+  .results-search .automatic {
+    padding: 0 12px;
+  }
+  .results-search .automatic .trip-type {
+    margin-bottom: 18px;
+  }
+  .results-search {
+    padding-bottom: 40px;
+  }
+}
+@media (max-width: 767px) {
+  .results-search .automatic .search-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 599px) {
+  .hero-image-container {
+    display: none;
+  }
+  .hero-content {
+    padding-top: 24px;
+  }
+  .hero h1 {
+    color: var(--ink);
+    text-shadow: none;
+    margin-bottom: 7px;
+  }
+  .hero {
+    margin-bottom: 24px;
+    box-shadow: 0 12px 24px #0000001a;
+  }
+}
+@media (max-width: 767px) {
+  .hero .search-form {
+    padding: 20px 12px 24px;
+  }
+  .search-field > span {
+    position: absolute;
+    top: -8px;
+    left: 8px;
+    background: white;
+    padding: 0 5px;
+    z-index: 1;
+    font-size: 14px;
+    line-height: 16px;
+    margin: 0;
+  }
+  .route-fields .search-field:nth-child(2) > span {
+    padding: 0 5px;
+  }
+  .route-fields .search-field:first-child .field-control,
+  .route-fields .search-field:nth-child(2) .field-control {
+    border: 1px solid #8b8b8b;
+    border-radius: 5px;
+  }
+  .trip-type {
+    margin-bottom: 18px;
+  }
+}

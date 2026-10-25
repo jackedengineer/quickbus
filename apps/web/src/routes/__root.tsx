@@ -4,9 +4,11 @@ import {
   Outlet,
   Scripts,
 } from '@tanstack/react-router';
+import type { ReactNode } from 'react';
 import stylesheet from '../styles.css?url';
 
 export const Route = createRootRoute({
+  headers: () => ({ 'Cache-Control': 'private, no-store' }),
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
@@ -15,7 +17,24 @@ export const Route = createRootRoute({
     ],
     links: [{ rel: 'stylesheet', href: stylesheet }],
   }),
-  component: () => (
+  errorComponent: () => (
+    <main id="main" className="empty-state">
+      <h1>We couldn’t load your journeys</h1>
+      <p>Please check your connection and try again.</p>
+      <a href="/">Try again</a>
+    </main>
+  ),
+  notFoundComponent: () => (
+    <main id="main" className="empty-state">
+      <h1>Page not found</h1>
+      <a href="/">Back to QuickBus</a>
+    </main>
+  ),
+  component: Outlet,
+  shellComponent: RootDocument,
+});
+function RootDocument({ children }: { children: ReactNode }) {
+  return (
     <html lang="en">
       <head>
         <HeadContent />
@@ -24,15 +43,9 @@ export const Route = createRootRoute({
         <a className="skip" href="#main">
           Skip to content
         </a>
-        <header>
-          <a className="brand" href="/">
-            quickbus<span>•</span>
-          </a>
-          <span>Development preview</span>
-        </header>
-        <Outlet />
+        {children}
         <Scripts />
       </body>
     </html>
-  ),
-});
+  );
+}
