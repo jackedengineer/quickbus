@@ -32,6 +32,10 @@ export function SeatPicker({
       const response = await fetch(`/api/v1/trips/${trip.id}/seats`);
       if (!response.ok) throw new Error();
       const data = (await response.json()) as { seats: Seat[] };
+      if (data.seats.length === 0)
+        setMessage(
+          'This journey is no longer available. Please choose another journey.',
+        );
       setSeats(data.seats);
       setSelected((previous) =>
         [...new Set(previous)]

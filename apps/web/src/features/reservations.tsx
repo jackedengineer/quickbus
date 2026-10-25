@@ -1,3 +1,4 @@
+import { useRouter } from '@tanstack/react-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from './icon';
 import { type Booking, money } from './models';
@@ -77,6 +78,10 @@ function HoldCard({
                     body: '{}',
                   },
                 );
+                if (response.status === 401) {
+                  onChange();
+                  return;
+                }
                 if (!response.ok) throw new Error();
                 onChange();
               } catch {
@@ -105,25 +110,44 @@ export function MyBookings({
   signedIn: boolean;
   onSignIn: () => void;
 }) {
+  const router = useRouter();
+  const latestRequest = useRef(0);
   const [bookings, setBookings] = useState<Booking[]>([]),
     [loading, setLoading] = useState(true),
     [error, setError] = useState('');
   const load = useCallback(async () => {
+    const requestId = ++latestRequest.current;
     setLoading(true);
     setError('');
     try {
       const response = await fetch('/api/v1/bookings');
+      if (requestId !== latestRequest.current) return;
+      if (response.status === 401) {
+        await router.invalidate();
+        return;
+      }
       if (!response.ok) throw new Error();
       const data = (await response.json()) as { bookings: Booking[] };
-      setBookings(data.bookings);
+      if (requestId === latestRequest.current) setBookings(data.bookings);
     } catch {
-      setError('Your reservations could not be loaded. Please try again.');
+      if (requestId === latestRequest.current)
+        setError('Your reservations could not be loaded. Please try again.');
     } finally {
-      setLoading(false);
+      if (requestId === latestRequest.current) setLoading(false);
     }
-  }, []);
+  }, [router]);
   useEffect(() => {
     if (signedIn) void load();
+    const refresh = () => {
+      if (signedIn && document.visibilityState === 'visible') void load();
+    };
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      latestRequest.current++;
+      window.removeEventListener('focus', refresh);
+      document.removeEventListener('visibilitychange', refresh);
+    };
   }, [signedIn, load]);
   if (!signedIn)
     return (
