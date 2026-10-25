@@ -10,20 +10,36 @@ import {
 } from '../tests/support/fixtures';
 
 const endpoints = ['http://localhost:8787', 'http://localhost:8788'];
+const implementationFiles = [
+  'apps/api/src/index.ts',
+  'packages/backend/src/app.ts',
+  'packages/backend/src/auth.ts',
+  'packages/backend/src/booking.ts',
+  'packages/backend/src/context.ts',
+  'packages/db/src/client.ts',
+  'packages/db/src/booking-schema.ts',
+  'packages/db/src/auth-schema.ts',
+  'pnpm-lock.yaml',
+];
+const implementationHash = createHash('sha256');
+for (const file of implementationFiles)
+  implementationHash
+    .update(file)
+    .update('\0')
+    .update(await readFile(file));
 const report: {
   timestamp: string;
   runtime: string;
   database: string;
   scenarios: Record<string, unknown>[];
   implementationSha256: string;
+  implementationFiles: string[];
   runtimeRole: string;
 } = {
   timestamp: new Date().toISOString(),
   runtimeRole: new URL(process.env.DATABASE_URL ?? '').username,
-  implementationSha256: createHash('sha256')
-    .update(await readFile('packages/backend/src/booking.ts'))
-    .update(await readFile('pnpm-lock.yaml'))
-    .digest('hex'),
+  implementationSha256: implementationHash.digest('hex'),
+  implementationFiles,
   runtime: 'Two separate Wrangler/workerd API instances',
   database: 'Neon PostgreSQL 18, pooled WebSocket transactions',
   scenarios: [],

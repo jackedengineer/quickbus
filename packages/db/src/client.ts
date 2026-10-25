@@ -10,6 +10,11 @@ export function createDatabase(connectionString: string) {
     max: 1,
     connectionTimeoutMillis: 8000,
   });
+  // Idle sockets can fail independently of an awaited query. The pool removes
+  // the failed client; query errors still reject and roll back normally.
+  pool.on('error', () => {
+    console.error(JSON.stringify({ event: 'database_idle_connection_error' }));
+  });
   return { db: drizzle({ client: pool, schema }), close: () => pool.end() };
 }
 
