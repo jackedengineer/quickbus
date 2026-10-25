@@ -11,13 +11,14 @@
     "build": "turbo build",
     "check": "biome check . && tsc --noEmit",
     "format": "biome check --write .",
-    "test": "vitest run",
+    "test": "pnpm test:integration",
     "test:integration": "node --env-file=.env node_modules/vitest/vitest.mjs run tests/integration",
     "test:contention": "node --env-file=.env --import tsx scripts/prove-concurrency.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node --env-file=.env --import tsx scripts/migrate.ts",
     "db:seed": "node --env-file=.env --import tsx scripts/seed.ts",
-    "cf:check": "pnpm --filter @quickbus/api build"
+    "cf:check": "pnpm --filter @quickbus/api build",
+    "dev:peer": "wrangler dev -c apps/api/wrangler.jsonc --name quickbus-api-peer --port 8788 --inspector-port 9235 --ip 127.0.0.1"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.3",
@@ -25,7 +26,9 @@
     "@types/express": "5.0.6",
     "@types/node": "24.12.0",
     "@types/pg": "8.20.0",
+    "auth": "1.7.12",
     "drizzle-kit": "0.31.11",
+    "pg": "8.23.1",
     "tsx": "4.23.15",
     "turbo": "2.11.10",
     "typescript": "7.0.2",

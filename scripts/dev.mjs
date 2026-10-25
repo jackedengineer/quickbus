@@ -2,7 +2,15 @@ import { spawn } from 'node:child_process';
 import { readFile, writeFile } from 'node:fs/promises';
 
 const environment = await readFile('.env', 'utf8');
-await writeFile('apps/api/.dev.vars', environment, { mode: 0o600 });
+const runtimeEnvironment = environment
+  .split('\n')
+  .filter((line) =>
+    /^(DATABASE_URL|AUTH_SECRET|APP_ORIGIN|MAILPIT_URL|DEPLOYMENT_ENV)=/.test(
+      line,
+    ),
+  )
+  .join('\n');
+await writeFile('apps/api/.dev.vars', runtimeEnvironment, { mode: 0o600 });
 const children = [
   spawn(
     'pnpm',
