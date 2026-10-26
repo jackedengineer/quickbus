@@ -13,23 +13,28 @@ export function Dialog({
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
-    ref.current?.showModal();
+    const dialog = ref.current;
+    const opener = document.activeElement;
+    dialog?.showModal();
     const previous = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
+      dialog?.close();
       document.body.style.overflow = previous;
+      if (opener instanceof HTMLElement && opener.isConnected)
+        opener.focus({ preventScroll: true });
     };
   }, []);
   return (
     <dialog
       ref={ref}
       className={drawer ? 'dialog drawer' : 'dialog'}
-      onCancel={onClose}
+      onCancel={(e) => {
+        e.preventDefault();
+        onClose();
+      }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
-      }}
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') onClose();
       }}
       aria-labelledby="dialog-title"
     >

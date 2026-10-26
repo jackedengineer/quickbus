@@ -11,6 +11,7 @@ Source implementation is complete; production deployment, browser acceptance and
 - Scheduled expiry preserves active holds under overlapping invocations. Inventory renewal rejects incomplete layouts, converges on unique departures under overlap, and rolls back all trip/seat writes after an injected seat failure.
 - Chrome DevTools CLI 1.12.0 captured the production baseline in an isolated headless profile with statistics/CrUX reporting disabled: 1200 × 2029, no CPU/network throttling, cold cache, LCP 965 ms, TTFB 619 ms, CLS 0. These are single lab observations, not field data or a device/traffic guarantee. Raw traces remain private/ignored.
 - Normal dialog/drawer transitions report 160 ms in the actual browser. At 390 × 844 with reduced motion enabled, transition duration is 0s, animation is none and document/scroll widths are both 390. Only opacity/transform and short press feedback were added; no library or page-load animation.
+- Production mobile interaction exposed lost keyboard focus after Escape. The dialog now closes its native modal, restores the connected opener without scrolling, and handles Escape once through the native cancel event. The reproduced local flow now returns focus to the original Continue link with no open dialog or retained body scroll lock; final production confirmation follows the patch rollout.
 
 ## Operational model
 
