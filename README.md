@@ -2,7 +2,7 @@
 
 A small bus-booking portfolio application built around correct seat ownership, retry behavior, and failure recovery.
 
-**Live V0 preview:** [Open KwikBus](https://kwikbus.ichiragbhugra.workers.dev/). TanStack Start and Express run on Cloudflare Workers with a private API service binding and Neon/Drizzle transactions. Google and email OTP sign-in, responsive search, seat selection, reloadable unpaid holds and release are live. OTP sends through the verified `jacked.dev` domain. The owned hostname `kwikbus.jacked.dev` is configured; the preview stays canonical during DNS propagation. See the [domain cutover status](docs/domain-cutover.md). No live tickets or payments. See the [release evidence and operations guide](docs/release-v0.md).
+**Live V0 preview:** [Open KwikBus](https://kwikbus.jacked.dev/). TanStack Start and Express run on Cloudflare Workers with a private API service binding and Neon/Drizzle transactions. Google and email OTP sign-in, responsive search, seat selection, reloadable unpaid holds and release are live. OTP sends through the verified `jacked.dev` domain. The owned hostname is live, with Google and email OTP verified through real mobile and desktop booking flows. See the [domain cutover evidence](docs/domain-cutover.md). No live tickets or payments. See the [release evidence and operations guide](docs/release-v0.md).
 
 ## Run locally
 
@@ -67,4 +67,4 @@ The contention harness creates only synthetic fixtures, waits for concurrent req
 
 ## Application identity
 
-The application is **KwikBus**. The intended production domain is `kwikbus.in`; domain registration and sender verification are pending. Cloudflare services use `kwikbus` (web) and `kwikbus-api` (private backend). Existing database identifiers and historical evidence retain their original names until a safe migration is needed.
+The application is **KwikBus**. The production domain is `kwikbus.jacked.dev`; OTP sends from `signin@jacked.dev` through a dedicated restricted Resend key. Cloudflare services use `kwikbus` (web) and `kwikbus-api` (private backend). Existing database identifiers and historical evidence retain their original names until a safe migration is needed.

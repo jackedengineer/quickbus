@@ -1,8 +1,6 @@
 {
   "date": "2026-10-26",
-  "targetOrigin": "https://kwikbus.jacked.dev",
-  "temporaryLiveOrigin": "https://kwikbus.ichiragbhugra.workers.dev",
-  "status": "DNS and custom hostname configured; final canonical switch waits for normal browser DNS/HTTPS verification",
+  "status": "Complete: normal DNS/TLS, canonical deployment and real browser flows verified",
   "nameservers": ["brett.ns.cloudflare.com", "isla.ns.cloudflare.com"],
   "dnsRecordsPreserved": 21,
   "originalExportRecordsIncludingSoaAndNs": 24,
@@ -19,16 +17,28 @@
     "newSeconds": 86400,
     "reason": "Cloudflare UI maximum TTL"
   },
-  "newHostnameTls": "Validated with certificate verification enabled against Cloudflare 104.21.17.206; local resolver/browser still returns prior Railway address",
+  "newHostnameTls": "Normal DNS and certificate verification passed in HTTP client and browser; clean canonical root navigation and full reload passed",
   "google": {
     "callbackAdded": "https://kwikbus.jacked.dev/api/auth/callback/google",
     "existingCallbacksPreserved": true,
     "brandingUrlsUpdated": true,
     "scopesChanged": false,
     "temporaryOriginBrowserSignIn": "passed; same reservation visible after email OTP and Google sign-in",
-    "brandVerification": "Not completed; basic identity sign-in remains published"
+    "brandVerification": "Not completed; basic identity sign-in remains published",
+    "ownedOriginBrowserSignIn": "Passed at 390×844; two seats preserved through callback"
   },
-  "email": {
+  "workers": {
+    "webVersion": "1f20d19c-7e9d-429a-95e6-ea665d6b480d",
+    "apiVersion": "387b5db3-c71b-47ea-ba5c-0f323fe8e9bf",
+    "webSourceRevision": "14ccff56f6b81aee4252d552fdc5020d54ff354f",
+    "apiSourceRevision": "801d95390ff033078fda7e01497a652f44780b86",
+    "apiPublicRoutes": false
+  },
+  "cloudflareZoneActive": true,
+  "canonicalOrigin": "https://kwikbus.jacked.dev",
+  "legacyOrigin": "https://kwikbus.ichiragbhugra.workers.dev",
+  "verifiedAt": "2026-10-26T07:31:26Z",
+  "previewEmailBrowserProof": {
     "sender": "KwikBus <signin@jacked.dev>",
     "provider": "Resend",
     "credential": "Separate sending-only key restricted to jacked.dev; ignored local file and private API Worker secret",
@@ -41,16 +51,17 @@
     "reservationSurvivedReload": true,
     "reservationReleased": true,
     "proofSeat": "5A",
-    "inboxPlacement": "Not independently certified; delivery status and message preview checked in Resend"
+    "inboxPlacement": "Not independently certified; delivery status and message preview checked in Resend",
+    "origin": "https://kwikbus.ichiragbhugra.workers.dev"
   },
-  "workers": {
+  "previousPreviewWorkers": {
     "webVersion": "eeb6bd4c-d8ad-4e97-abeb-dcc06e4e30fc",
     "apiVersion": "34beac93-2cf4-4b41-af09-d65fdc8d4f5e",
     "builtRevision": "afe3d18abcfe17b13604fe600a49777bc3da85cf",
     "configurationRevision": "f8ea91809f830612fabbac5533c35aace43f19bc",
     "apiPublicRoutes": false
   },
-  "redirectRuntimeChecks": [
+  "priorLocalRedirectRuntimeChecks": [
     {
       "path": "/",
       "method": "GET",
@@ -82,5 +93,62 @@
       "location": null
     }
   ],
-  "cloudflareZoneActive": true
+  "priorLocalRedirectRuntimeChecksNote": "Pre-cutover local Workers evidence; current production redirects additionally carry the migration query.",
+  "productionHttpChecks": {
+    "normalDnsAndTls": true,
+    "canonicalRoot": 200,
+    "legacyRedirect": 308,
+    "legacyLocation": "https://kwikbus.jacked.dev/?view=results&from=Bengaluru&to=Hyderabad&date=2026-10-26&adults=2&_kwikbus_domain=20261026",
+    "redirectCacheControl": "private, no-store",
+    "leadingSlashRedirectStaysCanonical": true,
+    "migrationCacheHeaderOnlyOnRecoveryLanding": true,
+    "legacyMutation": 421,
+    "wrongOriginMutation": 403,
+    "passwordRoute": 404,
+    "oversizedAuthBody": 413,
+    "privateApiPublicUrl": 404,
+    "googleEnabled": true,
+    "emailEnabled": true,
+    "localMailbox": false
+  },
+  "ownedDomainBrowserProof": {
+    "origin": "https://kwikbus.jacked.dev",
+    "mobileGoogle": {
+      "viewport": [390, 844],
+      "journey": "Bengaluru → Hyderabad, 2026-10-26 20:00",
+      "seats": ["6A", "6B"],
+      "amountINR": 1498,
+      "selectionRestoredAfterCallback": true,
+      "reserved": true,
+      "survivedFullReload": true,
+      "released": true
+    },
+    "desktopEmailOtp": {
+      "viewport": [1280, 720],
+      "seat": "7A",
+      "amountINR": 749,
+      "providerReportedDelivered": true,
+      "selectionRestoredAfterSignIn": true,
+      "reserved": true,
+      "survivedFullReload": true,
+      "released": true,
+      "googleReservationVisibleInSameAccount": true
+    },
+    "testHoldsRemaining": 0,
+    "responsiveWidths": [320, 390, 768, 1024, 1280],
+    "horizontalOverflow": false,
+    "consoleWarningsOrErrors": [],
+    "evidenceDirectory": "owned-domain-2026-10-26",
+    "limits": "Responsive browser viewports, not physical devices; email delivery checked in Resend, not recipient inbox placement."
+  },
+  "cachedRedirectRecovery": {
+    "observedProblem": "Previously cached canonical-to-preview 308 combined with the new preview-to-canonical redirect caused a browser loop.",
+    "migrationQuery": "_kwikbus_domain=20261026",
+    "redirectCacheControl": "private, no-store",
+    "recoveryLandingClearSiteData": "\"cache\"",
+    "clearHeaderAbsentOnCleanRoot": true,
+    "signedInSessionPreserved": true,
+    "cleanRootNavigationAndReloadPassed": true,
+    "securityOverridesUsed": false
+  }
 }

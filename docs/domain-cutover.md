@@ -1,8 +1,8 @@
 # Owned-domain cutover — 26 October 2026
 
-Target: **https://kwikbus.jacked.dev/**. Current usable preview: **https://kwikbus.ichiragbhugra.workers.dev/**.
+**Complete. Live V0 preview: https://kwikbus.jacked.dev/**. The legacy Workers hostname redirects reads to the owned hostname and rejects mutations.
 
-Cloudflare reports the DNS zone active. The new hostname is attached to the frontend Worker and has a valid Cloudflare certificate. Authoritative Cloudflare DNS and public resolvers return its Cloudflare addresses. The local resolver, automated browser and user's browser still reach the previous Railway address and fail certificate verification. Keep the original preview canonical until normal browser HTTPS works. The new hostname temporarily redirects to that preview for visitors with fresh DNS. The final canonical switch is **pending**, not certified complete.
+Normal DNS and certificate verification passed in the browser before switching both production origins. The private API was deployed first, then the frontend. Google and email OTP each passed actual selection → sign-in → reservation → full reload → release flows on the owned hostname. No certificate warning was bypassed and no resolver or browser security override was used.
 
 ## Completed configuration
 
@@ -16,23 +16,35 @@ DNS backups and provider screenshots are ignored under `artifacts/local/domain-m
 
 ## Actual browser verification
 
-On the usable production preview: select seat 5A → email OTP → wrong code rejected → resend → earlier code rejected → latest code accepted → seat restored → ₹749 reservation → full reload → release. Resend reports both emails delivered; the code was read from this test message's provider preview. Recipient inbox placement was not independently inspected.
+On **kwikbus.jacked.dev**, using live Cloudflare Workers, Resend and production Neon:
 
-After signing out, Google sign-in returned to the same account and showed the reservation created through email OTP. Browser console errors: none. These checks use live Cloudflare Workers, Resend and the production Neon database.
+- **Mobile, 390 × 844:** choose two adults, search Bengaluru → Hyderabad, select 6A/6B → Google sign-in through the owned-domain callback → both seats restored at ₹1,498 → reserve → full reload → release.
+- **Desktop, 1280 × 720:** sign out, search and select 7A → email OTP → selection restored at ₹749 → reserve → full reload → release. Resend reported this test email delivered; its provider preview supplied the code. Recipient inbox placement was not independently inspected. The earlier Google reservation was visible after OTP sign-in, confirming the same account.
+- Real viewport widths 320, 390, 768, 1024 and 1280 had matching document/scroll widths and no horizontal overflow. These are responsive browser checks, not physical-device certification. Browser warnings/errors: none. All holds created in this verification were released.
+- Clean-root navigation and reload passed after cached-redirect recovery, including while signed in. Legacy reads return 308, legacy mutations 421, wrong-origin mutations 403, password sign-in 404 and oversized auth requests 413. The private API's public Workers URL returns 404. Google/email are enabled and the local mailbox is disabled.
 
-[OTP reservation](evidence/domain-2026-10-26/production-otp-hold.png), [released seat](evidence/domain-2026-10-26/production-otp-release.png), [same reservation after Google](evidence/domain-2026-10-26/production-google-after-otp.png), and [configuration/runtime evidence](evidence/domain-cutover-2026-10-26.json).
+[Mobile home](evidence/owned-domain-2026-10-26/mobile-home.png), [results](evidence/owned-domain-2026-10-26/mobile-results.png), [selected seats](evidence/owned-domain-2026-10-26/mobile-selected-seats.png), [Google reservation](evidence/owned-domain-2026-10-26/mobile-google-hold.png), [released seats](evidence/owned-domain-2026-10-26/mobile-google-release.png), [desktop home](evidence/owned-domain-2026-10-26/desktop-home.png), [OTP reservation](evidence/owned-domain-2026-10-26/desktop-otp-hold.png), [OTP release](evidence/owned-domain-2026-10-26/desktop-otp-release.png), [desktop results](evidence/owned-domain-2026-10-26/desktop-results.png), and [runtime/deployment evidence](evidence/domain-cutover-2026-10-26.json).
+
+Earlier on the Workers preview, seat 5A passed wrong-code rejection, resend rotation, rejection of the earlier code, latest-code sign-in, restoration, reservation/reload/release, then Google sign-in to the same account. Those negative OTP checks are retained as preview evidence, separate from the new hostname's successful delivery/sign-in check. [Earlier screenshots](evidence/domain-2026-10-26/production-otp-hold.png).
 
 The earlier [V0 contention proof](evidence/v0-concurrency-2026-10-25.json) remains evidence for the tagged V0 reservation implementation. This hostname change does not alter reservation transactions; it is not a claim that the old source fingerprint includes the new deployment configuration.
 
-## Finish the cutover
+## Cached-redirect recovery
 
-1. Open `https://kwikbus.jacked.dev/` normally in the browser and confirm valid HTTPS. While the preview is canonical, this should successfully redirect to the preview; that is the DNS-readiness gate before switching origins. No resolver override or certificate-warning bypass counts as browser acceptance. Cache clearing through an internal browser URL was blocked by browser policy; wait for normal DNS propagation rather than bypassing it.
-2. Set `APP_ORIGIN` in `apps/api/wrangler.jsonc` and `PUBLIC_ORIGIN` in `apps/web/wrangler.jsonc` to `https://kwikbus.jacked.dev`. Align the ignored `.env.production` APP_ORIGIN too. The source currently matches the temporary live preview origin.
-3. Run `CLOUDFLARE_ENV=production pnpm check`, `pnpm cf:check`, deploy the API with `--env production`, then deploy `apps/web/dist/server/wrangler.json`. Do not rebuild with the development environment between production build and web deploy. Existing secrets persist; never bulk-upload `.env.production` because it contains the migration owner's URL.
-4. Verify Google and email OTP on the owned hostname, selection preservation, reservation/reload/release, and a mobile-sized view. New-domain cookies require a fresh sign-in. Confirm legacy read URLs redirect to the owned hostname while legacy mutations return 421; confirm the API still has no public route.
-5. Update this status, the deployment evidence and README; commit, push and verify CI. Keep the original callback during the transition; remove it only as an intentional later cleanup after rollback needs end.
+Real browser testing caught a loop: the previously cached owned-host → preview permanent redirect met the new preview → owned-host redirect. Legacy redirects now add `_kwikbus_domain=20261026` and `Cache-Control: private, no-store`, preserving the path and journey query. Assigning pathname separately keeps `//example.com` from replacing the destination hostname.
 
-The redirect handler preserves paths and queries, rejects mutations on a noncanonical origin, and assigns pathname separately so `//example.com` cannot replace the destination hostname. Five actual local Workers-runtime HTTP checks cover these behaviors. Wrangler's local upstream must represent the legacy host to avoid its normal development Location rewriting obscuring the result.
+Only the canonical migration landing sends `Clear-Site-Data: "cache"`. This evicts that origin's cached redirect without clearing session cookies or application storage. The regular clean root does not send this header. Visiting the recovery landing while signed in preserved the session; subsequent clean-root navigation and reload succeeded. Cache eviction may delay the recovery navigation, so it is limited to that landing rather than every response. See the [W3C directive semantics](https://w3c.github.io/webappsec-clear-site-data/) and [Chromium implementation](https://chromium.googlesource.com/chromium/src/+/refs/heads/main/content/browser/browsing_data/clear_site_data_utils.cc).
+
+## Deployment and future verification
+
+Both `apps/api/wrangler.jsonc` APP_ORIGIN and `apps/web/wrangler.jsonc` PUBLIC_ORIGIN now use `https://kwikbus.jacked.dev`; the ignored production environment file is aligned. Current API version: `387b5db3-c71b-47ea-ba5c-0f323fe8e9bf`; current web version: `1f20d19c-7e9d-429a-95e6-ea665d6b480d`.
+
+For future deployments:
+
+1. Review the diff and run `CLOUDFLARE_ENV=production pnpm check` and `pnpm cf:check`.
+2. Deploy the API with `--env production`, then deploy `apps/web/dist/server/wrangler.json`. Do not rebuild with the development environment between production build and web deploy. Existing secrets persist; never bulk-upload `.env.production` because it contains the migration owner's URL.
+3. Verify Google/email OTP, selection preservation, reservation/reload/release and mobile layouts. Confirm legacy redirects, wrong-origin rejection and private API routing. Keep the legacy Google callback until rollback needs end; removing it is a separate intentional change.
+4. Update evidence and verify GitHub CI before tagging a release. This cutover is recorded as `v0.0.2-preview`; it remains an unpaid reservation demonstration, with no live tickets or payments.
 
 ## Recovery
 
