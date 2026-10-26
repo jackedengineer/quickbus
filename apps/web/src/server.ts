@@ -18,7 +18,17 @@ export default createServerEntry({
       // Assign the path separately so a leading // cannot replace the hostname.
       destination.pathname = url.pathname;
       destination.search = url.search;
-      return Response.redirect(destination, 308);
+      // Earlier staging redirects may already be cached in the opposite direction.
+      // A distinct query breaks that cached cycle without changing search values.
+      destination.searchParams.set('_kwikbus_domain', '20261026');
+      return new Response(null, {
+        status: 308,
+        headers: {
+          Location: destination.href,
+          'Cache-Control': 'private, no-store',
+          'Referrer-Policy': 'no-referrer',
+        },
+      });
     }
     const nonce = crypto.randomUUID().replaceAll('-', '');
     const response = await handler.fetch(request, {
@@ -27,6 +37,10 @@ export default createServerEntry({
     });
     const secured = new Response(response.body, response);
     secured.headers.set('Cache-Control', 'private, no-store');
+    if (url.searchParams.get('_kwikbus_domain') === '20261026') {
+      // Evict this origin's old redirects, leaving cookies and app storage intact.
+      secured.headers.set('Clear-Site-Data', '"cache"');
+    }
     secured.headers.set('X-Content-Type-Options', 'nosniff');
     secured.headers.set('Referrer-Policy', 'no-referrer');
     secured.headers.set(
