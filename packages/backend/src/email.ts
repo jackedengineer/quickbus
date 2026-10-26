@@ -1,4 +1,5 @@
 import type { AuthEnvironment } from './auth';
+import { timed } from './telemetry';
 
 export async function sendSignInCode(
   environment: AuthEnvironment,
@@ -26,20 +27,22 @@ export async function sendSignInCode(
   }
   if (!environment.RESEND_API_KEY || !environment.EMAIL_FROM)
     throw new Error('A verified production sender is required.');
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${environment.RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: environment.EMAIL_FROM,
-      to: [email],
-      subject: 'Your KwikBus sign-in code',
-      text,
-    }),
-    signal: AbortSignal.timeout(10000),
+  await timed('email', async () => {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${environment.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: environment.EMAIL_FROM,
+        to: [email],
+        subject: 'Your KwikBus sign-in code',
+        text,
+      }),
+      signal: AbortSignal.timeout(10000),
+    });
+    // Never include the provider response: it can contain recipient data.
+    if (!response.ok) throw new Error('Email delivery is unavailable.');
   });
-  // Never include the provider response: it can contain recipient data.
-  if (!response.ok) throw new Error('Email delivery is unavailable.');
 }

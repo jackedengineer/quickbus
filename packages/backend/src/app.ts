@@ -11,16 +11,19 @@ import {
   releaseHold,
 } from './booking';
 import { context } from './context';
+import { reportFailure, timed } from './telemetry';
 
 async function readSession(
   request: express.Request,
   response: express.Response,
 ) {
   const { db, environment } = context();
-  const result = await createAuth(db, environment).api.getSession({
-    headers: fromNodeHeaders(request.headers),
-    returnHeaders: true,
-  });
+  const result = await timed('session', () =>
+    createAuth(db, environment).api.getSession({
+      headers: fromNodeHeaders(request.headers),
+      returnHeaders: true,
+    }),
+  );
   // Better Auth can renew or clear a session while reading it. Preserve those
   // cookie headers through Express, the service binding, and Start SSR.
   for (const cookie of result.headers.getSetCookie())
@@ -210,17 +213,7 @@ export function createApp() {
         response.status(400).json({ code: 'INVALID_REQUEST' });
         return;
       }
-      console.error(
-        JSON.stringify({
-          event: 'request_failed',
-          errorType: error instanceof Error ? error.name : 'unknown',
-          causeType: cause instanceof Error ? cause.name : 'unknown',
-          databaseCode:
-            typeof code === 'string' && /^[A-Z0-9]{5}$/.test(code)
-              ? code
-              : undefined,
-        }),
-      );
+      reportFailure('request_failed');
       response.status(503).json({
         code: 'DEPENDENCY_UNAVAILABLE',
         detail: 'The service is temporarily unavailable. Please retry.',
