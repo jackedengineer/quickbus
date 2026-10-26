@@ -1,4 +1,5 @@
 import { env } from 'cloudflare:workers';
+import { requestId, timed } from '@kwikbus/backend/telemetry';
 
 export async function apiFetch(request: Request): Promise<Response> {
   const bindings = env as unknown as { API: Fetcher };
@@ -28,5 +29,11 @@ export async function apiFetch(request: Request): Promise<Response> {
     headers.delete('Content-Length');
     request = new Request(request, { body, headers });
   }
-  return bindings.API.fetch(request);
+  const headers = new Headers(request.headers);
+  const correlation = requestId();
+  if (correlation) headers.set('X-Request-Id', correlation);
+  else headers.delete('X-Request-Id');
+  return timed('api', () =>
+    bindings.API.fetch(new Request(request, { headers })),
+  );
 }

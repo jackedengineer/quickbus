@@ -1,7 +1,8 @@
 import { env } from 'cloudflare:workers';
+import { observeRequest } from '@kwikbus/backend/telemetry';
 import handler, { createServerEntry } from '@tanstack/react-start/server-entry';
 
-export default createServerEntry({
+const web = createServerEntry({
   async fetch(request, options) {
     const url = new URL(request.url);
     const { PUBLIC_ORIGIN: canonicalOrigin } = env as unknown as {
@@ -69,4 +70,9 @@ export default createServerEntry({
     }
     return secured;
   },
+});
+
+export default createServerEntry({
+  fetch: (request, options) =>
+    observeRequest(request, 'web', () => web.fetch(request, options)),
 });
