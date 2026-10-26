@@ -1,0 +1,44 @@
+/* Small, interruptible feedback. Frequent seat/calendar changes retain their
+   immediate selected state; no layout property or page-load scene is animated. */
+@media (prefers-reduced-motion: no-preference) {
+  .search-submit,
+  .auth-submit,
+  .google-button,
+  .drawer-footer > button,
+  .booking-card > button {
+    transition:
+      background-color 120ms ease-out,
+      box-shadow 120ms ease-out,
+      scale 100ms ease-out;
+  }
+  .search-submit:active:not(:disabled),
+  .auth-submit:active:not(:disabled),
+  .google-button:active:not(:disabled),
+  .drawer-footer > button:active:not(:disabled),
+  .booking-card > button:active:not(:disabled) {
+    scale: 0.96;
+  }
+  .dialog[open] {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 160ms ease-out,
+      transform 160ms ease-out;
+  }
+  .dialog[open]::backdrop {
+    opacity: 1;
+    transition: opacity 120ms ease-out;
+  }
+  @starting-style {
+    .dialog[open] {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    .dialog.drawer[open] {
+      transform: translateX(8px);
+    }
+    .dialog[open]::backdrop {
+      opacity: 0;
+    }
+  }
+}
