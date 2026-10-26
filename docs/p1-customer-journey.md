@@ -23,15 +23,16 @@ Chrome DevTools CLI 1.12.0 controlled isolated Chrome contexts on the developmen
 - A saved desktop version rejects an older mobile draft with 412. Its unsaved name remains visible; reload recovers the saved version.
 - An invalid phone produces useful validation. Offline save retains the exact intent and disables editing; reconnect + retry saves once and displays the normalized phone.
 - A real ten-minute hold reaches the under-90-second notice and expires naturally. Editing becomes disabled and a full reload preserves the expired state; the deadline was never shortened through SQL for this browser check.
+- Keyboard Tab/Space selects a two-seat party in the equivalent list view. A conflict names 1A and retains 1B; choosing 1C successfully reserves 1B/1C for ₹998. Map/list switching preserves the same selection.
 - 320 px search/drawer and 390 px review show no horizontal overflow. Reduced-motion emulation removes the transform/scale effects. Focus moves to review and native dialogs preserve keyboard access.
 
-Reviewed captures: [mobile conflict](evidence/p1-2026-10-27/mobile-seat-conflict.png), [expired mobile review](evidence/p1-2026-10-27/mobile-expired-review.png), [saved desktop review](evidence/p1-2026-10-27/desktop-saved-review.png). Addresses/names in those captures are synthetic development data.
+Reviewed captures: [mobile seat list](evidence/p1-2026-10-27/mobile-seat-list.png), [mobile conflict](evidence/p1-2026-10-27/mobile-seat-conflict.png), [expired mobile review](evidence/p1-2026-10-27/mobile-expired-review.png), [saved desktop review](evidence/p1-2026-10-27/desktop-saved-review.png). Addresses/names in those captures are synthetic development data.
 
 ## Supporting correctness and release evidence
 
-The real-Neon integration run passed 18 checks across 13 files before adding the explicit edit/release race case. A fresh isolated PostgreSQL 18 migration/replay plus two-Worker run passed all 19 integration checks after adding the explicit edit/release race and PATCH origin/body-limit cases. Its contention proof passed too. Exact-revision GitHub CI must pass before rollout.
+The final real-Neon integration run passed all 19 checks across 13 files, including the edit/release race and labeled partial-party conflict. A fresh isolated PostgreSQL 18 migration/replay plus two-Worker run passed all 19 integration checks after adding the explicit edit/release race and PATCH origin/body-limit cases. Its contention proof passed too. Exact-revision GitHub CI must pass before rollout.
 
-The [real-Neon contention artifact](evidence/p1-neon-concurrency-2026-10-27.json) records nine scenarios against the implementation hash, including shared contracts and the PATCH bridge. The initial 100-customer burst had one success, seven seat conflicts and 92 bounded `RESOURCE_BUSY` responses. Retrying original keys converged to one winner/99 conflicts and one allocation; no dependency retry was required. This proves correctness under that scenario, not sustained throughput.
+The [real-Neon contention artifact](evidence/p1-neon-concurrency-2026-10-27.json) records nine scenarios against the implementation hash, including shared contracts and the PATCH bridge. The final 100-customer burst had one success, six seat conflicts and 93 bounded `RESOURCE_BUSY` responses. Retrying original keys converged to one winner/99 conflicts and one allocation; no dependency retry was required. This proves correctness under that scenario, not sustained throughput.
 
 Additive migrations 0004–0006 preserve existing reservations and old writers. Drizzle's generated 0006 ordering needed referenced unique constraints moved before their foreign keys; the corrected migration applies and replays on isolated PostgreSQL and Neon development, and regeneration reports no schema delta. Complete generated snapshots intentionally exceed the source commit size target.
 
