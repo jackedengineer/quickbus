@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-26T11:41:45.830Z",
+  "legacyRead": {
+    "status": 308,
+    "location": "https://kwikbus.jacked.dev/?view=help&_kwikbus_domain=20261026"
+  },
+  "wrongOriginMutation": {
+    "status": 403,
+    "code": "ORIGIN_REJECTED"
+  },
+  "privateApi": {
+    "status": 404,
+    "notPublic": true
+  }
+}

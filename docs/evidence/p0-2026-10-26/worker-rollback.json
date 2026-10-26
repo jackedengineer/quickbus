@@ -1,0 +1,41 @@
+{
+  "method": "Process log creation to last write on the same host; browser read checks occurred between commands.",
+  "steps": [
+    {
+      "step": "rollback-api",
+      "startedAt": "2026-10-26T11:23:16.301Z",
+      "completedAt": "2026-10-26T11:23:22.791Z",
+      "commandMs": 6490
+    },
+    {
+      "step": "rollback-web",
+      "startedAt": "2026-10-26T11:23:31.258Z",
+      "completedAt": "2026-10-26T11:23:38.604Z",
+      "commandMs": 7346
+    },
+    {
+      "step": "restore-api",
+      "startedAt": "2026-10-26T11:24:00.336Z",
+      "completedAt": "2026-10-26T11:24:08.516Z",
+      "commandMs": 8180
+    },
+    {
+      "step": "restore-web",
+      "startedAt": "2026-10-26T11:24:16.269Z",
+      "completedAt": "2026-10-26T11:24:24.050Z",
+      "commandMs": 7781
+    }
+  ],
+  "windowMs": 67749,
+  "previous": {
+    "api": "387b5db3-c71b-47ea-ba5c-0f323fe8e9bf",
+    "web": "1f20d19c-7e9d-429a-95e6-ea665d6b480d"
+  },
+  "restored": {
+    "api": "323d8311-263b-4f46-9051-a622c51cf778",
+    "web": "b4325a4b-2e8a-4f3f-ab56-ac19103cb617"
+  },
+  "browser": "Two-seat unpaid hold survived reload on the previous pair and restored pair, then released.",
+  "databaseRollback": false,
+  "limit": "One scheduled invocation during the older-handler window failed and resumed on restoration; no database was reverted. These are observed drill timings, not RTO guarantees."
+}

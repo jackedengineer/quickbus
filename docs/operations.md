@@ -29,8 +29,31 @@ The external monitor runs four times an hour on GitHub Actions, without credenti
 
 Run `node scripts/check-production.mjs --failure-drill`: it must fail after three attempts with `INTENTIONAL_MONITOR_DRILL`, without touching production. Once the workflow is on main, dispatch Production health with failure_drill=true and inspect the failed run/annotation; then dispatch it normally and confirm green. Record actual results in the P0 evidence. Recipient inbox delivery is a separate observation and must not be inferred from an Actions failure.
 
+The 26 October drill passed: intentional failure [40314860795](https://github.com/jackedengineer/quickbus/actions/runs/40314860795), then normal success [40315346714](https://github.com/jackedengineer/quickbus/actions/runs/40315346714). The failed run is an intentional notification-path exercise, not an app outage.
+
+## Native error monitor and job health
+
+Cloudflare **KwikBus application errors** (`98f43b5fff404d618cb30f4d97c0119b`) is enabled, scoped to `kwikbus` and `kwikbus-api`, threshold >=1, ten-minute execution/average window, one-hour repeat. It sends only to the existing account owner. Its built-in Test action was confirmed; inbox delivery is not certified. The account-scoped saved predicate is:
+
+```sql
+SELECT COUNT(*) AS value
+FROM logs.workersLogs
+WHERE scriptName IN ('kwikbus', 'kwikbus-api')
+  AND (level = 'error' OR (error IS NOT NULL AND error <> ''))
+```
+
+This covers application error logs and platform errors, including resource exceptions. Invocation URL logging remains disabled to protect OAuth callback parameters. Native metrics still expose outcomes/CPU. In the Logs UI, use `$metadata.error` / `$metadata.level` and `$workers.scriptName`; account SQL uses the dataset column aliases above. Structured application request IDs are the top-level `requestId`, distinct from Cloudflare's own `$metadata.requestId`.
+
+Production observations include a handled idle database connection error whose correlated session/read requests completed HTTP 200, and one missing scheduled handler while deliberately running the old Worker version during the rollback drill. Do not suppress these logs or confuse a successful HTTP response with proof that an underlying connection never failed. Escalate repeated socket errors with correlation/time/version data, and inspect Neon availability before making connection/security changes.
+
+`/api/health/maintenance` returns 503 when expiry has no successful pass in ten minutes, inventory has no success in three hours, any active service lacks an open departure beyond 27 days, or a HELD row is overdue by more than five minutes. Expiry runs every minute; inventory at minute 17 UTC each hour. Startup priming performs real work while Cron configuration propagates; observe later heartbeats rather than writing a fake success. Cron changes can take up to 15 minutes to propagate. A bounded expiry sweep handles ten trips; renewal inserts at most five complete departures. Monitor backlog/horizon before increasing those bounds.
+
+No offsite backup service, field latency SLO, paid Cloudflare plan or automatic provider reconciliation is implied by this baseline. See [P0 evidence](p0-hardening.md), [performance](p0-performance.md) and [recovery](recovery.md).
+
 ## Official references
 
 - [Workers observability](https://developers.cloudflare.com/workers/observability/)
 - [Workers CPU and invocation limits](https://developers.cloudflare.com/workers/platform/limits/)
+- [Workers error fields and outcomes](https://developers.cloudflare.com/workers/observability/errors/)
+- [Cron configuration propagation](https://developers.cloudflare.com/workers/configuration/cron-triggers/)
 - [Scheduled workflow limitations](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule)

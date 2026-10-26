@@ -1,0 +1,44 @@
+{
+  "at": "2026-10-26T11:35:24.270Z",
+  "status": 200,
+  "requestId": "5f453b81-bf58-4982-b8d3-a88687a787d6",
+  "serverTiming": "api;dur=328.0, binding;dur=515.0, web;dur=515.0",
+  "observed": [
+    {
+      "worker": "web",
+      "event": "dependency_completed",
+      "requestId": "5f453b81-bf58-4982-b8d3-a88687a787d6",
+      "service": "web",
+      "dependency": "binding",
+      "durationMs": 515,
+      "ok": true,
+      "cpuTime": 6,
+      "wallTime": 519,
+      "outcome": "ok"
+    },
+    {
+      "worker": "web",
+      "event": "request_completed",
+      "requestId": "5f453b81-bf58-4982-b8d3-a88687a787d6",
+      "service": "web",
+      "route": "/api/health/ready",
+      "status": 200,
+      "durationMs": 515,
+      "cpuTime": 6,
+      "wallTime": 519,
+      "outcome": "ok"
+    },
+    {
+      "worker": "api",
+      "event": "request_completed",
+      "requestId": "5f453b81-bf58-4982-b8d3-a88687a787d6",
+      "service": "api",
+      "route": "/api/health/ready",
+      "status": 200,
+      "durationMs": 328,
+      "cpuTime": 16,
+      "wallTime": 419,
+      "outcome": "ok"
+    }
+  ]
+}

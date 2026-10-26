@@ -1,0 +1,67 @@
+{
+  "before": {
+    "at": "2026-10-26T11:36:58.233Z",
+    "reservation": {
+      "status": "HELD",
+      "expires_at": "2026-10-26T11:38:13.994Z",
+      "allocations": 1,
+      "expiry_events": 0
+    },
+    "jobs": [
+      {
+        "name": "expiry",
+        "last_started_at": "2026-10-26T11:36:45.350Z",
+        "last_succeeded_at": "2026-10-26T11:36:45.790Z",
+        "last_failed_at": null,
+        "last_processed": 0
+      },
+      {
+        "name": "inventory",
+        "last_started_at": "2026-10-26T11:34:25.482Z",
+        "last_succeeded_at": "2026-10-26T11:34:25.646Z",
+        "last_failed_at": null,
+        "last_processed": 0
+      }
+    ],
+    "catalog": {
+      "services": 3,
+      "template_seats": 120,
+      "published_trips": 93,
+      "duplicate_departures": 0,
+      "partial_trips": 0
+    }
+  },
+  "after": {
+    "at": "2026-10-26T11:39:15.145Z",
+    "reservation": {
+      "status": "EXPIRED",
+      "expires_at": "2026-10-26T11:38:13.994Z",
+      "allocations": 0,
+      "expiry_events": 1
+    },
+    "jobs": [
+      {
+        "name": "expiry",
+        "last_started_at": "2026-10-26T11:38:45.607Z",
+        "last_succeeded_at": "2026-10-26T11:38:47.685Z",
+        "last_failed_at": null,
+        "last_processed": 1
+      },
+      {
+        "name": "inventory",
+        "last_started_at": "2026-10-26T11:34:25.482Z",
+        "last_succeeded_at": "2026-10-26T11:34:25.646Z",
+        "last_failed_at": null,
+        "last_processed": 0
+      }
+    ],
+    "catalog": {
+      "services": 3,
+      "template_seats": 120,
+      "published_trips": 93,
+      "duplicate_departures": 0,
+      "partial_trips": 0
+    }
+  },
+  "path": "Natural production Cron invocation; no manual expiry command or customer mutation between observations"
+}
