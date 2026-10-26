@@ -33,7 +33,7 @@ export async function apiFetch(request: Request): Promise<Response> {
   const correlation = requestId();
   if (correlation) headers.set('X-Request-Id', correlation);
   else headers.delete('X-Request-Id');
-  return timed('api', () =>
+  return timed('binding', () =>
     bindings.API.fetch(new Request(request, { headers })),
   );
 }

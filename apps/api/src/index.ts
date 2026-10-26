@@ -3,7 +3,11 @@ import { httpServerHandler } from 'cloudflare:node';
 import { createApp } from '@kwikbus/backend/app';
 import { type AppEnvironment, requestContext } from '@kwikbus/backend/context';
 import { runMaintenance } from '@kwikbus/backend/maintenance';
-import { observeRequest, reportFailure } from '@kwikbus/backend/telemetry';
+import {
+  observeRequest,
+  reportFailure,
+  requestId,
+} from '@kwikbus/backend/telemetry';
 import { createDatabase } from '@kwikbus/db';
 import { validateEnvironment } from './environment';
 
@@ -29,6 +33,7 @@ const api = {
       database = createDatabase(
         environment.DATABASE_URL,
         environment.CI_DATABASE_PROXY,
+        requestId(),
       );
       return await requestContext.run({ db: database.db, environment }, () =>
         handleHttp(request, environment, executionContext),
@@ -58,12 +63,14 @@ export default {
           ? 'inventory'
           : null;
     if (!job) throw new Error('Unknown maintenance schedule.');
+    const runId = crypto.randomUUID();
     const database = createDatabase(
       environment.DATABASE_URL,
       environment.CI_DATABASE_PROXY,
+      runId,
     );
     try {
-      await runMaintenance(database.db, job);
+      await runMaintenance(database.db, job, runId);
     } finally {
       await database.close();
     }

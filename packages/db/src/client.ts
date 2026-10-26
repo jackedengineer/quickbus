@@ -4,7 +4,15 @@ import * as schema from './schema';
 
 // Edge pools must live within one invocation, never at module scope.
 // https://neon.com/docs/serverless/serverless-driver#pool-and-client-usage-notes
-export function createDatabase(connectionString: string, ciProxy?: string) {
+export function createDatabase(
+  connectionString: string,
+  ciProxy?: string,
+  correlationId?: string,
+) {
+  const poolRequestId =
+    correlationId && /^[0-9a-f-]{36}$/i.test(correlationId)
+      ? correlationId
+      : crypto.randomUUID();
   let Driver = Client;
   if (ciProxy) {
     const target = new URL(connectionString);
@@ -39,7 +47,12 @@ export function createDatabase(connectionString: string, ciProxy?: string) {
   // Idle sockets can fail independently of an awaited query. The pool removes
   // the failed client; query errors still reject and roll back normally.
   pool.on('error', () => {
-    console.error(JSON.stringify({ event: 'database_idle_connection_error' }));
+    console.error(
+      JSON.stringify({
+        event: 'database_idle_connection_error',
+        requestId: poolRequestId,
+      }),
+    );
   });
   return { db: drizzle({ client: pool, schema }), close: () => pool.end() };
 }

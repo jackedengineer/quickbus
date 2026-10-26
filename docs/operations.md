@@ -5,13 +5,13 @@
 | Question | Signal | First action |
 |---|---|---|
 | Is the public app usable? | Scheduled Production health workflow: homepage, DB readiness, auth configuration, sellable trips; three attempts before failing. | Open the failed step and check the bounded error code, then verify normal HTTPS in a browser. |
-| Where did request latency go? | X-Request-Id links web/API JSON events. Server-Timing exposes wall-clock web/API/session/email/command/tripLock durations. | Find request_completed and dependency_completed for that UUID in Workers Logs. Compare route/status distributions and p95/p99 in query results. |
+| Where did request latency go? | X-Request-Id links web/API JSON events. Server-Timing exposes wall-clock web/API/binding/session/email/command/tripLock durations. | Find request_completed and dependency_completed for that UUID in Workers Logs. Compare route/status distributions and p95/p99 in query results. |
 | Are OTP requests failing? | email dependency_completed ok=false and auth route failure rates. | Inspect Resend delivery/errors for the user's reported time. Never paste codes or recipient data into logs. Provider acceptance is not inbox delivery. |
 | Are resources exhausted? | Cloudflare Workers Metrics: errors/outcomes (including exceededCpu), CPU and wall time by Worker. | Check web and API separately; correlate with request failures. No paid plan is enabled automatically. |
 
 ## Privacy and interpretation
 
-All public requests receive a server-generated UUID. The private API accepts the web-generated UUID only in UUID format. Routes use bounded templates; no query string, email, user/booking/trip identifier, headers, body, OTP or provider response is logged. Unknown routes become `other`. Timing numbers are wall clock, not CPU time. The web request span ends when response headers are ready, not after every streamed byte; parallel dependency totals can exceed request wall time. Do not add them together as a critical path. Existing callback invocation URL logging stays disabled.
+All public requests receive a server-generated UUID. The private API accepts the web-generated UUID only in UUID format. Routes use bounded templates; no query string, email, user/booking/trip identifier, headers, body, OTP or provider response is logged. Unknown routes become `other`. Start server functions use a bounded route template. Idle-pool failures retain the creating request/job UUID. `binding` measures the web-to-API call, while `api` identifies API Worker handling time. Timing numbers are wall clock, not CPU time. The web request span ends when response headers are ready, not after every streamed byte; parallel dependency totals can exceed request wall time. Do not add them together as a critical path. Existing callback invocation URL logging stays disabled.
 
 Request events provide route/status/duration samples, not a separate Prometheus service. Cloudflare's existing metrics supply invocation/error/CPU aggregates. Worker logs have account retention/volume limits; this is a portfolio baseline, not guaranteed long-term telemetry storage. Empty samples do not establish a latency percentile or SLO.
 

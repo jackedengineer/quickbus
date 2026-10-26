@@ -30,8 +30,9 @@ test('an idle connection terminated by Postgres is reported safely and the pool 
         expect(
           errors.mock.calls.some(
             (call) =>
-              call[0] ===
-              JSON.stringify({ event: 'database_idle_connection_error' }),
+              typeof call[0] === 'string' &&
+              JSON.parse(call[0]).event === 'database_idle_connection_error' &&
+              /^[0-9a-f-]{36}$/i.test(JSON.parse(call[0]).requestId),
           ),
         ).toBe(true),
       { timeout: 5000 },

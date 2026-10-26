@@ -6,9 +6,9 @@ import { renewInventory } from './inventory';
 export async function runMaintenance(
   db: Database,
   name: 'expiry' | 'inventory',
+  runId = crypto.randomUUID(),
 ) {
-  const runId = crypto.randomUUID(),
-    started = performance.now();
+  const started = performance.now();
   try {
     await db.execute(sql`INSERT INTO maintenance_jobs(name,last_started_at) VALUES(${name},clock_timestamp())
     ON CONFLICT(name) DO UPDATE SET last_started_at=excluded.last_started_at`);

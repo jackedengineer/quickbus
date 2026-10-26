@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createHash, randomUUID } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { setTimeout as delay } from 'node:timers/promises';
 import {
   cleanupFixtures,
@@ -11,23 +11,24 @@ import {
 
 const endpoints = ['http://localhost:8787', 'http://localhost:8788'];
 const implementationFiles = [
-  'apps/api/src/index.ts',
-  'apps/api/src/environment.ts',
   'apps/api/wrangler.jsonc',
-  'packages/backend/src/app.ts',
-  'packages/backend/src/auth.ts',
-  'packages/backend/src/email.ts',
-  'packages/backend/src/booking.ts',
-  'packages/backend/src/context.ts',
-  'packages/backend/src/expiry.ts',
-  'packages/backend/src/maintenance.ts',
-  'packages/backend/src/telemetry.ts',
-  'packages/db/src/operations-schema.ts',
-  'packages/db/src/client.ts',
-  'packages/db/src/booking-schema.ts',
-  'packages/db/src/auth-schema.ts',
+  'apps/web/src/api.server.ts',
+  'apps/web/src/server.ts',
+  'scripts/runtime-grants.ts',
   'pnpm-lock.yaml',
 ];
+for (const directory of [
+  'apps/api/src',
+  'packages/backend/src',
+  'packages/db/src',
+  'packages/db/migrations',
+]) {
+  for (const file of await readdir(directory, { recursive: true })) {
+    if (file.endsWith('.ts') || file.endsWith('.sql'))
+      implementationFiles.push(`${directory}/${file}`);
+  }
+}
+implementationFiles.sort();
 const implementationHash = createHash('sha256');
 for (const file of implementationFiles)
   implementationHash

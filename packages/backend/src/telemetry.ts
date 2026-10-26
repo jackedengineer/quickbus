@@ -1,6 +1,6 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 
-type Timing = 'api' | 'session' | 'email' | 'command' | 'tripLock';
+type Timing = 'binding' | 'session' | 'email' | 'command' | 'tripLock';
 type Telemetry = {
   requestId: string;
   service: 'web' | 'api';
@@ -31,7 +31,8 @@ export function routeLabel(path: string) {
   if (/^\/api\/v1\/bookings\/[^/]+\/release$/.test(path))
     return '/api/v1/bookings/:id/release';
   if (/^\/api\/v1\/bookings\/[^/]+$/.test(path)) return '/api/v1/bookings/:id';
-  if (path.startsWith('/_server/')) return '/_server/:function';
+  if (path.startsWith('/_server/') || path.startsWith('/_serverFn/'))
+    return '/_server/:function';
   return path === '/' ? '/' : 'other';
 }
 export function requestId() {

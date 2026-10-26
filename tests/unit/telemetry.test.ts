@@ -20,7 +20,7 @@ test('parallel traces remain isolated and never log a callback query or raw unkn
           async () => {
             const before = requestId();
             await timed(
-              'api',
+              'binding',
               () => new Promise((resolve) => setTimeout(resolve, i)),
             );
             expect(requestId()).toBe(before);
@@ -34,7 +34,7 @@ test('parallel traces remain isolated and never log a callback query or raw unkn
     ).toBe(8);
     expect(
       responses.every((r) =>
-        r.headers.get('Server-Timing')?.includes('api;dur='),
+        r.headers.get('Server-Timing')?.includes('binding;dur='),
       ),
     ).toBe(true);
     expect(JSON.stringify(logs.mock.calls)).not.toContain('private-');
