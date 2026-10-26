@@ -15,6 +15,8 @@ const routes = new Set([
   '/api/health/maintenance',
   '/api/v1/session',
   '/api/v1/trips',
+  '/api/v1/catalog',
+  '/api/v1/cities',
   '/api/v1/holds',
   '/api/v1/bookings',
   '/api/auth/email-otp/send-verification-otp',
@@ -28,6 +30,7 @@ export function routeLabel(path: string) {
   if (routes.has(path)) return path;
   if (/^\/api\/v1\/trips\/[^/]+\/seats$/.test(path))
     return '/api/v1/trips/:id/seats';
+  if (/^\/api\/v1\/trips\/[^/]+$/.test(path)) return '/api/v1/trips/:id';
   if (/^\/api\/v1\/bookings\/[^/]+\/release$/.test(path))
     return '/api/v1/bookings/:id/release';
   if (/^\/api\/v1\/bookings\/[^/]+$/.test(path)) return '/api/v1/bookings/:id';

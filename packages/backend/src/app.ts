@@ -1,3 +1,4 @@
+import { searchInput } from '@kwikbus/contracts';
 import { sql } from '@kwikbus/db/schema';
 import { fromNodeHeaders, toNodeHandler } from 'better-auth/node';
 import express from 'express';
@@ -10,6 +11,7 @@ import {
   listTrips,
   releaseHold,
 } from './booking';
+import { catalog, citySuggestions, searchTrips, tripDetails } from './catalog';
 import { context } from './context';
 import { maintenanceHealth } from './maintenance';
 import { reportFailure, timed } from './telemetry';
@@ -98,9 +100,42 @@ export function createApp() {
   });
   app.use(express.json({ limit: '16kb' }));
   const uuid = z.uuid();
-  app.get('/api/v1/trips', async (_request, response) =>
-    response.json({ trips: await listTrips(context().db) }),
+  app.get('/api/v1/catalog', async (_request, response) =>
+    response.json(await catalog(context().db)),
   );
+  app.get('/api/v1/cities', async (request, response) => {
+    const q = z
+      .object({ q: z.string().trim().max(100).default('') })
+      .strict()
+      .safeParse(request.query);
+    return q.success
+      ? response.json({ cities: await citySuggestions(context().db, q.data.q) })
+      : response.status(400).json({ code: 'INVALID_REQUEST' });
+  });
+  app.get('/api/v1/trips', async (request, response) => {
+    if (!Object.keys(request.query).length)
+      return response.json({ trips: await listTrips(context().db) });
+    const input = searchInput.safeParse(request.query);
+    if (!input.success)
+      return response
+        .status(400)
+        .json({
+          trips: [],
+          code: 'INVALID_SEARCH',
+          detail: 'Choose two cities, a valid date and one to four adults.',
+        });
+    const result = await searchTrips(context().db, input.data);
+    return response.status(result.status).json(result.body);
+  });
+  app.get('/api/v1/trips/:id', async (request, response) => {
+    const id = uuid.safeParse(request.params.id);
+    if (!id.success)
+      return response.status(400).json({ code: 'INVALID_REQUEST' });
+    const trip = await tripDetails(context().db, id.data);
+    return trip
+      ? response.json(trip)
+      : response.status(404).json({ code: 'TRIP_NOT_FOUND' });
+  });
   app.get('/api/v1/trips/:id/seats', async (request, response) => {
     const id = uuid.safeParse(request.params.id);
     if (!id.success)

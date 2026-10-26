@@ -65,6 +65,9 @@ importers:
       '@kwikbus/backend':
         specifier: workspace:*
         version: link:../../packages/backend
+      '@kwikbus/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@tanstack/react-router':
         specifier: 1.170.46
         version: 1.170.46(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -99,6 +102,9 @@ importers:
       '@better-auth/drizzle-adapter':
         specifier: 1.7.12
         version: 1.7.12(@better-auth/core@1.7.12(@better-auth/utils@0.5.0)(@better-fetch/fetch@1.3.2)(better-call@1.4.4(zod@4.6.7))(jose@6.2.13)(kysely@0.29.7)(nanostores@1.5.5))(@better-auth/utils@0.5.0)(drizzle-orm@0.45.4(@cloudflare/workers-types@5.20261025.1)(@neondatabase/serverless@1.2.0)(@types/pg@8.20.0)(kysely@0.29.7)(pg@8.23.1))
+      '@kwikbus/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@kwikbus/db':
         specifier: workspace:*
         version: link:../db
@@ -108,6 +114,12 @@ importers:
       express:
         specifier: 5.3.0
         version: 5.3.0
+      zod:
+        specifier: 4.6.7
+        version: 4.6.7
+
+  packages/contracts:
+    dependencies:
       zod:
         specifier: 4.6.7
         version: 4.6.7
