@@ -13,7 +13,9 @@
       "name": "kwikbus",
       "workers_dev": true,
       "preview_urls": false,
-      "vars": { "PUBLIC_ORIGIN": "https://kwikbus.jacked.dev" },
+      "vars": {
+        "PUBLIC_ORIGIN": "https://kwikbus.ichiragbhugra.workers.dev"
+      },
       "routes": [
         {
           "pattern": "kwikbus.jacked.dev",
