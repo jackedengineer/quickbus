@@ -106,7 +106,9 @@ export function CityInput({
               </button>
             ))
           ) : (
-            <p role="status">No matching cities. Try Bengaluru or Hyderabad.</p>
+            <p role="status">
+              No matching cities. Choose from the available journeys.
+            </p>
           )}
         </div>
       )}

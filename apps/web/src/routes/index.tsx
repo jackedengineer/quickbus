@@ -127,8 +127,8 @@ function Home() {
     }
   }, [session.user, search, navigate]);
   const values: SearchValues = {
-    from: search.from ?? 'Bengaluru',
-    to: search.to ?? 'Hyderabad',
+    from: search.from ?? trips[0]?.origin ?? '',
+    to: search.to ?? trips[0]?.destination ?? '',
     date: search.date ?? (trips[0] ? dateInIndia(trips[0].departureAt) : today),
     adults: search.adults ?? 1,
   };

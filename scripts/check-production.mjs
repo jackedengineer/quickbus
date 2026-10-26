@@ -26,6 +26,10 @@ async function check() {
     if ((await response.json()).status !== 'ok')
       throw new Error('DATABASE_NOT_READY');
   });
+  await probe('/api/health/maintenance', async (response) => {
+    if ((await response.json()).status !== 'ok')
+      throw new Error('MAINTENANCE_DEGRADED');
+  });
   await probe('/api/v1/session', async (response) => {
     const session = await response.json();
     if (

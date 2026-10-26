@@ -25,7 +25,11 @@ try {
   await client.query(
     `GRANT SELECT,INSERT,UPDATE ON maintenance_jobs TO "${role}"`,
   );
-  console.log('Reviewed maintenance grants applied.');
+  await client.query(
+    `GRANT SELECT ON inventory_services,inventory_service_seats TO "${role}"`,
+  );
+  await client.query(`GRANT INSERT ON trips,trip_seats TO "${role}"`);
+  console.log('Reviewed maintenance and snapshot-publication grants applied.');
 } finally {
   await client.end();
 }

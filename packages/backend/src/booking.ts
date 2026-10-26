@@ -227,7 +227,7 @@ export async function releaseHold(
 
 export async function listTrips(db: Database) {
   const result =
-    await db.execute(sql`SELECT t.id,t.origin,t.destination,t.operator_name AS "operatorName",
+    await db.execute(sql`SELECT t.id,t.origin,t.destination,t.operator_name AS "operatorName",t.vehicle_label AS "vehicleLabel",
     t.departure_at AS "departureAt",t.arrival_at AS "arrivalAt",min(s.fare_minor)::int AS "fareMinor",count(s.seat_label)::int AS "seatCount"
     FROM trips t JOIN trip_seats s ON s.trip_id=t.id WHERE t.sales_state='OPEN' AND t.sales_close_at>clock_timestamp()+interval '2 minutes'
     GROUP BY t.id ORDER BY t.departure_at LIMIT 100`);

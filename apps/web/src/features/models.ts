@@ -9,6 +9,7 @@ export type Trip = {
   origin: string;
   destination: string;
   operatorName: string;
+  vehicleLabel: string;
   departureAt: string;
   arrivalAt: string;
   fareMinor: number;

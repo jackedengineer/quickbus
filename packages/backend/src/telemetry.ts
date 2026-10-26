@@ -12,6 +12,7 @@ const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const routes = new Set([
   '/api/health/live',
   '/api/health/ready',
+  '/api/health/maintenance',
   '/api/v1/session',
   '/api/v1/trips',
   '/api/v1/holds',
@@ -38,11 +39,16 @@ export function requestId() {
 }
 export function reportFailure(
   event: 'request_failed' | 'worker_dependency_failed',
+  databaseCode?: string,
 ) {
   const value = store.getStore();
   console.error(
     JSON.stringify({
       event,
+      databaseCode:
+        databaseCode && /^[A-Z0-9]{5}$/.test(databaseCode)
+          ? databaseCode
+          : undefined,
       requestId: value?.requestId,
       service: value?.service,
       route: value?.route,

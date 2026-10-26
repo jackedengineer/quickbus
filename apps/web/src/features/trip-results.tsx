@@ -101,7 +101,9 @@ export function TripResults({
                   <small aria-hidden="true">per adult</small>
                 </strong>
               </div>
-              <p className="operator">{trip.operatorName} | AC Seater (2+2)</p>
+              <p className="operator">
+                {trip.operatorName} | {trip.vehicleLabel}
+              </p>
               <div className="trip-bottom">
                 <span className="direct-pill">
                   <Icon name="bus" size={20} />

@@ -14,7 +14,7 @@
   "env": {
     "production": {
       "name": "kwikbus-api",
-      "triggers": { "crons": ["* * * * *"] },
+      "triggers": { "crons": ["* * * * *", "17 * * * *"] },
       "workers_dev": false,
       "preview_urls": false,
       "vars": {

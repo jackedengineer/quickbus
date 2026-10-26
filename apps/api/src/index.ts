@@ -48,11 +48,16 @@ export default {
     environment: AppEnvironment,
   ) {
     validateEnvironment(environment);
-    if (controller.cron !== '* * * * *')
-      throw new Error('Unknown maintenance schedule.');
+    const job =
+      controller.cron === '* * * * *'
+        ? 'expiry'
+        : controller.cron === '17 * * * *'
+          ? 'inventory'
+          : null;
+    if (!job) throw new Error('Unknown maintenance schedule.');
     const database = createDatabase(environment.DATABASE_URL);
     try {
-      await runMaintenance(database.db, 'expiry');
+      await runMaintenance(database.db, job);
     } finally {
       await database.close();
     }

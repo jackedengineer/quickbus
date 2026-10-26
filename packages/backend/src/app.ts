@@ -11,6 +11,7 @@ import {
   releaseHold,
 } from './booking';
 import { context } from './context';
+import { maintenanceHealth } from './maintenance';
 import { reportFailure, timed } from './telemetry';
 
 async function readSession(
@@ -48,6 +49,10 @@ export function createApp() {
       sql`select current_setting('server_version_num')::int / 10000 as major`,
     );
     response.json({ status: 'ok', postgresMajor: rows.rows[0]?.major });
+  });
+  app.get('/api/health/maintenance', async (_request, response) => {
+    const health = await maintenanceHealth(context().db);
+    response.status(health.status === 'ok' ? 200 : 503).json(health);
   });
   // Auth must see the original body stream: https://better-auth.com/docs/integrations/express
   app.all('/api/auth/*splat', (request, response) => {
@@ -213,7 +218,10 @@ export function createApp() {
         response.status(400).json({ code: 'INVALID_REQUEST' });
         return;
       }
-      reportFailure('request_failed');
+      reportFailure(
+        'request_failed',
+        typeof code === 'string' ? code : undefined,
+      );
       response.status(503).json({
         code: 'DEPENDENCY_UNAVAILABLE',
         detail: 'The service is temporarily unavailable. Please retry.',
