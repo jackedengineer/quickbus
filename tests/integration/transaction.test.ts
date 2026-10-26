@@ -3,7 +3,10 @@ import { createDatabase } from '../../packages/db/src/client';
 import { sql } from '../../packages/db/src/schema';
 
 test('interactive Neon transactions retain their session and roll back failed work', async () => {
-  const database = createDatabase(process.env.DATABASE_URL ?? '');
+  const database = createDatabase(
+    process.env.DATABASE_URL ?? '',
+    process.env.CI_DATABASE_PROXY,
+  );
   try {
     await expect(
       database.db.transaction(async (tx) => {
@@ -32,7 +35,10 @@ test('interactive Neon transactions retain their session and roll back failed wo
 });
 
 test('the pooled application role has no database, role, or public-schema creation privilege', async () => {
-  const database = createDatabase(process.env.DATABASE_URL ?? '');
+  const database = createDatabase(
+    process.env.DATABASE_URL ?? '',
+    process.env.CI_DATABASE_PROXY,
+  );
   try {
     const result = await database.db.execute<{
       rolsuper: boolean;

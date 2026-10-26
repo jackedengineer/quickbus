@@ -48,7 +48,9 @@ const report: {
   implementationSha256: implementationHash.digest('hex'),
   implementationFiles,
   runtime: 'Two separate Wrangler/workerd API instances',
-  database: 'Neon PostgreSQL 18, pooled WebSocket transactions',
+  database: process.env.CI_DATABASE_PROXY
+    ? 'Isolated PostgreSQL 18 through Neon WebSocket proxy (no Neon pooler)'
+    : 'Neon PostgreSQL 18, pooled WebSocket transactions',
   scenarios: [],
 };
 const client = await fixtureClient(),

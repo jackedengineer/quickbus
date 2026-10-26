@@ -26,7 +26,10 @@ const api = {
     let database: ReturnType<typeof createDatabase> | undefined;
     try {
       validateEnvironment(environment);
-      database = createDatabase(environment.DATABASE_URL);
+      database = createDatabase(
+        environment.DATABASE_URL,
+        environment.CI_DATABASE_PROXY,
+      );
       return await requestContext.run({ db: database.db, environment }, () =>
         handleHttp(request, environment, executionContext),
       );
@@ -55,7 +58,10 @@ export default {
           ? 'inventory'
           : null;
     if (!job) throw new Error('Unknown maintenance schedule.');
-    const database = createDatabase(environment.DATABASE_URL);
+    const database = createDatabase(
+      environment.DATABASE_URL,
+      environment.CI_DATABASE_PROXY,
+    );
     try {
       await runMaintenance(database.db, job);
     } finally {

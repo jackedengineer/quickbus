@@ -11,7 +11,10 @@ test('an idle connection terminated by Postgres is reported safely and the pool 
   const runtime = new URL(process.env.DATABASE_URL ?? '');
   direct.username = runtime.username;
   direct.password = runtime.password;
-  const database = createDatabase(direct.toString());
+  const database = createDatabase(
+    direct.toString(),
+    process.env.CI_DATABASE_PROXY,
+  );
   const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
   try {
     const before = await database.db.execute<{ pid: number }>(

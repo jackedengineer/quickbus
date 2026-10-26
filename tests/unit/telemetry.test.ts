@@ -58,3 +58,14 @@ test('parallel traces remain isolated and never log a callback query or raw unkn
     logs.mockRestore();
   }
 });
+
+test('CI transport overrides cannot target a remote or production database', async () => {
+  const { createDatabase } = await import('../../packages/db/src/client');
+  for (const target of [
+    'postgresql://unused:unused@example.com:55432/quickbus_ci?sslmode=disable',
+    'postgresql://unused:unused@127.0.0.1:55432/kwikbus_v0?sslmode=disable',
+  ])
+    expect(() => createDatabase(target, '127.0.0.1:6543')).toThrow(
+      'isolated loopback',
+    );
+});

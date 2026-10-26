@@ -17,6 +17,7 @@ export function validateEnvironment(environment: AppEnvironment) {
       database.username !== 'kwikbus_v0_runtime' ||
       database.searchParams.get('sslmode') !== 'verify-full' ||
       environment.MAILPIT_URL ||
+      environment.CI_DATABASE_PROXY ||
       !environment.GOOGLE_CLIENT_ID ||
       !environment.GOOGLE_CLIENT_SECRET
     )

@@ -4,7 +4,10 @@ import pg from 'pg';
 export async function fixtureClient() {
   if (
     process.env.DEPLOYMENT_ENV !== 'local' ||
-    process.env.ALLOW_DEV_FIXTURES !== 'true'
+    process.env.ALLOW_DEV_FIXTURES !== 'true' ||
+    !['/quickbus', '/quickbus_ci'].includes(
+      new URL(process.env.MIGRATION_DATABASE_URL ?? '').pathname,
+    )
   ) {
     throw new Error(
       'Synthetic fixtures require local mode and ALLOW_DEV_FIXTURES=true.',

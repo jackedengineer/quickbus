@@ -1,4 +1,5 @@
 import pg from 'pg';
+import { applyRuntimeGrants } from './runtime-grants';
 
 const ownerUrl = process.env.MIGRATION_DATABASE_URL;
 const runtimeUrl = process.env.DATABASE_URL;
@@ -21,14 +22,7 @@ if (
 const client = new pg.Client({ connectionString: ownerUrl });
 await client.connect();
 try {
-  // Identifiers come only from the fixed allowlist above, never user input.
-  await client.query(
-    `GRANT SELECT,INSERT,UPDATE ON maintenance_jobs TO "${role}"`,
-  );
-  await client.query(
-    `GRANT SELECT ON inventory_services,inventory_service_seats TO "${role}"`,
-  );
-  await client.query(`GRANT INSERT ON trips,trip_seats TO "${role}"`);
+  await applyRuntimeGrants(client, role);
   console.log('Reviewed maintenance and snapshot-publication grants applied.');
 } finally {
   await client.end();

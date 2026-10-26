@@ -2,7 +2,10 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import type { Database } from '@kwikbus/db';
 import type { AuthEnvironment } from './auth';
 
-export type AppEnvironment = AuthEnvironment & { DATABASE_URL: string };
+export type AppEnvironment = AuthEnvironment & {
+  DATABASE_URL: string;
+  CI_DATABASE_PROXY?: string;
+};
 export const requestContext = new AsyncLocalStorage<{
   db: Database;
   environment: AppEnvironment;

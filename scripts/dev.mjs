@@ -1,11 +1,21 @@
 import { spawn } from 'node:child_process';
 import { readFile, writeFile } from 'node:fs/promises';
 
-const environment = await readFile('.env', 'utf8');
+const environment = await readFile(
+  process.env.KWIKBUS_ENV_FILE ?? '.env',
+  'utf8',
+);
+if (
+  !/^DEPLOYMENT_ENV=local$/m.test(environment) ||
+  /\/kwikbus_v0(?:[?\n]|$)/m.test(environment)
+)
+  throw new Error(
+    'Development servers require a dedicated local/development database.',
+  );
 const runtimeEnvironment = environment
   .split('\n')
   .filter((line) =>
-    /^(DATABASE_URL|AUTH_SECRET|APP_ORIGIN|MAILPIT_URL|DEPLOYMENT_ENV|GOOGLE_CLIENT_ID|GOOGLE_CLIENT_SECRET|RESEND_API_KEY|EMAIL_FROM)=/.test(
+    /^(DATABASE_URL|CI_DATABASE_PROXY|AUTH_SECRET|APP_ORIGIN|MAILPIT_URL|DEPLOYMENT_ENV|GOOGLE_CLIENT_ID|GOOGLE_CLIENT_SECRET|RESEND_API_KEY|EMAIL_FROM)=/.test(
       line,
     ),
   )

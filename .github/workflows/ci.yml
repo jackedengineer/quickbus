@@ -1,7 +1,7 @@
 name: Quality
 on:
   push:
-    branches: [main]
+    branches: [main, 'codex/**']
   pull_request:
 permissions:
   contents: read
@@ -22,5 +22,27 @@ jobs:
       - run: npm install --global pnpm@10.34.5 --ignore-scripts
       - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm check
+      - run: pnpm exec vitest run tests/unit
       - run: pnpm cf:check
       - run: pnpm audit --audit-level=high
+
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: '24.14.0'
+          package-manager-cache: false
+      - run: npm install --global pnpm@10.34.5 --ignore-scripts
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Start isolated PostgreSQL, WebSocket proxy and local email
+        run: docker compose -f infra/compose.ci.yml up -d --wait
+      - name: Migrate from empty, grant restricted role and seed database inventory
+        run: node --import tsx scripts/setup-ci.ts
+      - name: Exercise two real Workers against isolated PostgreSQL
+        run: node scripts/ci-integration.mjs
+      - name: Stop isolated fixture services
+        if: always()
+        run: docker compose -f infra/compose.ci.yml down --volumes

@@ -1,0 +1,27 @@
+name: kwikbus-ci
+services:
+  postgres:
+    image: postgres@sha256:edb0c08dc33befd0262ab3b5cf1c4f3f8cfd8b09e88c05b45adee29d6761ddb6
+    command: ['postgres', '-c', 'max_connections=250']
+    environment:
+      POSTGRES_DB: quickbus_ci
+      POSTGRES_PASSWORD: fixture-owner-only
+    ports: ['127.0.0.1:55432:5432']
+    tmpfs: ['/var/lib/postgresql']
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d quickbus_ci']
+      interval: 2s
+      timeout: 2s
+      retries: 30
+  proxy:
+    image: ghcr.io/neondatabase/wsproxy@sha256:7f2e2149aa6a57ba382a140102fba44f5053f3e44389ccc18adcecf896054efb
+    environment:
+      ALLOW_ADDR_REGEX: '^postgres:5432$$'
+      LOG_CONN_INFO: 'false'
+      LOG_TRAFFIC: 'false'
+    ports: ['127.0.0.1:6543:80']
+    depends_on:
+      postgres: { condition: service_healthy }
+  mailpit:
+    image: axllent/mailpit:v1.27.8
+    ports: ['127.0.0.1:8025:8025']
