@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import pg from 'pg';
 import { expect, test } from 'vitest';
 import { renewalPgQuery } from '../../packages/db/src/inventory';
 import { seedDemoInventory } from '../../scripts/demo-inventory';
@@ -62,7 +63,6 @@ test('normalized publication validates stops/layout and rolls back either snapsh
       await owner.query(`DROP TRIGGER p1_snapshot_fault ON ${table}`);
       await owner.query('DROP FUNCTION p1_snapshot_fault()');
     }
-    await owner.query('SET LOCAL ROLE quickbus_runtime');
     expect((await publish()).rows[0]).toMatchObject({
       created: 1,
       invalid: 0,
@@ -70,11 +70,6 @@ test('normalized publication validates stops/layout and rolls back either snapsh
       stops: 4,
     });
     expect((await publish()).rows[0].created).toBe(0);
-    await owner.query('SAVEPOINT privileges');
-    await expect(owner.query('UPDATE cities SET name=name')).rejects.toThrow(
-      /permission denied/,
-    );
-    await owner.query('ROLLBACK TO privileges');
   } finally {
     await owner.query('ROLLBACK');
     await owner.end();
@@ -96,5 +91,20 @@ test('owner seed replay preserves published stop IDs, fares and journey identity
     expect(await snapshot()).toEqual(before);
   } finally {
     await owner.end();
+  }
+});
+
+test('actual runtime connection can read catalog but cannot edit its definitions', async () => {
+  const runtime = new pg.Client({ connectionString: process.env.DATABASE_URL });
+  await runtime.connect();
+  try {
+    expect(
+      (await runtime.query('SELECT id FROM cities LIMIT 1')).rowCount,
+    ).toBe(1);
+    await expect(runtime.query('UPDATE cities SET name=name')).rejects.toThrow(
+      /permission denied/,
+    );
+  } finally {
+    await runtime.end();
   }
 });
