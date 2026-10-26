@@ -1,6 +1,6 @@
 # P0 hardening — 26 October 2026
 
-The P0 runtime is deployed and real Google/email OTP, reserve/reload/release, natural scheduled expiry and isolated restore/Worker rollback drills have passed. Final acceptance is waiting on the next natural hourly inventory invocation and the measured formatter patch. Admin and public payments remain out of scope. Follow the [active checklist](../tasks/p0-hardening.md).
+The P0 runtime is deployed and real Google/email OTP, reserve/reload/release, natural scheduled expiry and isolated restore/Worker rollback drills have passed. Formatter reuse reduced the repeated throttled search median from 318 to 96 ms. Final acceptance is waiting on the next natural hourly inventory invocation and verification of native callback-query redaction. Admin and public payments remain out of scope. Follow the [active checklist](../tasks/p0-hardening.md).
 
 ## Verified before rollout
 

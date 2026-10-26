@@ -2,6 +2,8 @@
 
 Quality CI runs on main and codex branches. Besides build/type/lint/unit/audit checks, it creates an isolated PostgreSQL 18 database from empty, applies migrations twice, grants a restricted runtime role, seeds database service definitions and exercises two real Workers through Neon's WebSocket proxy. It runs the integration suite and the 100-customer contention proof. These fixtures are not production Neon and do not establish Neon throughput; actual Neon evidence remains separate.
 
+Turbo preserves the package build graph and explicitly passes `CLOUDFLARE_ENV`, but build-result caching is disabled. Generated Worker configurations depend on environment selection and server-only source packages without separate compiled outputs; reusing a build before those inputs are fully modeled would be unsafe. Release/CI checks already build directly. Re-enable caching only after an environment/transitive-source invalidation proof. [Turbo cache configuration](https://turborepo.dev/docs/reference/configuration#cache).
+
 CI uses pinned PostgreSQL/proxy image digests, loopback-only published ports and a private Docker network. The proxy can forward only to its fixture PostgreSQL container. Plain WebSocket transport is accepted only for the exact loopback `quickbus_ci` database/port and is forbidden by production configuration validation. The CI database allows 250 connections so a 100-request correctness burst does not test PostgreSQL's default 100-connection capacity ceiling. The runtime has no DDL, owner or role-management privilege and cannot edit service definitions. No production secrets are needed by this workflow.
 
 ## Local reproduction

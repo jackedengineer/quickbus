@@ -1,5 +1,23 @@
 # KwikBus relational database design
 
+This document describes the full target product. The deployed unpaid subset uses the Drizzle sources in `packages/db/src`; payment/refund, normalised catalog and stop tables below are future work. [Task ledger](../tasks/todo.md).
+
+## Current P0 schema
+
+The restore drill compared 17 tables including the migration ledger: six Better Auth tables, seven trip/booking/command tables, two inventory-definition tables and one maintenance heartbeat table. The presence of the auth library's two-factor table does not mean an admin MFA flow is exposed.
+
+| Table / relationship | Current responsibility |
+|---|---|
+| `inventory_services` | Persistent synthetic route/operator/vehicle/local departure, journey duration, sales lead and active flag; bounded fields and distinct cities. Owner tooling edits definitions. |
+| `inventory_service_seats` | Service FK plus unique label and unique position, positive integer-paise fare; renewal validates a complete contiguous layout. Runtime can read, not edit. |
+| `trips.source_service_id` | Nullable service FK for historical compatibility; unique `(source_service_id, departure_at)` makes concurrent renewal converge. Existing trips were adopted without replacing IDs. |
+| `trips` → `trip_seats` | Published trip/seat snapshots are inserted by one statement. A seat-insert failure rolls back every trip/seat in that statement. Existing quotes and reservations are retained. |
+| `bookings` → `booking_items` / `seat_allocations` | Immutable fare/seat history plus current unique allocation ownership. Every hold/release/expiry mutation uses the same trip-row serialization lock and post-lock DB time. |
+| `idempotency_keys` / `booking_events` | Command replay commits with the booking transaction; terminal expiry inserts one unique event while deleting allocations atomically. |
+| `maintenance_jobs` | `expiry` / `inventory` started/succeeded/failed timestamps and bounded aggregate processed counts; no job payload, user data or credential. |
+
+Renewal materialises the next 30 India service days in batches of at most five missing departures. Expiry sweeps at most ten due trips, skips busy locks and retains lazy expiry as the correctness fallback. These definitions are the V0 renewal model; normalised cities/aliases/stops, draft authoring, publication audit commands and an admin UI remain separate future tasks. [Operational thresholds](operations.md), [schema/restore audit](recovery.md).
+
 ## Modeling principles
 
 Use normalized relational tables for identity, inventory, bookings, and money. Use JSON only for bounded immutable snapshots, versioned event payloads, and validated provider evidence. Drizzle describes the schema and executes parameterized SQL; PostgreSQL constraints remain the final guard.

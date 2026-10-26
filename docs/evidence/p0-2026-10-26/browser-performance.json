@@ -1,0 +1,141 @@
+{
+  "measuredOn": "2026-10-26",
+  "tool": "Chrome DevTools CLI 1.12.0",
+  "browser": "HeadlessChrome/155.0.0.0 (macOS isolated profile)",
+  "fieldDataAvailable": false,
+  "search": {
+    "viewport": {
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "mobile": true,
+      "touch": true
+    },
+    "cpuSlowdown": 4,
+    "network": "Fast 4G",
+    "cache": "Fresh document per sample; ordinary browser cache, no search-trace cache override",
+    "route": "Bengaluru → Hyderabad, 26 October, four adults, 93 database-backed trip snapshots",
+    "beforeRevision": "cb6fb3e5e5d10addb15e652e64f62592e35d8baa",
+    "afterRevision": "54a2b73764290a92a59b7b9ff21887644e4892de",
+    "before": [
+      {
+        "inpMs": 318,
+        "cls": [
+          0,
+          0
+        ]
+      },
+      {
+        "inpMs": 464,
+        "cls": [
+          0,
+          0
+        ]
+      },
+      {
+        "inpMs": 116,
+        "cls": [
+          0,
+          0
+        ]
+      }
+    ],
+    "after": [
+      {
+        "inpMs": 239,
+        "cls": [
+          0,
+          0
+        ]
+      },
+      {
+        "inpMs": 90,
+        "cls": [
+          0,
+          0
+        ]
+      },
+      {
+        "inpMs": 96,
+        "cls": [
+          0,
+          0
+        ]
+      }
+    ],
+    "medianBeforeMs": 318,
+    "medianAfterMs": 96,
+    "limits": "Three samples per revision. The post-change 239 ms sample exceeds the 200 ms good threshold; no field/SLO or physical-device claim."
+  },
+  "loads": [
+    {
+      "revision": "13f05fe baseline",
+      "width": 1200,
+      "height": 2029,
+      "cpu": 1,
+      "network": "none",
+      "cache": "cold",
+      "lcpMs": 965,
+      "ttfbMs": 619,
+      "cls": 0
+    },
+    {
+      "revision": "e923be5",
+      "width": 1200,
+      "height": 2029,
+      "cpu": 1,
+      "network": "none",
+      "cache": "cold",
+      "lcpMs": 781,
+      "ttfbMs": 591,
+      "cls": 0
+    },
+    {
+      "revision": "cb6fb3e",
+      "width": 390,
+      "height": 844,
+      "cpu": 4,
+      "network": "Fast 4G",
+      "cache": "cold",
+      "lcpMs": 879,
+      "ttfbMs": 469,
+      "cls": 0
+    }
+  ],
+  "motion": {
+    "normalDialogMs": 160,
+    "reducedMotionDialogMs": 0,
+    "reducedMotionAnimation": "none",
+    "width320ScrollWidth": 320,
+    "partyFourTotalMinor": 299600,
+    "fifthSeatDisabled": true,
+    "escapeFocusRestored": true
+  },
+  "bookingWidths": [
+    {
+      "width": 320,
+      "scrollWidth": 320,
+      "openDialog": false
+    },
+    {
+      "width": 390,
+      "scrollWidth": 390,
+      "openDialog": false
+    },
+    {
+      "width": 768,
+      "scrollWidth": 768,
+      "openDialog": false
+    },
+    {
+      "width": 1024,
+      "scrollWidth": 1024,
+      "openDialog": false
+    },
+    {
+      "width": 1280,
+      "scrollWidth": 1280,
+      "openDialog": false
+    }
+  ]
+}

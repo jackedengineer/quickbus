@@ -1,5 +1,21 @@
 # KwikBus API contract
 
+## Deployed unpaid surface
+
+The sections after this implementation note define the target contract, including future DTO/OpenAPI packages, problem details, payments and admin. They are not a claim that those endpoints exist. The current Express/Zod boundary lives in `packages/backend/src/app.ts`; [task status](../tasks/todo.md).
+
+| Current route | Behavior |
+|---|---|
+| `GET /api/health/live`, `/ready`, `/maintenance` | Liveness, real database readiness and freshness/horizon/backlog health; maintenance returns 503 when degraded. |
+| `GET /api/v1/session` | Safe auth availability flags and the current verified customer; session cookie renewal propagates through SSR. |
+| `GET /api/v1/trips`, `/trips/:id/seats` | Bounded database-backed preview timetable and authoritative seat availability. Filtered/cursor-based server search remains P1. |
+| `POST /api/v1/holds` | Verified customer; UUID idempotency key, one to four distinct labels, expected INR total. Atomic all-or-none hold and replay result. |
+| `GET /api/v1/bookings`, `/bookings/:id` | Owned unpaid reservations only; no other customer's booking data. |
+| `POST /api/v1/bookings/:id/release` | Owner, UUID command key and current trip-lock protocol; no physical deletion of history. |
+| Better Auth allowlist under `/api/auth/*` | Google social sign-in/callback, send/verify sign-in email OTP, sign-out and error return only. Passwords, magic links, OTP inspection/reset and admin methods are unreachable. |
+
+Browser calls stay on the public web origin and pass through a private API service binding. Mutations require the exact canonical Origin and bounded bodies. Current errors are bounded JSON `code`/`detail` responses; UUID request correlation and safe Server-Timing are response headers. No payment, webhook, ticket or admin route is exposed.
+
 ## Common contract
 
 Express owns `/api/v1/*`. Better Auth owns `/api/auth/*`; provider webhooks use `/webhooks/razorpay`. Every endpoint has runtime input/output schemas in `packages/contracts`, an OpenAPI representation, and contract tests. Share DTOs and generated client functions, never Drizzle entities or private session types.

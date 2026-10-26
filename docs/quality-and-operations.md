@@ -2,7 +2,7 @@
 
 ## Release definition
 
-A release is ready when its agreed product behaviors work, the inventory/money invariants survive adversarial tests, and deployment/recovery have evidence. A green unit-test suite alone is insufficient. The design pack is not that evidence; the application has not been implemented or benchmarked yet.
+A release is ready when its agreed product behaviors work, the inventory/money invariants survive adversarial tests, and deployment/recovery have evidence. A green unit-test suite alone is insufficient. The unpaid V0 is deployed and has real browser, Neon contention, isolated PostgreSQL CI and recovery evidence; [current P0 record](p0-hardening.md). Paid lifecycle scenarios and scale targets below remain future acceptance work, not completed claims.
 
 ## Verification layers
 
@@ -64,7 +64,7 @@ Run a warm 15-minute baseline at 50 requests/second with approximately 90% brows
 
 Targets: warm search p95 <500 ms; uncontended hold/detail/cancellation p95 <750 ms; non-contention server errors <0.5%. Report p99, lock waits/timeouts, DB pool waits, CPU/memory, Neon compute, connection totals, throughput, business conflicts, and invariant results. Cold-start/provider delays are separate measurements, not excluded silently.
 
-Start each process with a small bounded pool, for example API max 5 and worker max 3, then budget the sum across replicas, migrations, monitoring, and database capacity. No connection per request without pooling. Use query plans to guide indexes; fix N+1 reads and overfetching before adding caches.
+Workers currently use one bounded, max-one-client pool per invocation, closed before that invocation ends, as required by Neon's edge connection lifecycle. Budget concurrent invocations, migrations, monitoring and database capacity together; never share a connected pool across Worker invocations. Use query plans to guide indexes; fix N+1 reads and overfetching before adding caches.
 
 If trip lock contention fails the target, first shorten the transaction and expiry batch, then reconsider seat-level locking with a written equivalent protocol. Do not loosen correctness checks to improve a benchmark.
 
@@ -82,13 +82,13 @@ If trip lock contention fails the target, first shorten the transaction and expi
 | Worker heartbeat | Alert no heartbeat >2 min | Restart, inspect leases, reconcile in-flight effects |
 | DB pool/locks | Sustained waits or lock timeouts above baseline | Reduce contention/traffic, inspect long transactions |
 
-Exact windows are initial operating settings to tune from evidence. Provider completion time is not under the application's sole control. Every alert needs a recipient and a tested runbook before the public release.
+These full-product windows are proposed targets. Actual V0 monitors and thresholds are recorded in [operations](operations.md); do not infer that financial or leased-job alerts exist yet. Provider completion time is not under the application's sole control. Every shipped alert needs a recipient and a tested runbook.
 
-Structured logs carry request/trace ID, route template, safe resource IDs, outcome code, duration, job ID, and attempt count. Keep passenger fields, session cookies, magic-link tokens, provider secrets, card data, and authentication screens out of logs/traces. Metrics use bounded labels; booking/user IDs belong in logs, not high-cardinality metric labels. Record trace links across outbox/job transitions.
+Current structured logs carry request UUID, bounded route template, status/outcome, safe dependency durations and maintenance job name/count. They omit user/booking/trip identifiers, query strings, bodies, cookies and OTPs. Raw browser traces stay private. Metrics use bounded labels. Future outbox/job transitions must retain the same correlation/privacy policy.
 
 ## Security and privacy baseline
 
-- Use established auth/session primitives; configure magic-link token hashing explicitly rather than relying on the library's plain-storage default, and verify concurrent single-use/expiry behavior in the pinned version. Restrict callback origins/return paths. Admin roles are provisioned outside signup; require MFA and recent authentication for privileged operations. [Magic-link configuration](https://better-auth.com/docs/plugins/magic-link).
+- Use Better Auth Google sign-in and email OTP with explicit hashed storage and concurrent single-consumption evidence; no passwords or magic links. Restrict callback origins/return paths. Admin roles are provisioned outside signup; require MFA and recent authentication before that deferred surface exists. [Current authentication](authentication.md).
 - Enforce ownership server-side on every private endpoint and worker command. Treat provider observations as untrusted until validated. [Express production guidance](https://expressjs.com/en/advanced/best-practice-security/).
 - Apply TLS, Secure/HttpOnly host-scoped cookies, CSRF protection for cookie-authenticated commands, strict trusted proxy settings, security headers, and a tested CSP that allows only the necessary checkout resources.
 - Never collect/store PAN, security codes, or bank OTPs. Hosted checkout reduces card-data handling; do not claim it removes all security/compliance obligations.
@@ -105,7 +105,7 @@ For each PR: frozen-lockfile install → lint/types → unit tests → build →
 
 Do not cache environment-sensitive build outputs without declaring the inputs. Do not cache test results that depend on a mutable external database. Preview databases and payment credentials must be isolated.
 
-For release: validate environment → apply reviewed backward-compatible migration once → deploy immutable images → health/synthetic smoke → observe errors/queue age → retain rollback image. Handle SIGTERM by stopping admissions/claims, finishing bounded DB transactions, marking ambiguous external work for reconciliation, and exiting within the host grace period.
+For Workers release: validate clean pushed source/exact green CI → serialize operators/migrations → apply reviewed additive changes → build immutable Worker versions → deploy private API before web → health probes and actual browser acceptance → retain compatible rollback versions. There is no persistent server SIGTERM protocol. Invocation-scoped cleanup closes pools; future ambiguous provider work needs durable reconciliation. [Release guard](releasing.md).
 
 ## Runbooks
 

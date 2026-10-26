@@ -1,5 +1,7 @@
 # KwikBus architecture
 
+Implementation status, 26 October 2026: the unpaid customer app is live on `kwikbus.jacked.dev`. Google/email OTP, private API routing, transactional holds/release, scheduled expiry and database-backed renewal are implemented. Queues, payment workflows and admin below describe later capabilities. [P0 runtime evidence](p0-hardening.md) and [task ledger](../tasks/todo.md) distinguish completed work from the target architecture.
+
 ## Architectural choice
 
 Use a **modular monolith on Cloudflare Workers**: Express handles synchronous API requests through Cloudflare’s supported Node HTTP adapter. Scheduled/queue-triggered Worker handlers run bounded background work using the same backend modules and Neon database. TanStack Start renders the web interface in a separate Worker and calls the API through a service binding. There is no persistent Node server or background polling process in deployment. Node 24 is the local build/migration toolchain, not the production runtime. This runtime decision was specified by the user after the initial design.
@@ -107,7 +109,7 @@ Neon is in Singapore for this development project. Each API/scheduled/queue invo
 
 Use Cron Triggers to scan durable Postgres work in bounded batches. Add Cloudflare Queues for low-latency delivery where useful, keeping the outbox as the durable source of undispatched work and handlers idempotent. `waitUntil()` may finish bounded cleanup; it is not a replacement for a durable queue. Design for invocation CPU/subrequest/wall-time limits, with small batches and DB lock deadlines. No long-running provider polling loops.
 
-Wrangler secrets hold runtime credentials; migrations run in a separate Node CI job using the direct database URL. Keep test, preview, and live environments separate. The current development project is free/synthetic; its default branch name is not an indication that live commerce is enabled. Production DML-only role, email delivery, custom-domain routing, secret provisioning, and remote deployment remain release gates.
+Wrangler secrets hold only runtime credentials. The guarded Node release tool uses the ignored direct migration-owner connection on the authorised operator's machine; GitHub CI uses only a disposable PostgreSQL fixture. No unattended deployment credential or production-owner secret is installed in CI. Development and production use separate Neon databases/roles in the same project/compute, so this is data isolation rather than a separate fault domain. The production DML-only role, Resend OTP delivery, custom-domain routing and private API are deployed and browser-verified. Live commerce remains disabled.
 
 Build and dry-run both Workers, run migrations once, deploy the API before the bound web Worker, and run browser smoke checks against the actual deployment. Retain rollback versions; use expand/contract migrations. Check Workers account limits and measured database latency before promising availability or throughput. Smart Placement/region hints are optimizations to evaluate after measuring; they do not replace database serialization.
 

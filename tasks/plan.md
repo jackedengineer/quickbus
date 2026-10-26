@@ -53,7 +53,7 @@ Within each slice, implement migration/contract, transaction behavior, HTTP endp
 1. Pin stable compatible versions; run Start SSR and Express in Workers with a service binding and an Express-owned session. Confirm per-request cache isolation.
 2. Use request-scoped Neon WebSocket/Drizzle transactions in Workers to prove interactive transactions, row locking, timeouts, and pooled/direct connection separation.
 3. Prove Razorpay order creation and receipt lookup after a simulated lost response, failure-to-new-attempt behavior, capture verification, webhook validation, and same-key refund retry. Document any disagreement between guides and observed account behavior.
-4. Prove auth magic-link consumption under concurrent requests and explicit hashed-token configuration, then admin MFA. Verify email delivery; use a deterministic test mail adapter for CI.
+4. Prove Better Auth email OTP single-consumption under concurrent requests, explicit hashed storage and Google login. Verify production delivery; use the local mail adapter for CI. Admin MFA is a prerequisite of the deferred admin slice.
 
 Stop a particular integration from advancing if its guarantee is unknown. Keep building independent catalog/UI work. Do not compensate for an uncertain provider contract with optimistic money-state assumptions.
 

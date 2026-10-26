@@ -2,11 +2,13 @@
 
 **Version:** proposal 1 · **Date:** 25 October 2026 · **Owner:** portfolio developer
 
+**Delivery update, 26 October 2026:** the unpaid V0 is live on `kwikbus.jacked.dev`, with Google/email OTP, database-backed journeys, party seat holds/release and operational hardening. The full paid lifecycle below remains the target product. Admin authoring/dashboard is explicitly last, after customer/P0/P1 work; synthetic inventory is persisted in PostgreSQL and served through the API. [Current backlog](tasks/todo.md), [production evidence](docs/p0-hardening.md).
+
 ## Objective
 
 Help a traveler find a direct bus, reserve specific seats, pay, obtain a ticket, and cancel an eligible booking with clear status at every stage. Demonstrate complete engineering ownership: useful UI, accessible interaction, sound relational modeling, safe concurrent transactions, external-service recovery, testing, deployment, and operation.
 
-The portfolio claim should be specific: “I built and tested a booking system that prevents duplicate allocation and recovers payment failures.” Production readiness is established by the release evidence, not by the number of technologies used.
+The final portfolio claim should be specific: “I built and tested a booking system that prevents duplicate allocation and recovers payment failures.” The current demonstrated claim covers concurrent unpaid reservations and operational recovery; payment recovery is not implemented. Production readiness is established by release evidence, not by the number of technologies used.
 
 ## Users and operating model
 

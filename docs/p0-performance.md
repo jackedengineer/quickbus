@@ -8,7 +8,9 @@ The first production four-person search at 390 × 844, 4× CPU slowdown and Fast
 
 Reuse four fixed Intl formatters per module. They hold no customer data, preserve explicit Asia/Kolkata and currency semantics, and do not cache availability, sessions or reservations. A focused boundary check preserves the Indian midnight transition, weekday/time display and integer-paise formatting.
 
-Supporting Node 24 lab: five runs of 1,000 calls to each of the four presentation functions measured `[335, 280, 283, 283, 299]` ms before and `[6, 6, 7, 5, 5]` ms after. This isolates formatter allocation cost; it does not substitute for browser measurement. Production search is being remeasured with three repeated samples on each revision under the same viewport, CPU and network settings. Retain the change only if browser acceptance and measurements support it.
+Supporting Node 24 lab: five runs of 1,000 calls to each of the four presentation functions measured `[335, 280, 283, 283, 299]` ms before and `[6, 6, 7, 5, 5]` ms after. This isolates formatter allocation cost; it does not substitute for browser measurement.
+
+Repeated actual production searches at the same 390 × 844 / 4× CPU / Fast 4G settings measured INP `[318, 464, 116]` ms before and `[239, 90, 96]` ms after, with CLS 0 in every sample. Each sample loaded a fresh document with ordinary browser cache, then clicked Search for four adults against the same 93 persisted trip snapshots. Median INP fell from 318 to 96 ms. The first after sample still exceeded 200 ms; three observations are not a field percentile or a guarantee. Date/fare behavior, party limits and real flows passed. Retain the formatter reuse; further cold-interaction tuning remains P1. [Conditions and all samples](evidence/p0-2026-10-26/browser-performance.json).
 
 ## Other observations
 
