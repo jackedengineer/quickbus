@@ -14,6 +14,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { user } from './auth-schema';
+import { inventoryServices } from './service-schema';
 
 const instant = (name: string) =>
   timestamp(name, { withTimezone: true, mode: 'date' });
@@ -26,6 +27,10 @@ export const trips = pgTable(
     origin: text('origin').notNull(),
     destination: text('destination').notNull(),
     operatorName: text('operator_name').notNull(),
+    sourceServiceId: text('source_service_id').references(
+      () => inventoryServices.id,
+    ),
+    vehicleLabel: text('vehicle_label').notNull().default('AC Seater (2+2)'),
     departureAt: instant('departure_at').notNull(),
     arrivalAt: instant('arrival_at').notNull(),
     salesCloseAt: instant('sales_close_at').notNull(),
@@ -41,6 +46,7 @@ export const trips = pgTable(
       sql`${t.salesState} IN ('OPEN', 'CLOSED', 'CANCELLED')`,
     ),
     index('trip_departure').on(t.departureAt),
+    unique('trip_service_departure').on(t.sourceServiceId, t.departureAt),
   ],
 );
 
