@@ -50,7 +50,7 @@ Then run `pnpm check`, `pnpm build`, `pnpm test:integration`, and `pnpm test:con
 
 The direct URL is used only by migration/fixture tooling. The pooled URL, auth secret, app origin, deployment mode, and local-mailbox URL are the only values copied to the API's ignored `.dev.vars`. The web Worker receives a service binding, not database credentials.
 
-## Release gates still open
+## Original spike gates (historical; reconciled below)
 
 - Admin role enforcement and fresh MFA step-up: enabling the library's two-factor plugin alone does **not** protect a magic-link login or an admin action. No admin mutation endpoint is exposed in this slice.
 - Production email transport, public-domain cookie/CSRF verification, configuration validation, callback-query log redaction, edge/principal rate limits, and full observability.
@@ -59,6 +59,10 @@ The direct URL is used only by migration/fixture tooling. The pooled URL, auth s
 - Remote Workers smoke, CI, load/latency budgets, restore/recovery exercise, and complete accessibility review.
 
 `pnpm build` succeeds for both Worker targets. Vite emits an upstream CSS sourcemap warning in the SSR build; CSS output renders, but CSS source mapping is not certified. The dependency audit's Zod high-severity issue was removed by pinning 4.6.7. One moderate esbuild advisory remains under Drizzle Kit's deprecated esbuild-kit loader. That code is used for CLI transforms, not an esbuild development server or the Worker request path; do not expose a server from that legacy package. It remains tracked rather than suppressed.
+
+## Current gate reconciliation — 26 October 2026
+
+Production email, owned-domain cookies/CSRF, runtime configuration validation, callback-query log suppression, remote Workers smoke and build/type/lint/audit CI have since passed. Customer authentication uses Google and email OTP; the earlier magic-link spike is not the shipped public surface. Admin MFA remains deferred with admin access. Correlated telemetry, automated isolated-DB CI, scheduled jobs, measured performance and restore/recovery are active [P0 work](../tasks/p0-hardening.md). Full catalog/publication, checkout and paid lifecycle acceptance remain open.
 
 ## Primary references
 

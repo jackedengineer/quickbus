@@ -2,12 +2,14 @@
 
 ## Delivery strategy
 
-Implementation update: Cloudflare Workers is the required backend runtime. Follow [ADR 010](../docs/decisions.md) and the updated architecture. T02 payment work is deferred until the real-Postgres/Workers concurrency proof passes; first execute T01 and the non-payment identity spike, bringing forward only the foundations needed to prove them. Browser usage is a required verification step for every usable slice.
+Implementation update: Cloudflare Workers is the required backend runtime. Follow [ADR 010](../docs/decisions.md) and the updated architecture. The unpaid real-Neon/two-Workers concurrency proof and customer identity slice have passed. The immediate order is the [P0 hardening plan](p0-hardening.md), followed by catalog/publication and checkout review. Admin stays at the end. T02 payment research is eligible after P0; public payments still require reconciliation and refund recovery. Browser usage is a required verification step for every usable slice.
 
 
 Build the smallest complete system that can sell a seat correctly, then prove it can recover failures. Retain the requested TanStack Start/Express/Turborepo/Neon/Drizzle stack. Use the [PRD](../PRD.md) for scope and the [correctness protocol](../docs/booking-correctness.md) as the transaction contract.
 
 The first technical proof is the contended hold against a real PostgreSQL database, before payment checkout or a full admin UI. The first end-to-end release candidate includes payment reconciliation and refund recovery; those are required scope, not post-launch enhancements.
+
+**Reconciliation:** The owned-domain unpaid V0 is live. Demo data is synthetic but persisted in PostgreSQL, never client-only fixtures. The original estimates and broad phase gates below are planning history, not evidence of outstanding auth/domain setup. See the task status ledger for partial acceptance.
 
 **Task source of truth:** [todo.md](todo.md). T01 and the workspace foundation have implementation evidence. Other items remain unchecked until their complete acceptance criteria pass; the reservation/UI slice was brought forward to prove the core risk.
 

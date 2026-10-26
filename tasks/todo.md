@@ -1,12 +1,37 @@
 # KwikBus task backlog
 
-Implementation has started. Items remain unchecked until their full acceptance criteria have evidence. Cloudflare Workers is now required (ADR 010); payment task T02 is deferred until the seat-concurrency proof passes. Each task targets one focused session. Paths in future tasks are planned; the repository and evidence documents identify landed files. Keep a task to roughly 2–5 implementation/test files; split it further if scaffolding or integration expands that scope. Gates are review points, not permission requests embedded in application flows.
+Implementation has started. Items remain unchecked until their full acceptance criteria have evidence. Cloudflare Workers is required (ADR 010). The unpaid seat-concurrency proof has passed; payment task T02 is eligible after the current P0 operational work. Each task targets one focused session. Paths in future tasks are planned; the repository and evidence documents identify landed files. Keep a task to roughly 2–5 implementation/test files; split it further if scaffolding or integration expands that scope. Gates are review points, not permission requests embedded in application flows.
 
 Commands refer to the [proposed command interface](plan.md). Before those scripts exist, a spike records its exact reproducible commands and output. Every later task also runs `pnpm check` and the affected build; focused verification is listed below.
 
 ## Current slice evidence
 
 See [compatibility](../docs/compatibility.md), [reservation proof](../docs/reservation-proof.md), and [UI/browser reference](../docs/ui-reference.md). The real Neon/Workers seat proof and a usable search/reserve/release UI were brought forward. The [V0 preview](../docs/release-v0.md) now has published Google login, locally verified hashed/single-use email OTP, SSR isolation and cookie renewal. Public OTP now sends through the verified `jacked.dev` sender and has passed browser verification; the [owned-domain cutover](../docs/domain-cutover.md) is complete, with mobile Google and desktop OTP reservation/reload/release verified on `kwikbus.jacked.dev`. Fresh admin MFA remains open for future admin routes. T02 remains unimplemented. Later reservation/search items remain unchecked because catalog publication, stop snapshots, telemetry, and full acceptance have not all landed. The UI reference is now FlixBus, with per-page visual comparison required.
+
+## Active delivery order — reconciled 26 October 2026
+
+The user has prioritised [five P0 operational slices](p0-hardening.md): monitoring → scheduled expiry → database-backed inventory renewal → release safeguards → recovery drill. Real browser acceptance leads each usable change; focused SQL/concurrency checks supplement it. Use focused commits of roughly 300–400 lines, with a working application after each slice. Admin authoring/dashboard and its required MFA stay at the end of the roadmap. All synthetic inventory must be stored in PostgreSQL and served through the API; no client-only catalog or invented availability.
+
+Completed independently of the original sequence: T01, T03 customer authentication, T04, T07 and T13's unpaid concurrency proof. Partial tasks retain unchecked boxes until their remaining criteria pass. Production hosting, the owned domain and real email delivery are complete; they are not future launch blockers.
+
+| Task | Reconciled status / remaining work |
+|---|---|
+| T03 / T07 | Customer Google/email OTP, hashed single-use codes, session renewal/isolation and owned-domain browser flows complete. Admin MFA moves to the deferred admin gate. |
+| T05 | Worker adapter, validated config, request-scoped bounded DB pools, health and real-Neon harness exist. Correlated telemetry remains P0-01. Persistent-server shutdown requirements do not apply to Workers. |
+| T06 | Responsive shell, clean install/build/type/lint/audit CI exist. Isolated PostgreSQL integration/contention CI remains P0-04. |
+| T08 / T09 | Search and suggestions use database trips. Normalised catalog/aliases, server search contract/pagination and full acceptance remain P1. |
+| T10 / T11 | DB seat/booking/allocation constraints exist. Editable catalog, stop snapshots and publication service remain P1. |
+| T12 | Atomic party holds, immutable quote/deadline and key/hash replay proved. Lock/command latency instrumentation remains P0-01; publication dependencies are deferred. |
+| T13 | Nine unpaid two-instance scenarios plus independent SQL audit passed; preserve source-scoped evidence and rerun after mutation changes. |
+| T14 / T15 | Seat selection, login return, unpaid hold/reload/release exist. Boarding/drop-off and passenger/contact review remain P1. |
+| T16 | Durable payment jobs/inbox/outbox remain unbuilt. P0-02 adds bounded scheduled expiry only, not the complete payment job foundation. |
+| T17–T25 | Payments, reconciliation, ticket delivery, cancellation/refunds and trip drain remain unimplemented. |
+| T26 | Deferred to the end: no admin dashboard or admin endpoint in the active P0/P1 scope. Fresh MFA is mandatory before any admin mutation. |
+| T27 / T28 | Responsive widths and reservation/auth browser flows proved; full accessibility, performance budgets and lifecycle fault/load evidence remain open. |
+| T29 | Public/private Workers routing, runtime secrets and serialized migrations exist. Automated release safeguards and an isolated restore/rollback drill remain P0-04/05. |
+| T30 | Public unpaid V0, README, ADRs and browser/concurrency evidence exist. Complete paid-lifecycle portfolio package remains future work. |
+
+Historical baseline: [V0](../docs/release-v0.md). Current deployed state: [owned-domain release](../docs/domain-cutover.md). The original phase gates below describe the complete product, not a claim that every prerequisite was implemented before the intentionally smaller V0 preview.
 
 ## Phase 0 — Verify the assumptions
 
@@ -20,8 +45,8 @@ See [compatibility](../docs/compatibility.md), [reservation proof](../docs/reser
   - Verify: deterministic adapter tests plus sanitized Razorpay sandbox evidence; no real payment.
   - Depends: none. Targets: provider spike harness, fixtures, `docs/provider-contract.md`. Size: M.
 
-- [ ] **T03 — Identity and policy review**
-  - Accept: demonstrate verified-email login, explicit hashed email OTP storage, Google login and single-use code behavior, admin MFA, and request-scoped session handling. Review scope/cutoffs and record accepted changes to the PRD/ADRs.
+- [x] **T03 — Customer identity and policy review**
+  - Accept: demonstrate verified-email login, explicit hashed email OTP storage, Google login and single-use code behavior, and request-scoped session handling. Admin MFA is an explicit prerequisite of deferred T26. Review scope/cutoffs and record accepted changes to the PRD/ADRs.
   - Verify: concurrent token redemption test and two-user SSR isolation check.
   - Depends: T01. Targets: auth spike, auth tests, PRD/decision updates. Size: M.
 
@@ -46,7 +71,7 @@ See [compatibility](../docs/compatibility.md), [reservation proof](../docs/reser
 
 **Gate B:** clean local/CI builds, no private dependency in the browser, real database harness ready.
 
-- [ ] **T07 — Verified customer session vertical slice**
+- [x] **T07 — Verified customer session vertical slice**
   - Accept: login/logout and safe return URL work; ownership is server-derived; admin roles cannot be self-assigned. Reuse the approved library configuration.
   - Verify: focused identity integration/E2E tests, CSRF and invalid-link cases.
   - Depends: T03, T06. Targets: generated auth schema migration, identity adapter, login route, auth integration/E2E test. Size: M.
@@ -82,7 +107,7 @@ See [compatibility](../docs/compatibility.md), [reservation proof](../docs/reser
 
 **Gate D:** reviewed SQL and constraints; no partial publication or partial-party claim; no network calls in the critical transaction.
 
-- [ ] **T13 — Multi-instance contention proof**
+- [x] **T13 — Unpaid multi-instance contention proof**
   - Accept: last-seat, overlapping-party, different-key/same-user, inverse-seat-order, and lock-expiry cases pass through two API instances. Add an independent invariant audit.
   - Verify: `pnpm test:contention`; persist seed/environment/result artifact.
   - Depends: T12. Targets: contention runner, barrier/fault fixture, invariant audit, result documentation. Size: M.
@@ -169,7 +194,7 @@ See [compatibility](../docs/compatibility.md), [reservation proof](../docs/reser
   - Verify: `pnpm test:a11y`, manual screen-reader record, focused browser regressions.
   - Depends: T22, T24, T26. Targets: affected UI components, focused browser tests, accessibility report; split fixes by page. Size: M.
 
-**Gate I:** customer/admin lifecycle usable and accessible; admin recovery is operationally meaningful, not a dashboard mock.
+**Gate I:** customer lifecycle usable and accessible. The admin portion is deferred until after the customer/P0/P1 scope; when introduced, admin recovery must be operationally meaningful and MFA-protected.
 
 ## Phase 5 — Prove and release
 
@@ -179,7 +204,7 @@ See [compatibility](../docs/compatibility.md), [reservation proof](../docs/reser
   - Depends: T21, T24, T25, T27. Targets: fault/load scenarios, invariant audit, benchmark manifest/report. Size: M for execution/reporting, remediation separate.
 
 - [ ] **T29 — Deployment, migration, and restore drill**
-  - Accept: immutable container deployment, single-origin routing, runtime secrets, health/shutdown, queue/error alerts, serialized migration, rollback, and isolated DB restore with provider reconciliation are demonstrated.
+  - Accept: reviewed immutable Workers versions, single-origin routing, runtime secrets, health and bounded invocation cleanup, job/error alerts, serialized migration, rollback, and isolated DB restore (provider reconciliation before payments launch) are demonstrated.
   - Verify: staging smoke, injected worker outage/alert, prior-schema upgrade, timed restore/RPO/RTO record. Split infrastructure setup from drill execution as needed.
   - Depends: T28. Targets: deployment configuration, release workflow, operating/restore runbook, evidence. Size: M per focused subtask.
 

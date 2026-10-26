@@ -1,5 +1,7 @@
 # KwikBus V0 preview — 25 October 2026
 
+Historical `v0.0.1-preview` record. The domain and email rollout below were completed in [`v0.0.2-preview`](domain-cutover.md); current live site: https://kwikbus.jacked.dev/. Preserve this baseline for version comparison.
+
 Live: https://kwikbus.ichiragbhugra.workers.dev/
 
 This is a public portfolio preview using demonstration journeys and unpaid, ten-minute seat reservations. It does not issue travel tickets or accept payments. Google sign-in is live. Email OTP is implemented and verified locally, but intentionally disabled in production until the user registers and verifies `kwikbus.in`. The user explicitly chose to wait instead of using the existing `jacked.dev` sender.
