@@ -232,7 +232,7 @@ export function SiteFooter() {
         <div className="footer-legal">
           <a href="/?view=privacy">Privacy</a>
           <a href="/?view=terms">Terms</a>
-          <span>V0 · Unpaid seat reservations</span>
+          <span>V0.1 · Unpaid seat reservations</span>
         </div>
       </div>
     </footer>

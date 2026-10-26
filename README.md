@@ -18,7 +18,7 @@ docker run -d --name quickbus-mailpit -p 127.0.0.1:8025:8025 axllent/mailpit:v1.
 pnpm dev
 ```
 
-If the local inbox container already exists, use `docker start quickbus-mailpit` instead of creating it again. Open [KwikBus](http://localhost:3000); the local inbox is at [Mailpit](http://localhost:8025). Seed adds future Bengaluru/Hyderabad journeys from persistent service definitions idempotently without deleting reservations. Local development has no automatic Cron execution; rerun seed when its timetable ages out. Production renewal runs hourly.
+If the local inbox container already exists, use `docker start quickbus-mailpit` instead of creating it again. Open [KwikBus](http://localhost:3000); the local inbox is at [Mailpit](http://localhost:8025). Seed creates five cities and three explicitly synthetic operators, with four directional routes and stop menus persisted in PostgreSQL. It adds future journeys idempotently without deleting reservations. Local development has no automatic Cron execution; rerun seed when its timetable ages out. Production renewal runs hourly.
 
 `pnpm dev` writes only runtime variables to ignored `apps/api/.dev.vars`, starts Express in Wrangler on port 8787, and starts the web Worker on port 3000. The migration owner URL is never copied to the Worker. Ctrl+C stops both processes.
 
@@ -29,7 +29,7 @@ For the second API instance and correctness checks:
 ```sh
 pnpm dev:peer
 # In another terminal while both APIs and the web app are running:
-pnpm test:integration
+node --env-file=.env node_modules/vitest/vitest.mjs run tests/integration --no-file-parallelism
 pnpm test:contention
 pnpm check
 pnpm build
@@ -38,6 +38,8 @@ pnpm build
 The contention harness creates only synthetic fixtures, waits for concurrent requests to settle, audits the database independently, and cleans up its own rows. It uses the direct owner connection for fixture setup and a trip-scoped fault trigger; HTTP requests still pass through normal authentication and the restricted runtime role. It refuses to run without explicit local fixture flags. Run it against a disposable development database, never production. While it runs, synthetic trips may briefly appear in the development timetable.
 
 ## Implementation evidence
+
+- [P1 catalog, server search, stops and passenger review](docs/p1-customer-journey.md)
 
 - [P0 monitoring, scheduled jobs, CI and recovery evidence](docs/p0-hardening.md)
 

@@ -201,3 +201,107 @@ test('owned passenger review serializes edits, replays the same intent and rejec
     await owner.end();
   }
 });
+
+test('detail edits racing release across Workers cannot retain seat ownership or half-save details', async () => {
+  const owner = await fixtureClient(),
+    [customer] = await createCustomers(owner, 1),
+    trip = await createTrip(owner);
+  const origin = process.env.APP_ORIGIN ?? 'http://localhost:3000';
+  const call = (
+    endpoint: string,
+    path: string,
+    method: string,
+    body: unknown,
+    key = randomUUID(),
+    version?: number,
+  ) =>
+    fetch(`${endpoint}/api/v1${path}`, {
+      method,
+      headers: {
+        Origin: origin,
+        Cookie: customer.cookie,
+        'Content-Type': 'application/json',
+        'Idempotency-Key': key,
+        ...(version ? { 'If-Match': `"${version}"` } : {}),
+      },
+      body: JSON.stringify(body),
+    });
+  try {
+    await owner.query(
+      `INSERT INTO trip_stops(id,trip_id,source_stop_id,city_id,name,address,role,sequence,scheduled_at)
+      SELECT gen_random_uuid(),$1,st.id,st.city_id,st.name,st.address,d.role,d.sequence,t.departure_at+d.offset_minutes*interval '1 minute'
+      FROM trips t,inventory_service_stops d JOIN stops st ON st.id=d.stop_id WHERE t.id=$1 AND d.service_id='demo-blr-hyd-20'`,
+      [trip],
+    );
+    const stops = (
+      await owner.query(
+        'SELECT id,role FROM trip_stops WHERE trip_id=$1 ORDER BY sequence',
+        [trip],
+      )
+    ).rows;
+    const held = await call(origin, '/holds', 'POST', {
+      tripId: trip,
+      seatLabels: ['1A'],
+      expectedTotalMinor: 74900,
+      currency: 'INR',
+    });
+    expect(held.status).toBe(201);
+    const id = ((await held.json()) as { id: string }).id;
+    const body = {
+      pickupStopId: stops[0].id,
+      dropStopId: stops[3].id,
+      contactPhone: null,
+      passengers: [{ seatLabel: '1A', name: 'Release race fixture' }],
+    };
+    const badOrigin = await fetch(`${origin}/api/v1/bookings/${id}/details`, {
+      method: 'PATCH',
+      headers: {
+        Origin: 'https://untrusted.invalid',
+        Cookie: customer.cookie,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+    expect(badOrigin.status).toBe(403);
+    const huge = await fetch(`${origin}/api/v1/bookings/${id}/details`, {
+      method: 'PATCH',
+      headers: { Origin: origin, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ unused: 'x'.repeat(17000) }),
+    });
+    expect(huge.status).toBe(413);
+    const key = randomUUID();
+    const [saved, released] = await Promise.all([
+      call(
+        'http://localhost:8787',
+        `/bookings/${id}/details`,
+        'PATCH',
+        body,
+        key,
+        1,
+      ),
+      call('http://localhost:8788', `/bookings/${id}/release`, 'POST', {}),
+    ]);
+    expect([200, 409]).toContain(saved.status);
+    expect(released.status).toBe(200);
+    const audit = (
+      await owner.query(
+        `SELECT b.status,b.version,b.contact_email IS NOT NULL contact,
+      (SELECT count(*)::int FROM seat_allocations WHERE booking_id=b.id) allocations,
+      (SELECT count(*)::int FROM booking_items WHERE booking_id=b.id AND passenger_name IS NOT NULL) names,
+      (SELECT count(*)::int FROM booking_events WHERE booking_id=b.id AND type='DETAILS_SAVED') events FROM bookings b WHERE id=$1`,
+        [id],
+      )
+    ).rows[0];
+    expect(audit).toMatchObject({ status: 'CANCELLED', allocations: 0 });
+    expect(audit.names).toBe(audit.events);
+    expect(audit.version).toBe(1 + audit.events);
+    expect(audit.contact).toBe(Boolean(audit.events));
+    expect(
+      (await call(origin, `/bookings/${id}/details`, 'PATCH', body, key, 1))
+        .status,
+    ).toBe(saved.status);
+  } finally {
+    await cleanupFixtures(owner, [trip], [customer.id]);
+    await owner.end();
+  }
+});
