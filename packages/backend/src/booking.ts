@@ -76,11 +76,18 @@ export async function holdSeats(
       )}) ORDER BY s.position`);
       if (selected.rowCount !== seats.length)
         return failure('INVALID_SEATS', 'Choose seats from this trip.', 422);
-      if (selected.rows.some((s) => s.occupied))
-        return failure(
-          'SEATS_UNAVAILABLE',
-          'Some seats were just reserved. Please choose again.',
-        );
+      const unavailableSeatLabels = selected.rows
+        .filter((s) => s.occupied)
+        .map((s) => s.seat_label);
+      if (unavailableSeatLabels.length)
+        return {
+          status: 409,
+          body: {
+            code: 'SEATS_UNAVAILABLE',
+            unavailableSeatLabels,
+            detail: `Seats ${unavailableSeatLabels.join(', ')} were just reserved. Please choose other seats.`,
+          },
+        };
       const total = selected.rows.reduce((sum, s) => sum + s.fare_minor, 0);
       if (total !== input.expectedTotalMinor)
         return failure(

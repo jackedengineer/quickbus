@@ -44,6 +44,10 @@ test('a reservation is atomic, replayable, owned, and rejects a changed request 
       randomUUID(),
     );
     expect(overlap.status).toBe(409);
+    expect(await overlap.json()).toMatchObject({
+      code: 'SEATS_UNAVAILABLE',
+      unavailableSeatLabels: ['1B'],
+    });
     const count = await client.query(
       'SELECT seat_label FROM seat_allocations WHERE trip_id=$1 ORDER BY seat_label',
       [tripId],

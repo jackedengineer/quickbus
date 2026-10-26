@@ -29,6 +29,7 @@ export function SeatPicker({
     [loading, setLoading] = useState(true),
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState('');
+  const [seatView, setSeatView] = useState<'map' | 'list'>('map');
   const [stops, setStops] = useState<TripStop[]>([]);
   const [pickup, setPickup] = useState(initialPickup),
     [drop, setDrop] = useState(initialDrop);
@@ -143,7 +144,6 @@ export function SeatPicker({
         data.detail ??
           'Unable to reserve these seats. Please refresh and try again.',
       );
-      setSelected([]);
       await load(false);
     } catch {
       setUncertain(true);
@@ -216,21 +216,53 @@ export function SeatPicker({
             Unavailable
           </span>
         </div>
+        <div
+          className="seat-view-switch"
+          role="group"
+          aria-label="Seat selection view"
+        >
+          <button
+            type="button"
+            className="secondary"
+            aria-pressed={seatView === 'map'}
+            onClick={() => setSeatView('map')}
+          >
+            Seat map
+          </button>
+          <button
+            type="button"
+            className="secondary"
+            aria-pressed={seatView === 'list'}
+            onClick={() => setSeatView('list')}
+          >
+            Seat list
+          </button>
+        </div>
         {loading ? (
           <p role="status">Loading seats…</p>
         ) : seats.length ? (
-          <div className="bus-shell">
-            <div className="bus-front">
-              <Icon name="bus" />
-              Front of bus
-            </div>
-            <div className="seat-grid">
+          <div
+            className={
+              seatView === 'map' ? 'bus-shell' : 'bus-shell list-shell'
+            }
+          >
+            {seatView === 'map' && (
+              <div className="bus-front">
+                <Icon name="bus" />
+                Front of bus
+              </div>
+            )}
+            <div
+              className={seatView === 'map' ? 'seat-grid' : 'seat-list'}
+              role="group"
+              aria-label="Seats"
+            >
               {seats.map((s) => (
                 <button
                   key={s.label}
                   type="button"
                   className={s.available ? 'seat' : 'seat unavailable-seat'}
-                  aria-label={`Seat ${s.label}, ${money(s.fareMinor)}${s.available ? '' : ', unavailable'}`}
+                  aria-label={`Seat ${s.label}, row ${Math.floor((s.position - 1) / 4) + 1}, ${s.position % 4 === 1 || s.position % 4 === 0 ? 'window' : 'aisle'}, ${money(s.fareMinor)}, ${s.available ? 'available' : 'unavailable'}`}
                   aria-pressed={selected.includes(s.label)}
                   disabled={
                     !s.available ||
@@ -247,7 +279,28 @@ export function SeatPicker({
                     );
                   }}
                 >
-                  {s.label}
+                  {seatView === 'map' ? (
+                    s.label
+                  ) : (
+                    <>
+                      <strong>{s.label}</strong>
+                      <span>
+                        Row {Math.floor((s.position - 1) / 4) + 1} ·{' '}
+                        {s.position % 4 === 1 || s.position % 4 === 0
+                          ? 'Window'
+                          : 'Aisle'}
+                        <br />
+                        {money(s.fareMinor)}
+                      </span>
+                      <small>
+                        {!s.available
+                          ? 'Unavailable'
+                          : selected.includes(s.label)
+                            ? 'Selected'
+                            : 'Available'}
+                      </small>
+                    </>
+                  )}
                 </button>
               ))}
             </div>

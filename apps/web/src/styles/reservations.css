@@ -347,3 +347,33 @@
 .drawer-footer .error {
   margin: 0;
 }
+.seat-view-switch {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.seat-view-switch button[aria-pressed="true"] {
+  background: #eff9db;
+  border-color: var(--brand-dark);
+}
+.bus-shell.list-shell {
+  width: 100%;
+  border: 0;
+  padding: 0;
+}
+.seat-list {
+  display: grid;
+  gap: 8px;
+}
+.seat-list .seat {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 60px;
+  padding: 8px 12px;
+  border-radius: 5px;
+  box-shadow: none;
+  text-align: left;
+}
