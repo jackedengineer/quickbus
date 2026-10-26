@@ -72,10 +72,21 @@ if (
   throw new Error(
     'Production environment does not match the approved isolated database/origin.',
   );
-const apiConfig = JSON.parse(await readFile('apps/api/wrangler.jsonc', 'utf8'))
-  .env.production;
-const webConfig = JSON.parse(await readFile('apps/web/wrangler.jsonc', 'utf8'))
-  .env.production;
+const apiRoot = JSON.parse(await readFile('apps/api/wrangler.jsonc', 'utf8'));
+const webRoot = JSON.parse(await readFile('apps/web/wrangler.jsonc', 'utf8'));
+const apiConfig = apiRoot.env.production;
+const webConfig = webRoot.env.production;
+for (const observability of [
+  apiConfig.observability ?? apiRoot.observability,
+  webConfig.observability ?? webRoot.observability,
+])
+  if (
+    observability?.redact_query_string !== true ||
+    observability?.logs?.invocation_logs !== false
+  )
+    throw new Error(
+      'Worker URL query redaction and invocation-log policy required.',
+    );
 if (
   apiConfig.vars.APP_ORIGIN !== canonical ||
   webConfig.vars.PUBLIC_ORIGIN !== canonical ||

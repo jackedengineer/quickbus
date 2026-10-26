@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-10-26T10:51:56.968Z",
+  "timestamp": "2026-10-26T12:05:12.793Z",
   "runtimeRole": "quickbus_runtime",
-  "implementationSha256": "4c3d6dbb9dccf38e9a066eb91b7673a28e5e47a4ba4e56d8730839002ec0ca50",
+  "implementationSha256": "246080dbcdd596d4292cfa3db3a3e91ac56e195d1df9d9bde377fc0a9d00a493",
   "implementationFiles": [
     "apps/api/src/environment.ts",
     "apps/api/src/index.ts",
@@ -40,11 +40,11 @@
       "winners": 1,
       "conflicts": 99,
       "allocations": 1,
-      "initialBusy": 93,
-      "initialUnavailable": 6,
+      "initialBusy": 94,
+      "initialUnavailable": 5,
       "recovery": "Same-key retries after burst, no new holds",
       "dependencyRetries": 0,
-      "elapsedMs": 67469
+      "elapsedMs": 73013
     },
     {
       "name": "12 concurrent same-key requests",
