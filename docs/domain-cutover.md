@@ -26,7 +26,7 @@ The earlier [V0 contention proof](evidence/v0-concurrency-2026-10-25.json) remai
 
 ## Finish the cutover
 
-1. Open `https://kwikbus.jacked.dev/` normally in the browser and confirm valid HTTPS. No resolver override or certificate-warning bypass counts as browser acceptance. Cache clearing through an internal browser URL was blocked by browser policy; wait for normal DNS propagation rather than bypassing it.
+1. Open `https://kwikbus.jacked.dev/` normally in the browser and confirm valid HTTPS. While the preview is canonical, this should successfully redirect to the preview; that is the DNS-readiness gate before switching origins. No resolver override or certificate-warning bypass counts as browser acceptance. Cache clearing through an internal browser URL was blocked by browser policy; wait for normal DNS propagation rather than bypassing it.
 2. Set `APP_ORIGIN` in `apps/api/wrangler.jsonc` and `PUBLIC_ORIGIN` in `apps/web/wrangler.jsonc` to `https://kwikbus.jacked.dev`. Align the ignored `.env.production` APP_ORIGIN too. The source currently matches the temporary live preview origin.
 3. Run `CLOUDFLARE_ENV=production pnpm check`, `pnpm cf:check`, deploy the API with `--env production`, then deploy `apps/web/dist/server/wrangler.json`. Do not rebuild with the development environment between production build and web deploy. Existing secrets persist; never bulk-upload `.env.production` because it contains the migration owner's URL.
 4. Verify Google and email OTP on the owned hostname, selection preservation, reservation/reload/release, and a mobile-sized view. New-domain cookies require a fresh sign-in. Confirm legacy read URLs redirect to the owned hostname while legacy mutations return 421; confirm the API still has no public route.
