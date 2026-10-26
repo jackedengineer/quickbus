@@ -4,8 +4,9 @@ import { createServerFn } from '@tanstack/react-start';
 import { appendResponseHeader, getRequest } from '@tanstack/react-start/server';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../api.server';
+import { Dialog } from '../features/dialog';
 import { Legal } from '../features/legal';
-import { type Session } from '../features/models';
+import { type Session, type Trip } from '../features/models';
 import { ReservationReviewScreen } from '../features/reservation-review';
 import { MyBookings } from '../features/reservations';
 import { SearchForm, type SearchValues } from '../features/search';
@@ -27,6 +28,7 @@ const getInitialData = createServerFn({ method: 'GET' })
       adults?: number;
       sort?: string;
       cursor?: string;
+      limit?: number;
       results: boolean;
     }) => {
       if (
@@ -47,8 +49,12 @@ const getInitialData = createServerFn({ method: 'GET' })
       'adults',
       'sort',
       'cursor',
+      'limit',
     ] as const)
       if (data[field] !== undefined) query.set(field, String(data[field]));
+    if (data.results)
+      for (const field of ['from', 'to', 'date'] as const)
+        query.set(field, data[field] ?? '');
     const [sessionResponse, catalogResponse, tripsResponse] = await Promise.all(
       [
         apiFetch(
@@ -84,11 +90,14 @@ type PageSearch = {
   view?: 'results' | 'bookings' | 'help' | 'privacy' | 'terms' | 'review';
   authError?: boolean;
   bookingId?: string;
+  pickup?: string;
+  drop?: string;
   from?: string;
   to?: string;
   date?: string;
   sort?: 'departure' | 'price';
   cursor?: string;
+  limit?: number;
   adults?: number;
   trip?: string;
   seats?: string;
@@ -122,6 +131,14 @@ export const Route = createFileRoute('/')({
       new Date(input.date).toISOString().slice(0, 10) === input.date
         ? input.date
         : undefined,
+    pickup:
+      typeof input.pickup === 'string' && /^[0-9a-f-]{36}$/i.test(input.pickup)
+        ? input.pickup
+        : undefined,
+    drop:
+      typeof input.drop === 'string' && /^[0-9a-f-]{36}$/i.test(input.drop)
+        ? input.drop
+        : undefined,
     bookingId:
       typeof input.bookingId === 'string' &&
       /^[0-9a-f-]{36}$/i.test(input.bookingId)
@@ -144,6 +161,12 @@ export const Route = createFileRoute('/')({
       typeof input.cursor === 'string' && input.cursor.length <= 1200
         ? input.cursor
         : undefined,
+    limit:
+      Number.isInteger(Number(input.limit)) &&
+      Number(input.limit) >= 1 &&
+      Number(input.limit) <= 20
+        ? Number(input.limit)
+        : undefined,
     adults:
       Number.isInteger(Number(input.adults)) &&
       Number(input.adults) >= 1 &&
@@ -158,6 +181,7 @@ export const Route = createFileRoute('/')({
     adults: search.adults,
     sort: search.sort,
     cursor: search.cursor,
+    limit: search.limit,
     results: search.view === 'results',
   }),
   loader: ({ deps }) => getInitialData({ data: deps }),
@@ -169,8 +193,32 @@ function Home() {
     search = Route.useSearch(),
     navigate = Route.useNavigate();
   const [accountOpen, setAccountOpen] = useState(Boolean(search.authError));
+  const listedTrip = page.trips.find((trip) => trip.id === search.trip) ?? null;
+  const [restoredTrip, setRestoredTrip] = useState<Trip | null>(null),
+    [tripError, setTripError] = useState('');
   const selectedTrip =
-    page.trips.find((trip) => trip.id === search.trip) ?? null;
+    listedTrip ?? (restoredTrip?.id === search.trip ? restoredTrip : null);
+  useEffect(() => {
+    if (!search.trip || listedTrip) return;
+    const controller = new AbortController();
+    setTripError('');
+    void (async () => {
+      try {
+        const response = await fetch(`/api/v1/trips/${search.trip}`, {
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error();
+        const trip = (await response.json()) as Trip;
+        if (!controller.signal.aborted) setRestoredTrip(trip);
+      } catch {
+        if (!controller.signal.aborted)
+          setTripError(
+            'This journey could not be loaded. Close this panel and search again.',
+          );
+      }
+    })();
+    return () => controller.abort();
+  }, [search.trip, listedTrip]);
   useEffect(() => {
     const refresh = () => {
       if (document.visibilityState === 'visible') void router.invalidate();
@@ -207,11 +255,20 @@ function Home() {
   };
   const show = (view: PageSearch['view']) => {
     void navigate({
-      search: { ...search, view, trip: undefined, seats: undefined },
+      search: {
+        ...search,
+        view,
+        trip: undefined,
+        seats: undefined,
+        pickup: undefined,
+        drop: undefined,
+      },
     });
   };
   const doSearch = (v: SearchValues) =>
-    void navigate({ search: { view: 'results', ...v } });
+    void navigate({
+      search: { view: 'results', ...v, sort: search.sort, limit: search.limit },
+    });
   return (
     <>
       <SiteHeader
@@ -334,6 +391,23 @@ function Home() {
         )}
       </main>
       <SiteFooter />
+      {search.trip && !selectedTrip && !accountOpen && (
+        <Dialog
+          title="Journey"
+          onClose={() =>
+            void navigate({
+              search: { ...search, trip: undefined },
+              replace: true,
+            })
+          }
+        >
+          <div className="dialog-content">
+            <p role={tripError ? 'alert' : 'status'}>
+              {tripError || 'Loading journey…'}
+            </p>
+          </div>
+        </Dialog>
+      )}
       {selectedTrip && !accountOpen && (
         <SeatPicker
           key={selectedTrip.id}
@@ -341,25 +415,35 @@ function Home() {
           adults={values.adults}
           signedIn={Boolean(session.user)}
           initialSelected={search.seats?.split(',')}
-          onSignIn={async (seats) => {
+          initialPickup={search.pickup}
+          initialDrop={search.drop}
+          onSignIn={async (seats, pickup, drop) => {
             await router.invalidate();
             await navigate({
               search: {
                 ...search,
                 trip: selectedTrip.id,
                 seats: seats.join(','),
+                pickup,
+                drop,
               },
             });
             setAccountOpen(true);
           }}
           onClose={() => {
             void navigate({
-              search: { ...search, trip: undefined, seats: undefined },
+              search: {
+                ...search,
+                trip: undefined,
+                seats: undefined,
+                pickup: undefined,
+                drop: undefined,
+              },
               replace: true,
             });
           }}
-          onReserved={() => {
-            show('bookings');
+          onReserved={(bookingId) => {
+            void navigate({ search: { view: 'review', bookingId } });
           }}
         />
       )}

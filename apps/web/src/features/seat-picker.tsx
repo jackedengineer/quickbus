@@ -1,3 +1,4 @@
+import type { TripStop } from '@kwikbus/contracts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Dialog } from './dialog';
 import { Icon } from './icon';
@@ -7,6 +8,8 @@ export function SeatPicker({
   adults,
   signedIn,
   initialSelected = [],
+  initialPickup = '',
+  initialDrop = '',
   onSignIn,
   onClose,
   onReserved,
@@ -15,23 +18,47 @@ export function SeatPicker({
   adults: number;
   signedIn: boolean;
   initialSelected?: string[];
-  onSignIn: (seats: string[]) => void;
+  initialPickup?: string;
+  initialDrop?: string;
+  onSignIn: (seats: string[], pickup: string, drop: string) => void;
   onClose: () => void;
-  onReserved: () => void;
+  onReserved: (id: string) => void;
 }) {
   const [seats, setSeats] = useState<Seat[]>([]),
     [selected, setSelected] = useState<string[]>(initialSelected),
     [loading, setLoading] = useState(true),
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState('');
+  const [stops, setStops] = useState<TripStop[]>([]);
+  const [pickup, setPickup] = useState(initialPickup),
+    [drop, setDrop] = useState(initialDrop);
+  const latestLoad = useRef(0);
   const pending = useRef<{ key: string; body: string } | null>(null);
   const [uncertain, setUncertain] = useState(false);
   const load = useCallback(async () => {
+    const sequence = ++latestLoad.current;
     setLoading(true);
+    setMessage('');
     try {
-      const response = await fetch(`/api/v1/trips/${trip.id}/seats`);
-      if (!response.ok) throw new Error();
+      const [response, detailsResponse] = await Promise.all([
+        fetch(`/api/v1/trips/${trip.id}/seats`),
+        fetch(`/api/v1/trips/${trip.id}`),
+      ]);
+      if (!response.ok || !detailsResponse.ok) throw new Error();
       const data = (await response.json()) as { seats: Seat[] };
+      const details = (await detailsResponse.json()) as { stops: TripStop[] };
+      if (sequence !== latestLoad.current) return;
+      setStops(details.stops);
+      setPickup((previous) =>
+        details.stops.some((s) => s.id === previous && s.role === 'PICKUP')
+          ? previous
+          : '',
+      );
+      setDrop((previous) =>
+        details.stops.some((s) => s.id === previous && s.role === 'DROP')
+          ? previous
+          : '',
+      );
       if (data.seats.length === 0)
         setMessage(
           'This journey is no longer available. Please choose another journey.',
@@ -45,20 +72,24 @@ export function SeatPicker({
           .slice(0, adults),
       );
     } catch {
-      setMessage('Seats could not be loaded. Please try again.');
+      if (sequence === latestLoad.current)
+        setMessage('Seats could not be loaded. Please try again.');
     } finally {
-      setLoading(false);
+      if (sequence === latestLoad.current) setLoading(false);
     }
   }, [trip.id, adults]);
   useEffect(() => {
     void load();
+    return () => {
+      latestLoad.current++;
+    };
   }, [load]);
   const total = seats
     .filter((s) => selected.includes(s.label))
     .reduce((sum, s) => sum + s.fareMinor, 0);
   async function reserve() {
     if (!signedIn) {
-      onSignIn(selected);
+      onSignIn(selected, pickup, drop);
       return;
     }
     pending.current ??= {
@@ -68,6 +99,8 @@ export function SeatPicker({
         seatLabels: selected,
         expectedTotalMinor: total,
         currency: 'INR',
+        pickupStopId: pickup,
+        dropStopId: drop,
       }),
     };
     setBusy(true);
@@ -82,11 +115,12 @@ export function SeatPicker({
         body: pending.current.body,
       });
       const data = (await response.json()) as {
+        id?: string;
         code?: string;
         detail?: string;
       };
-      if (response.status === 201) {
-        onReserved();
+      if (response.status === 201 && data.id) {
+        onReserved(data.id);
         return;
       }
       if (data.code === 'RESOURCE_BUSY' || response.status >= 500) {
@@ -99,7 +133,7 @@ export function SeatPicker({
       pending.current = null;
       setUncertain(false);
       if (response.status === 401) {
-        onSignIn(selected);
+        onSignIn(selected, pickup, drop);
         return;
       }
       setMessage(
@@ -130,6 +164,41 @@ export function SeatPicker({
         <p>
           Choose {adults} {adults === 1 ? 'seat' : 'seats'} for your journey.
         </p>
+        {!loading && (
+          <div className="stop-choices">
+            {(['PICKUP', 'DROP'] as const).map((role) => (
+              <label key={role}>
+                {role === 'PICKUP' ? 'Pickup point' : 'Drop point'}
+                <select
+                  value={role === 'PICKUP' ? pickup : drop}
+                  disabled={busy || uncertain}
+                  onChange={(e) => {
+                    pending.current = null;
+                    if (role === 'PICKUP') setPickup(e.target.value);
+                    else setDrop(e.target.value);
+                  }}
+                >
+                  <option value="">
+                    Choose a {role === 'PICKUP' ? 'pickup' : 'drop'} point
+                  </option>
+                  {stops
+                    .filter((s) => s.role === role)
+                    .map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name} · {time(s.scheduledAt)}
+                      </option>
+                    ))}
+                </select>
+              </label>
+            ))}
+            {!stops.length && (
+              <p className="error">
+                Stops are unavailable for this journey. Please choose another
+                journey.
+              </p>
+            )}
+          </div>
+        )}
         <div className="seat-legend">
           <span>
             <i />
@@ -209,7 +278,12 @@ export function SeatPicker({
         <button
           type="button"
           disabled={
-            loading || busy || seats.length === 0 || selected.length !== adults
+            loading ||
+            busy ||
+            !pickup ||
+            !drop ||
+            seats.length === 0 ||
+            selected.length !== adults
           }
           onClick={() => void reserve()}
         >

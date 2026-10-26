@@ -228,13 +228,11 @@ export function createApp() {
       !/^"[1-9][0-9]{0,8}"$/.test(version) ||
       !input.success
     )
-      return response
-        .status(400)
-        .json({
-          code: 'INVALID_DETAILS',
-          detail:
-            'Enter a name for each seat, valid stops and an optional international phone number.',
-        });
+      return response.status(400).json({
+        code: 'INVALID_DETAILS',
+        detail:
+          'Enter a name for each seat, valid stops and an optional international phone number.',
+      });
     const result = await saveReservationDetails(
       context().db,
       response.locals.userId,
