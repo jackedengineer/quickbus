@@ -1,0 +1,13 @@
+{
+  "before": {
+    "status": "HELD",
+    "allocations": 1,
+    "expiry_events": 0
+  },
+  "scheduledStatus": 200,
+  "after": {
+    "status": "EXPIRED",
+    "allocations": 0,
+    "expiry_events": 1
+  }
+}

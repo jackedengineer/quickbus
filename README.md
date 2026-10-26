@@ -37,6 +37,8 @@ The contention harness creates only synthetic fixtures, waits for concurrent req
 
 ## Implementation evidence
 
+- [P0 monitoring, scheduled jobs, CI and recovery evidence](docs/p0-hardening.md)
+
 - [V0 preview, browser evidence and deployment runbook](docs/release-v0.md)
 - [Passwordless Google and email OTP](docs/authentication.md)
 - [Phase 0 Cloudflare/Neon compatibility and remaining release gates](docs/compatibility.md)

@@ -2,6 +2,8 @@
 
 Scope accepted 26 October 2026: keep the live unpaid customer app working while completing these slices sequentially. Admin dashboard/access remains deferred. Synthetic catalog/inventory lives in PostgreSQL and reaches the browser through the real API. Production credentials and data never enter CI fixtures, logs or public evidence.
 
+Implementation checkpoint: source, real-Neon checks and isolated-PostgreSQL CI passed. Production rollout, real public browser acceptance and recovery drill remain pending; [evidence](../docs/p0-hardening.md).
+
 ## P0-01 — Monitoring and performance baseline
 
 - [ ] Correlate frontend/API/dependency logs with server-generated request IDs; bounded route labels, no query strings, identity, bodies, cookies or credentials.
@@ -36,7 +38,7 @@ Questions: Is the site available? Which boundary is slow? Are OTP requests faili
 
 ## Browser and motion acceptance
 
-Use actual browser interactions as the primary product acceptance evidence. Focused tests prove concurrency, rollback and schema properties that a browser alone cannot establish. Chrome DevTools MCP is not configured; use native Chrome DevTools for performance/network inspection where supported, and document any unavailable trace capability.
+Use actual browser interactions as the primary product acceptance evidence. Focused tests prove concurrency, rollback and schema properties that a browser alone cannot establish. Chrome DevTools MCP is not wired into the tool list. Native app access timed out; the official Chrome DevTools CLI 1.12.0 provides actual isolated-Chrome performance traces, network/console inspection, viewport and reduced-motion controls. Do not attach it to the personal Chrome profile. Use the ordinary browser for existing authorised Google/provider sessions.
 
 Add only restrained transitions in the existing CSS: short press/hover feedback, dialog/seat-panel entrance, stable numeric timers, no layout animation or blanket `transition: all`. Respect `prefers-reduced-motion`. Verify keyboard/focus, rapid interruption, mobile widths and console/network failures. No new animation library is needed.
 

@@ -1,0 +1,103 @@
+{
+  "timestamp": "2026-10-26T10:51:56.968Z",
+  "runtimeRole": "quickbus_runtime",
+  "implementationSha256": "4c3d6dbb9dccf38e9a066eb91b7673a28e5e47a4ba4e56d8730839002ec0ca50",
+  "implementationFiles": [
+    "apps/api/src/environment.ts",
+    "apps/api/src/index.ts",
+    "apps/api/wrangler.jsonc",
+    "apps/web/src/api.server.ts",
+    "apps/web/src/server.ts",
+    "packages/backend/src/app.ts",
+    "packages/backend/src/auth.ts",
+    "packages/backend/src/booking.ts",
+    "packages/backend/src/context.ts",
+    "packages/backend/src/email.ts",
+    "packages/backend/src/expiry.ts",
+    "packages/backend/src/inventory.ts",
+    "packages/backend/src/maintenance.ts",
+    "packages/backend/src/telemetry.ts",
+    "packages/db/migrations/0000_calm_trish_tilby.sql",
+    "packages/db/migrations/0001_premium_franklin_storm.sql",
+    "packages/db/migrations/0002_maintenance_jobs.sql",
+    "packages/db/migrations/0003_renewable_inventory.sql",
+    "packages/db/src/auth-schema.ts",
+    "packages/db/src/booking-schema.ts",
+    "packages/db/src/client.ts",
+    "packages/db/src/inventory.ts",
+    "packages/db/src/migrate.ts",
+    "packages/db/src/operations-schema.ts",
+    "packages/db/src/schema.ts",
+    "packages/db/src/service-schema.ts",
+    "pnpm-lock.yaml",
+    "scripts/runtime-grants.ts"
+  ],
+  "runtime": "Two separate Wrangler/workerd API instances",
+  "database": "Neon PostgreSQL 18, pooled WebSocket transactions",
+  "scenarios": [
+    {
+      "name": "100 customers race for the last seat across two instances",
+      "winners": 1,
+      "conflicts": 99,
+      "allocations": 1,
+      "initialBusy": 93,
+      "initialUnavailable": 6,
+      "recovery": "Same-key retries after burst, no new holds",
+      "dependencyRetries": 0,
+      "elapsedMs": 67469
+    },
+    {
+      "name": "12 concurrent same-key requests",
+      "responses": 12,
+      "bookings": 1,
+      "events": 1,
+      "allocations": 2
+    },
+    {
+      "name": "Overlapping two-seat parties",
+      "winners": 1,
+      "conflicts": 1,
+      "partialParties": 0
+    },
+    {
+      "name": "Lazy expiry without scheduler",
+      "oldBooking": "EXPIRED",
+      "replacement": "HELD",
+      "allocations": 1,
+      "unrequestedOldSeatReleased": true
+    },
+    {
+      "name": "Sales deadline crossed while waiting for trip lock",
+      "response": "SALES_CLOSED",
+      "allocations": 0
+    },
+    {
+      "name": "Bounded lock timeout and safe same-key retry",
+      "first": "RESOURCE_BUSY",
+      "retry": 201,
+      "allocations": 1
+    },
+    {
+      "name": "Same customer, different keys and seats across two instances",
+      "bookings": 1,
+      "allocations": 1,
+      "secondResponse": "ACTIVE_HOLD_EXISTS"
+    },
+    {
+      "name": "Injected allocation failure after booking and items writes",
+      "rolledBack": [
+        "booking",
+        "items",
+        "allocations",
+        "event",
+        "idempotency claim"
+      ],
+      "sameKeyRetry": 201
+    },
+    {
+      "name": "Independent invariant audit across every scenario",
+      "missing_allocations": 0,
+      "terminal_allocations": 0
+    }
+  ]
+}
