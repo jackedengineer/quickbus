@@ -43,6 +43,13 @@
       "when": 1793041075245,
       "tag": "0005_loose_salo",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793041862478,
+      "tag": "0006_fluffy_giant_man",
+      "breakpoints": true
     }
   ]
 }

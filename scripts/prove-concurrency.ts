@@ -13,6 +13,7 @@ const endpoints = ['http://localhost:8787', 'http://localhost:8788'];
 const implementationFiles = [
   'apps/api/wrangler.jsonc',
   'apps/web/src/api.server.ts',
+  'apps/web/src/routes/api.$.ts',
   'apps/web/src/server.ts',
   'scripts/runtime-grants.ts',
   'pnpm-lock.yaml',
@@ -20,6 +21,7 @@ const implementationFiles = [
 for (const directory of [
   'apps/api/src',
   'packages/backend/src',
+  'packages/contracts/src',
   'packages/db/src',
   'packages/db/migrations',
 ]) {

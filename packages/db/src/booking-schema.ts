@@ -50,6 +50,18 @@ export const trips = pgTable(
       'trip_sales_state',
       sql`${t.salesState} IN ('OPEN', 'CLOSED', 'CANCELLED')`,
     ),
+    foreignKey({
+      columns: [t.routeId, t.originCityId, t.destinationCityId],
+      foreignColumns: [
+        routes.id,
+        routes.originCityId,
+        routes.destinationCityId,
+      ],
+    }),
+    check(
+      'trip_catalog_pair',
+      sql`(${t.routeId} IS NULL AND ${t.originCityId} IS NULL AND ${t.destinationCityId} IS NULL) OR (${t.routeId} IS NOT NULL AND ${t.originCityId} IS NOT NULL AND ${t.destinationCityId} IS NOT NULL)`,
+    ),
     index('trip_departure').on(t.departureAt),
     index('trip_route_departure').on(
       t.originCityId,
@@ -237,6 +249,10 @@ export const tripStops = pgTable(
   },
   (t) => [
     unique('trip_stop_identity').on(t.tripId, t.id),
+    foreignKey({
+      columns: [t.sourceStopId, t.cityId],
+      foreignColumns: [stops.id, stops.cityId],
+    }),
     unique('trip_stop_sequence').on(t.tripId, t.sequence),
     check(
       'trip_stop_bounds',

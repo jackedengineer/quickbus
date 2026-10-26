@@ -2,6 +2,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { parseEnv } from 'node:util';
 import pg from 'pg';
+import { backfillTripCatalog } from './catalog-seed';
 
 const canonical = 'https://kwikbus.jacked.dev';
 const git = (...args: string[]) =>
@@ -227,6 +228,16 @@ try {
     '--env',
     'production',
   ]);
+  if (migrate) {
+    // The previous API may have published a legacy-shaped trip while migrations
+    // ran. Reconcile after its replacement, before the web consumes stop menus.
+    // Each bounded statement commits and releases its trip locks independently.
+    await client.query("SET lock_timeout='2s'");
+    await client.query("SET statement_timeout='5s'");
+    await backfillTripCatalog(client);
+    await client.query('RESET lock_timeout');
+    await client.query('RESET statement_timeout');
+  }
   run('pnpm', [
     'exec',
     'wrangler',

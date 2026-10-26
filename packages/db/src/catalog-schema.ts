@@ -56,6 +56,7 @@ export const routes = pgTable(
   },
   (t) => [
     unique('route_direction').on(t.originCityId, t.destinationCityId),
+    unique('route_identity').on(t.id, t.originCityId, t.destinationCityId),
     check(
       'route_distinct_cities',
       sql`${t.originCityId}<>${t.destinationCityId}`,
@@ -90,11 +91,15 @@ export const layoutSeats = pgTable(
     ),
   ],
 );
-export const stops = pgTable('stops', {
-  id: text('id').primaryKey(),
-  cityId: text('city_id')
-    .notNull()
-    .references(() => cities.id),
-  name: text('name').notNull(),
-  address: text('address').notNull(),
-});
+export const stops = pgTable(
+  'stops',
+  {
+    id: text('id').primaryKey(),
+    cityId: text('city_id')
+      .notNull()
+      .references(() => cities.id),
+    name: text('name').notNull(),
+    address: text('address').notNull(),
+  },
+  (t) => [unique('stop_city_identity').on(t.id, t.cityId)],
+);

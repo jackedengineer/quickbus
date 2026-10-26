@@ -23,6 +23,14 @@ export const invariantQuery = `SELECT json_build_object(
     LEFT JOIN seat_allocations a ON a.booking_id=i.booking_id AND a.trip_id=i.trip_id AND a.seat_label=i.seat_label WHERE b.status='HELD' AND a.booking_id IS NULL),
   'terminalAllocations',(SELECT count(*)::int FROM seat_allocations a JOIN bookings b ON b.id=a.booking_id WHERE b.status<>'HELD'),
   'incorrectQuotes',(SELECT count(*)::int FROM bookings b WHERE total_minor<>(SELECT sum(fare_minor) FROM booking_items WHERE booking_id=b.id)),
+  'crossTripStopChoices',(SELECT count(*)::int FROM bookings b WHERE
+    (pickup_stop_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM trip_stops WHERE trip_id=b.trip_id AND id=b.pickup_stop_id AND role='PICKUP')) OR
+    (drop_stop_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM trip_stops WHERE trip_id=b.trip_id AND id=b.drop_stop_id AND role='DROP'))),
+  'missingDetailEvents',(SELECT count(*)::int FROM bookings b WHERE b.version>1 AND NOT EXISTS(
+    SELECT 1 FROM booking_events e WHERE e.booking_id=b.id AND e.type='DETAILS_SAVED' AND e.version=b.version)),
+  'incompleteCatalogSnapshots',(SELECT count(*)::int FROM trips t WHERE route_id IS NOT NULL AND (
+    NOT EXISTS(SELECT 1 FROM trip_stops WHERE trip_id=t.id AND role='PICKUP') OR
+    NOT EXISTS(SELECT 1 FROM trip_stops WHERE trip_id=t.id AND role='DROP'))),
   'partialServiceTrips',(SELECT count(*)::int FROM trips t JOIN inventory_services s ON s.id=t.source_service_id WHERE
     (SELECT count(*) FROM trip_seats WHERE trip_id=t.id)<>s.seat_count)
 ) value`;
