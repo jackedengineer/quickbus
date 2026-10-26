@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { Database, Transaction } from '@kwikbus/db';
 import { sql } from '@kwikbus/db/schema';
+import { expireTripHolds } from './expiry';
 import { timed } from './telemetry';
 
 type Result = { status: number; body: Record<string, unknown> };
@@ -15,20 +16,6 @@ const failure = (code: string, detail: string, status = 409): Result => ({
   body: { code, detail },
 });
 const scope = 'POST /api/v1/holds';
-
-async function expire(tx: Transaction, tripId: string, timestamp: string) {
-  const due = await tx.execute<{ id: string }>(sql`
-    UPDATE bookings SET status='EXPIRED'
-    WHERE trip_id=${tripId} AND status='HELD' AND expires_at <= ${timestamp}::timestamptz RETURNING id`);
-  for (const booking of due.rows) {
-    await tx.execute(
-      sql`DELETE FROM seat_allocations WHERE booking_id=${booking.id}`,
-    );
-    await tx.execute(
-      sql`INSERT INTO booking_events(id,booking_id,type) VALUES(${randomUUID()},${booking.id},'EXPIRED')`,
-    );
-  }
-}
 
 // The trip row is the serialization boundary for every inventory mutation.
 // Read clock_timestamp only AFTER acquiring it: transaction now() can be stale.
@@ -47,7 +34,7 @@ async function lockTrip(tx: Transaction, tripId: string) {
     sql`SELECT clock_timestamp()::text AS timestamp`,
   );
   const timestamp = clock.rows[0].timestamp;
-  await expire(tx, tripId, timestamp);
+  await expireTripHolds(tx, tripId, timestamp);
   return { ...trip.rows[0], timestamp };
 }
 

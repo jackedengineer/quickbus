@@ -2,6 +2,7 @@
 import { httpServerHandler } from 'cloudflare:node';
 import { createApp } from '@kwikbus/backend/app';
 import { type AppEnvironment, requestContext } from '@kwikbus/backend/context';
+import { runMaintenance } from '@kwikbus/backend/maintenance';
 import { observeRequest, reportFailure } from '@kwikbus/backend/telemetry';
 import { createDatabase } from '@kwikbus/db';
 import { validateEnvironment } from './environment';
@@ -42,6 +43,20 @@ const api = {
 };
 
 export default {
+  async scheduled(
+    controller: ScheduledController,
+    environment: AppEnvironment,
+  ) {
+    validateEnvironment(environment);
+    if (controller.cron !== '* * * * *')
+      throw new Error('Unknown maintenance schedule.');
+    const database = createDatabase(environment.DATABASE_URL);
+    try {
+      await runMaintenance(database.db, 'expiry');
+    } finally {
+      await database.close();
+    }
+  },
   fetch: (...args: Parameters<typeof api.fetch>) =>
     observeRequest(args[0], 'api', () => api.fetch(...args)),
 };

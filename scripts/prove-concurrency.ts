@@ -19,6 +19,10 @@ const implementationFiles = [
   'packages/backend/src/email.ts',
   'packages/backend/src/booking.ts',
   'packages/backend/src/context.ts',
+  'packages/backend/src/expiry.ts',
+  'packages/backend/src/maintenance.ts',
+  'packages/backend/src/telemetry.ts',
+  'packages/db/src/operations-schema.ts',
   'packages/db/src/client.ts',
   'packages/db/src/booking-schema.ts',
   'packages/db/src/auth-schema.ts',
@@ -137,6 +141,14 @@ try {
   const initialBusy = race.filter(
     (r) => r.body.code === 'RESOURCE_BUSY',
   ).length;
+  const burstOutcomes: Record<string, number> = {};
+  for (const result of race) {
+    const label = `${result.status}:${result.body.code ?? 'SUCCESS'}`;
+    burstOutcomes[label] = (burstOutcomes[label] ?? 0) + 1;
+  }
+  console.log(
+    JSON.stringify({ event: 'burst_outcomes', counts: burstOutcomes }),
+  );
   assert.ok(
     race.every(
       (r) =>
