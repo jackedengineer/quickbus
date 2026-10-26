@@ -17,9 +17,9 @@
       "workers_dev": false,
       "preview_urls": false,
       "vars": {
-        "APP_ORIGIN": "https://kwikbus.ichiragbhugra.workers.dev",
+        "APP_ORIGIN": "https://kwikbus.jacked.dev",
         "DEPLOYMENT_ENV": "production",
-        "EMAIL_FROM": "KwikBus <signin@kwikbus.in>"
+        "EMAIL_FROM": "KwikBus <signin@jacked.dev>"
       }
     }
   }

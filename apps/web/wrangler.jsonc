@@ -13,6 +13,14 @@
       "name": "kwikbus",
       "workers_dev": true,
       "preview_urls": false,
+      "vars": { "PUBLIC_ORIGIN": "https://kwikbus.jacked.dev" },
+      "routes": [
+        {
+          "pattern": "kwikbus.jacked.dev",
+          "zone_id": "6b92d4ee95d7748b860361693db256f3",
+          "custom_domain": true
+        }
+      ],
       "services": [{ "binding": "API", "service": "kwikbus-api" }]
     }
   }

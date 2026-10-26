@@ -10,11 +10,9 @@ export function validateEnvironment(environment: AppEnvironment) {
   if (environment.DEPLOYMENT_ENV === 'production') {
     if (
       origin.protocol !== 'https:' ||
-      ![
-        'kwikbus.ichiragbhugra.workers.dev',
-        'kwikbus.in',
-        'www.kwikbus.in',
-      ].includes(origin.hostname) ||
+      !['kwikbus.ichiragbhugra.workers.dev', 'kwikbus.jacked.dev'].includes(
+        origin.hostname,
+      ) ||
       database.pathname !== '/kwikbus_v0' ||
       database.username !== 'kwikbus_v0_runtime' ||
       database.searchParams.get('sslmode') !== 'verify-full' ||

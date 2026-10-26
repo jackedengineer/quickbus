@@ -1,7 +1,25 @@
+import { env } from 'cloudflare:workers';
 import handler, { createServerEntry } from '@tanstack/react-start/server-entry';
 
 export default createServerEntry({
   async fetch(request, options) {
+    const url = new URL(request.url);
+    const { PUBLIC_ORIGIN: canonicalOrigin } = env as unknown as {
+      PUBLIC_ORIGIN?: string;
+    };
+    if (canonicalOrigin && url.origin !== canonicalOrigin) {
+      // Mutations must be initiated on the origin that owns the session cookie.
+      if (!['GET', 'HEAD'].includes(request.method))
+        return Response.json(
+          { code: 'CANONICAL_ORIGIN_REQUIRED' },
+          { status: 421, headers: { 'Cache-Control': 'no-store' } },
+        );
+      const destination = new URL(canonicalOrigin);
+      // Assign the path separately so a leading // cannot replace the hostname.
+      destination.pathname = url.pathname;
+      destination.search = url.search;
+      return Response.redirect(destination, 308);
+    }
     const nonce = crypto.randomUUID().replaceAll('-', '');
     const response = await handler.fetch(request, {
       ...options,
