@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { Database } from '@kwikbus/db';
 import { sql } from '@kwikbus/db/schema';
 import { failure, idempotent, lockTrip, validStops } from './commands';
+import { isoInstant } from './presentation';
 
 export type HoldInput = {
   tripId: string;
@@ -171,13 +172,17 @@ export async function listTrips(db: Database) {
     t.departure_at AS "departureAt",t.arrival_at AS "arrivalAt",min(s.fare_minor)::int AS "fareMinor",count(s.seat_label)::int AS "seatCount"
     FROM trips t JOIN trip_seats s ON s.trip_id=t.id WHERE t.sales_state='OPEN' AND t.sales_close_at>clock_timestamp()+interval '2 minutes'
     GROUP BY t.id ORDER BY t.departure_at LIMIT 100`);
-  return result.rows;
+  return result.rows.map((t) => ({
+    ...t,
+    departureAt: isoInstant(t.departureAt),
+    arrivalAt: isoInstant(t.arrivalAt),
+  }));
 }
 
 export async function listSeats(db: Database, tripId: string) {
   const result =
     await db.execute(sql`SELECT s.seat_label AS label,s.position,s.fare_minor AS "fareMinor",
-    (b.id IS NULL OR b.status<>'HELD' OR b.expires_at<=clock_timestamp()) AS available
+    (b.id IS NULL OR b.status<>'HELD' OR b.expires_at<=statement_timestamp()) AS available
     FROM trip_seats s LEFT JOIN seat_allocations a USING(trip_id,seat_label) LEFT JOIN bookings b ON b.id=a.booking_id
     WHERE s.trip_id=${tripId} ORDER BY s.position`);
   return result.rows;
@@ -191,5 +196,10 @@ export async function getBookings(db: Database, userId: string, id?: string) {
     ARRAY(SELECT seat_label FROM booking_items WHERE booking_id=b.id ORDER BY seat_label) AS "seatLabels",clock_timestamp() AS "serverTime"
     FROM bookings b JOIN trips t ON t.id=b.trip_id WHERE b.user_id=${userId} ${id ? sql`AND b.id=${id}` : sql``}
     ORDER BY b.created_at DESC LIMIT 25`);
-  return result.rows;
+  return result.rows.map((b) => ({
+    ...b,
+    departureAt: isoInstant(b.departureAt),
+    expiresAt: isoInstant(b.expiresAt),
+    serverTime: isoInstant(b.serverTime),
+  }));
 }

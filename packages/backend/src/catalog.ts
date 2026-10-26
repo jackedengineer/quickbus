@@ -9,6 +9,7 @@ import type {
 import type { Database } from '@kwikbus/db';
 import { sql } from '@kwikbus/db/schema';
 import { z } from 'zod';
+import { isoInstant } from './presentation';
 
 export async function citySuggestions(db: Database, query: string) {
   return (
@@ -128,7 +129,9 @@ export async function searchTrips(
     FROM candidates t JOIN availability a ON a.id=t.id GROUP BY t.id,t.origin,t.destination,t.operator_name,t.vehicle_label,t.departure_at,t.arrival_at
     HAVING count(*) FILTER(WHERE a.available)>=${input.adults}
   ) SELECT * FROM q WHERE ${after} ORDER BY ${order} LIMIT ${input.limit + 1}`);
-  const trips = result.rows.slice(0, input.limit),
+  const trips = result.rows
+      .slice(0, input.limit)
+      .map((t) => ({ ...t, arrivalAt: isoInstant(t.arrivalAt) })),
     last = trips.at(-1);
   return {
     status: 200,
@@ -158,5 +161,13 @@ export async function tripDetails(db: Database, id: string) {
   const stops =
     await db.execute<TripStop>(sql`SELECT id,name,address,city_id AS "cityId",role,sequence,scheduled_at AS "scheduledAt"
     FROM trip_stops WHERE trip_id=${id} ORDER BY sequence`);
-  return { ...result.rows[0], stops: stops.rows };
+  return {
+    ...result.rows[0],
+    departureAt: isoInstant(result.rows[0].departureAt),
+    arrivalAt: isoInstant(result.rows[0].arrivalAt),
+    stops: stops.rows.map((s) => ({
+      ...s,
+      scheduledAt: isoInstant(s.scheduledAt),
+    })),
+  };
 }

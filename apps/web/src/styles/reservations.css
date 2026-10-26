@@ -344,3 +344,6 @@
     align-items: start;
   }
 }
+.drawer-footer .error {
+  margin: 0;
+}

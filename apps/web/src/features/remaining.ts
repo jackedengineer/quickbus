@@ -5,6 +5,10 @@ export function useRemaining(expiresAt: string, serverTime: string) {
   useEffect(() => {
     const start = performance.now(),
       initial = Date.parse(expiresAt) - Date.parse(serverTime);
+    if (!Number.isFinite(initial)) {
+      setRemaining(null);
+      return;
+    }
     const tick = () =>
       setRemaining(
         Math.max(0, Math.ceil((initial - (performance.now() - start)) / 1000)),

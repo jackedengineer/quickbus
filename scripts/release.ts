@@ -234,7 +234,12 @@ try {
     // Each bounded statement commits and releases its trip locks independently.
     await client.query("SET lock_timeout='2s'");
     await client.query("SET statement_timeout='5s'");
-    await backfillTripCatalog(client);
+    await client.query('SELECT pg_advisory_lock(74910250)');
+    try {
+      await backfillTripCatalog(client);
+    } finally {
+      await client.query('SELECT pg_advisory_unlock(74910250)');
+    }
     await client.query('RESET lock_timeout');
     await client.query('RESET statement_timeout');
   }

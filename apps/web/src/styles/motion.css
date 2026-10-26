@@ -5,7 +5,8 @@
   .auth-submit,
   .google-button,
   .drawer-footer > button,
-  .booking-card > button {
+  .booking-card > button,
+  .review-form > .continue-button {
     transition:
       background-color 120ms ease-out,
       box-shadow 120ms ease-out,
@@ -15,7 +16,8 @@
   .auth-submit:active:not(:disabled),
   .google-button:active:not(:disabled),
   .drawer-footer > button:active:not(:disabled),
-  .booking-card > button:active:not(:disabled) {
+  .booking-card > button:active:not(:disabled),
+  .review-form > .continue-button:active:not(:disabled) {
     scale: 0.96;
   }
   .dialog[open] {

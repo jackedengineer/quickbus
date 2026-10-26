@@ -17,6 +17,10 @@ export function ReservationReviewScreen({
   onSignIn: () => void;
   onBack: () => void;
 }) {
+  const heading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    heading.current?.focus({ preventScroll: true });
+  }, [id]);
   const router = useRouter(),
     latest = useRef(0),
     dirty = useRef(false),
@@ -182,7 +186,7 @@ export function ReservationReviewScreen({
         setUncertain(false);
         await load(true);
         setNotice(
-          'Reservation details saved. Your seats remain held until the original deadline.',
+          'Reservation details saved. The original reservation deadline is unchanged.',
         );
         return;
       }
@@ -226,7 +230,9 @@ export function ReservationReviewScreen({
   return (
     <section className="bookings-content review-content">
       <div className="section-heading">
-        <h1>Review reservation</h1>
+        <h1 ref={heading} tabIndex={-1}>
+          Review reservation
+        </h1>
         <button type="button" className="text-button" onClick={onBack}>
           My bookings
         </button>

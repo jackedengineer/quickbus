@@ -35,49 +35,52 @@ export function SeatPicker({
   const latestLoad = useRef(0);
   const pending = useRef<{ key: string; body: string } | null>(null);
   const [uncertain, setUncertain] = useState(false);
-  const load = useCallback(async () => {
-    const sequence = ++latestLoad.current;
-    setLoading(true);
-    setMessage('');
-    try {
-      const [response, detailsResponse] = await Promise.all([
-        fetch(`/api/v1/trips/${trip.id}/seats`),
-        fetch(`/api/v1/trips/${trip.id}`),
-      ]);
-      if (!response.ok || !detailsResponse.ok) throw new Error();
-      const data = (await response.json()) as { seats: Seat[] };
-      const details = (await detailsResponse.json()) as { stops: TripStop[] };
-      if (sequence !== latestLoad.current) return;
-      setStops(details.stops);
-      setPickup((previous) =>
-        details.stops.some((s) => s.id === previous && s.role === 'PICKUP')
-          ? previous
-          : '',
-      );
-      setDrop((previous) =>
-        details.stops.some((s) => s.id === previous && s.role === 'DROP')
-          ? previous
-          : '',
-      );
-      if (data.seats.length === 0)
-        setMessage(
-          'This journey is no longer available. Please choose another journey.',
+  const load = useCallback(
+    async (clearMessage = true) => {
+      const sequence = ++latestLoad.current;
+      setLoading(true);
+      if (clearMessage) setMessage('');
+      try {
+        const [response, detailsResponse] = await Promise.all([
+          fetch(`/api/v1/trips/${trip.id}/seats`),
+          fetch(`/api/v1/trips/${trip.id}`),
+        ]);
+        if (!response.ok || !detailsResponse.ok) throw new Error();
+        const data = (await response.json()) as { seats: Seat[] };
+        const details = (await detailsResponse.json()) as { stops: TripStop[] };
+        if (sequence !== latestLoad.current) return;
+        setStops(details.stops);
+        setPickup((previous) =>
+          details.stops.some((s) => s.id === previous && s.role === 'PICKUP')
+            ? previous
+            : '',
         );
-      setSeats(data.seats);
-      setSelected((previous) =>
-        [...new Set(previous)]
-          .filter((label) =>
-            data.seats.some((seat) => seat.label === label && seat.available),
-          )
-          .slice(0, adults),
-      );
-    } catch {
-      if (sequence === latestLoad.current)
-        setMessage('Seats could not be loaded. Please try again.');
-    } finally {
-      if (sequence === latestLoad.current) setLoading(false);
-    }
-  }, [trip.id, adults]);
+        setDrop((previous) =>
+          details.stops.some((s) => s.id === previous && s.role === 'DROP')
+            ? previous
+            : '',
+        );
+        if (data.seats.length === 0)
+          setMessage(
+            'This journey is no longer available. Please choose another journey.',
+          );
+        setSeats(data.seats);
+        setSelected((previous) =>
+          [...new Set(previous)]
+            .filter((label) =>
+              data.seats.some((seat) => seat.label === label && seat.available),
+            )
+            .slice(0, adults),
+        );
+      } catch {
+        if (sequence === latestLoad.current)
+          setMessage('Seats could not be loaded. Please try again.');
+      } finally {
+        if (sequence === latestLoad.current) setLoading(false);
+      }
+    },
+    [trip.id, adults],
+  );
   useEffect(() => {
     void load();
     return () => {
@@ -141,7 +144,7 @@ export function SeatPicker({
           'Unable to reserve these seats. Please refresh and try again.',
       );
       setSelected([]);
-      await load();
+      await load(false);
     } catch {
       setUncertain(true);
       setMessage(
@@ -252,11 +255,6 @@ export function SeatPicker({
         ) : (
           <p>No seats are available for this trip.</p>
         )}
-        {message && (
-          <p role="alert" className="error">
-            {message}
-          </p>
-        )}
         <button
           type="button"
           className="text-button"
@@ -275,6 +273,11 @@ export function SeatPicker({
           </span>
           <strong>{money(total)}</strong>
         </div>
+        {message && (
+          <p role="alert" className="error">
+            {message}
+          </p>
+        )}
         <button
           type="button"
           disabled={

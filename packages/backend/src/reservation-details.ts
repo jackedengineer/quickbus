@@ -6,6 +6,7 @@ import type {
 import type { Database } from '@kwikbus/db';
 import { sql } from '@kwikbus/db/schema';
 import { failure, idempotent, lockTrip, validStops } from './commands';
+import { isoInstant } from './presentation';
 
 export async function saveReservationDetails(
   db: Database,
@@ -122,13 +123,13 @@ export async function reservationReview(
   return row
     ? {
         ...row,
-        departureAt: new Date(row.departureAt).toISOString(),
-        arrivalAt: new Date(row.arrivalAt).toISOString(),
-        expiresAt: new Date(row.expiresAt).toISOString(),
-        serverTime: new Date(row.serverTime).toISOString(),
+        departureAt: isoInstant(row.departureAt),
+        arrivalAt: isoInstant(row.arrivalAt),
+        expiresAt: isoInstant(row.expiresAt),
+        serverTime: isoInstant(row.serverTime),
         stops: row.stops.map((s) => ({
           ...s,
-          scheduledAt: new Date(s.scheduledAt).toISOString(),
+          scheduledAt: isoInstant(s.scheduledAt),
         })),
       }
     : null;
