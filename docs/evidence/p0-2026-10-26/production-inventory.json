@@ -1,0 +1,56 @@
+{
+  "method": "Natural production hourly Cron; no operator priming after 12:11:33 UTC",
+  "before": {
+    "at": "2026-10-26T12:13:12.472Z",
+    "jobs": [
+      {
+        "name": "expiry",
+        "last_started_at": "2026-10-26T12:12:46.134Z",
+        "last_succeeded_at": "2026-10-26T12:12:46.493Z",
+        "last_failed_at": null,
+        "last_processed": 0
+      },
+      {
+        "name": "inventory",
+        "last_started_at": "2026-10-26T12:11:32.869Z",
+        "last_succeeded_at": "2026-10-26T12:11:33.130Z",
+        "last_failed_at": null,
+        "last_processed": 0
+      }
+    ],
+    "catalog": {
+      "services": 3,
+      "template_seats": 120,
+      "published_trips": 93,
+      "duplicate_departures": 0,
+      "partial_trips": 0
+    }
+  },
+  "after": {
+    "at": "2026-10-26T12:18:23.246Z",
+    "jobs": [
+      {
+        "name": "expiry",
+        "last_started_at": "2026-10-26T12:17:45.239Z",
+        "last_succeeded_at": "2026-10-26T12:17:45.595Z",
+        "last_failed_at": null,
+        "last_processed": 0
+      },
+      {
+        "name": "inventory",
+        "last_started_at": "2026-10-26T12:17:52.911Z",
+        "last_succeeded_at": "2026-10-26T12:17:53.071Z",
+        "last_failed_at": null,
+        "last_processed": 0
+      }
+    ],
+    "catalog": {
+      "services": 3,
+      "template_seats": 120,
+      "published_trips": 93,
+      "duplicate_departures": 0,
+      "partial_trips": 0
+    }
+  },
+  "result": "Success heartbeat advanced at 12:17:53 UTC. Full horizon required no new rows; duplicate departures and partial trips remain zero."
+}

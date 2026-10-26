@@ -4,6 +4,8 @@ A small bus-booking portfolio application built around correct seat ownership, r
 
 **Live V0 preview:** [Open KwikBus](https://kwikbus.jacked.dev/). TanStack Start and Express run on Cloudflare Workers with a private API service binding and Neon/Drizzle transactions. Google and email OTP sign-in, responsive search, seat selection, reloadable unpaid holds and release are live. OTP sends through the verified `jacked.dev` domain. The owned hostname is live, with Google and email OTP verified through real mobile and desktop booking flows. See the [domain cutover evidence](docs/domain-cutover.md). No live tickets or payments. See the [release evidence and operations guide](docs/release-v0.md).
 
+**P0 operational baseline · v0.0.3-preview:** correlated/private logs and tested monitors, minute-by-minute expiry, hourly renewal from persisted service/seat definitions, isolated PostgreSQL/Workers CI, guarded releases and a measured restore/rollback drill are complete. Real browser flows lead acceptance; the 100-customer Neon proof supplements them. [Current evidence and limits](docs/p0-hardening.md), [browser performance](docs/p0-performance.md), [release runbook](docs/releasing.md). Admin stays at the end of the roadmap.
+
 ## Run locally
 
 Use Node 24.14.0 and pnpm 10.34.5. Copy `.env.example` to an ignored `.env` and configure a **dedicated development** Neon database. `DATABASE_URL` uses a pooled DML-only application role; `MIGRATION_DATABASE_URL` uses the direct owner/migration connection. Set a random secret of at least 32 bytes. Keep credentials out of Git and chat.
@@ -16,7 +18,7 @@ docker run -d --name quickbus-mailpit -p 127.0.0.1:8025:8025 axllent/mailpit:v1.
 pnpm dev
 ```
 
-If the local inbox container already exists, use `docker start quickbus-mailpit` instead of creating it again. Open [KwikBus](http://localhost:3000); the local inbox is at [Mailpit](http://localhost:8025). Seed adds future Bengaluru/Hyderabad journeys idempotently without deleting reservations. Rerun it when the demo timetable ages out.
+If the local inbox container already exists, use `docker start quickbus-mailpit` instead of creating it again. Open [KwikBus](http://localhost:3000); the local inbox is at [Mailpit](http://localhost:8025). Seed adds future Bengaluru/Hyderabad journeys from persistent service definitions idempotently without deleting reservations. Local development has no automatic Cron execution; rerun seed when its timetable ages out. Production renewal runs hourly.
 
 `pnpm dev` writes only runtime variables to ignored `apps/api/.dev.vars`, starts Express in Wrangler on port 8787, and starts the web Worker on port 3000. The migration owner URL is never copied to the Worker. Ctrl+C stops both processes.
 

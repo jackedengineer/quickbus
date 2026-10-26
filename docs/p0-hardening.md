@@ -1,6 +1,6 @@
 # P0 hardening — 26 October 2026
 
-The P0 runtime is deployed and real Google/email OTP, reserve/reload/release, natural scheduled expiry and isolated restore/Worker rollback drills have passed. Formatter reuse reduced the repeated throttled search median from 318 to 96 ms. Final acceptance is waiting on the next natural hourly inventory invocation and verification of native callback-query redaction. Admin and public payments remain out of scope. Follow the [active checklist](../tasks/p0-hardening.md).
+All five P0 slices are deployed and verified: monitoring, natural scheduled expiry, database-backed inventory renewal, guarded releases and isolated recovery. Real Google/email OTP and desktop/mobile reservation flows passed. Formatter reuse reduced the repeated throttled search median from 318 to 96 ms. Admin and public payments remain out of scope. [Completed checklist](../tasks/p0-hardening.md), [final source/Worker/acceptance manifest](evidence/p0-deployment-2026-10-26.json).
 
 ## Verified before rollout
 
@@ -34,3 +34,13 @@ Expiry runs every minute and retains lazy expiry as the inventory safety fallbac
 - The compatible Worker rollback/redeploy window measured 67,749 ms including browser checks. One scheduled event during the older version's window reported a missing scheduled handler; subsequent real Cron successes resumed after restoration. No database rollback occurred. [Version/timing record](evidence/p0-2026-10-26/worker-rollback.json).
 - A direct, consistent production snapshot restored to a no-network PostgreSQL target: 17 tables / 4,013 rows, matching schema/counts and zero invariant violations. Backup 8,825 ms, target restore/audit 1,715 ms. Plaintext copies and temporary credentials were removed after success; the private encrypted archive/key remain local. [Recovery result and limits](recovery.md).
 - Legacy reads return 308 to the owned domain; wrong-origin mutations return 403; the API workers.dev hostname returns 404. [Routing/security probes](evidence/p0-2026-10-26/routing-security.json). Existing secrets, identity scopes, DNS/mail services and the private binding were preserved.
+
+## Final acceptance
+
+Runtime revision `17ddd416673c7d0c6a4abeeec2b73dc54e78ac05` passed [Quality CI](https://github.com/jackedengineer/quickbus/actions/runs/40320335826) and the guarded API-before-web rollout. The final Google flow restored 8C, reserved ₹749, survived reload and released successfully. Both new native callback records were inspected without exporting their values: the query string was removed in web and API. The release guard now requires this platform redaction flag as well as disabled invocation logs. Historical provider events retain their normal access/retention policy; application-only redaction was insufficient.
+
+The natural hourly inventory invocation advanced its success heartbeat to 12:17:53 UTC, independently of startup priming at 12:11:33. It needed zero new departures because the horizon was already full. All three database service definitions / 120 template seats / 93 trip snapshots remained intact, with zero duplicate departures and zero partial trips. [Natural inventory audit](evidence/p0-2026-10-26/production-inventory.json). The latest real-Neon proof matches all 28 recorded runtime/config/schema sources and again resolves 100 customers to one winner / 99 conflicts; all 12 integration checks passed.
+
+Turbo build outputs are deliberately uncached until all environment/transitive-source inputs have a verified cache model; development and production-selector graph builds both executed successfully. Audit gates report no high/critical findings. The remaining moderate advisory is the optional esbuild serve feature under Drizzle Kit's development loader, not a deployed Worker dependency or the application's dev server. Track upstream tool maintenance under P1/T28; do not claim a zero-advisory dependency graph. [Upstream advisory](https://github.com/evanw/esbuild/security/advisories/GHSA-67mh-4wv8-2f99).
+
+The later release tag may include documentation/evidence-only commits after the runtime revision. The manifest names the exact built revision and Worker versions; no additional deployment is implied by a documentation commit. Continuous offsite backup, field SLOs, full accessibility/scale certification and the paid lifecycle remain outside this P0 baseline.

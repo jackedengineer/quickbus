@@ -1,0 +1,57 @@
+{
+  "release": "v0.0.3-preview",
+  "state": "Production deployed; browser and operational acceptance complete",
+  "origin": "https://kwikbus.jacked.dev",
+  "runtimeRevision": "17ddd416673c7d0c6a4abeeec2b73dc54e78ac05",
+  "runtimeCiRun": "40320335826",
+  "workers": {
+    "api": "3f886a3d-6bd5-49f4-8b6e-488f635ff285",
+    "web": "1e7f5b0c-dd84-4643-a89d-27a93356dae0"
+  },
+  "initialP0Revision": "e923be57b4c529b6408b5f5e2a27f768fd3ffdac",
+  "additiveMigrations": ["0002_maintenance_jobs", "0003_renewable_inventory"],
+  "apiPublic": false,
+  "auth": "Google and email OTP; existing scopes/secrets/callbacks preserved",
+  "browser": [
+    "Google seat restoration → reserve → full reload → release, repeated on final deployment",
+    "Desktop and isolated mobile email OTP → restored selection → hold/reload",
+    "Natural ten-minute expiry → scheduled allocation removal → mobile reclaim/reload/release",
+    "Same-user second hold rejected with recovery message; four-seat limit/price verified",
+    "Escape restores opener focus; reduced motion removes transitions; widths 320–1280 inspected"
+  ],
+  "operationalEvidence": {
+    "expiry": "p0-2026-10-26/production-expiry.json",
+    "inventory": "p0-2026-10-26/production-inventory.json",
+    "nativeQueryRedaction": "p0-2026-10-26/native-url-redaction.json",
+    "correlation": "p0-2026-10-26/request-correlation.json",
+    "routing": "p0-2026-10-26/routing-security.json",
+    "backupRestore": "p0-2026-10-26/recovery.json",
+    "workerRollback": "p0-2026-10-26/worker-rollback.json",
+    "performance": "p0-2026-10-26/browser-performance.json"
+  },
+  "monitor": {
+    "cloudflareId": "98f43b5fff404d618cb30f4d97c0119b",
+    "enabled": true,
+    "testActionConfirmed": true,
+    "githubIntentionalFailure": 40314860795,
+    "githubNormalSuccess": 40315346714,
+    "inboxDeliveryCertified": false
+  },
+  "neonProof": {
+    "sourceFiles": 28,
+    "implementationSha256": "246080dbcdd596d4292cfa3db3a3e91ac56e195d1df9d9bde377fc0a9d00a493",
+    "sourceMatches": true,
+    "customers": 100,
+    "winners": 1,
+    "conflictsAfterSameKeyRecovery": 99,
+    "scenarios": 9
+  },
+  "limits": [
+    "Unpaid synthetic portfolio inventory only; all trips/seats/fares come from PostgreSQL. No tickets, payments or admin.",
+    "One local encrypted snapshot/isolated restore, not continuous offsite backup or RPO/RTO guarantees.",
+    "Three-sample throttled browser comparison, no field percentile or physical-device claim; one post-change search sample was 239 ms.",
+    "Native provider metadata retains request paths; historical query-bearing events expire under provider retention. New callback queries verified removed in both Workers.",
+    "One handled idle DB socket event completed with HTTP 200 responses; one Cron event failed during the deliberate old-version rollback window and recovered.",
+    "No high/critical audit findings; one moderate esbuild serve advisory is confined to the Drizzle Kit development-tool dependency path."
+  ]
+}

@@ -107,3 +107,11 @@ Use **kwikbus.jacked.dev**, rather than purchasing `kwikbus.in`. GoDaddy remains
 Switch backend APP_ORIGIN and frontend PUBLIC_ORIGIN together. Keep the existing preview canonical while local/user DNS still resolves the former Railway wildcard. New-host browser verification is a release gate; a successful TLS check using an explicit Cloudflare address is useful evidence but does not satisfy that gate. Do not broaden trusted origins or weaken TLS to work around propagation. [Cutover record](domain-cutover.md).
 
 The cutover completed on 26 October 2026 after normal DNS and browser HTTPS succeeded. Both production origins now use the owned hostname. A cached staging redirect loop discovered in the real browser required a migration query and an origin-scoped `Clear-Site-Data: "cache"` recovery response. Cookies and application storage remain intact; clean-root navigation and reload then passed. See the cutover evidence for Google/mobile and OTP/desktop flows.
+
+## ADR 014 — P0 operations before payment work; admin last
+
+**Status:** implemented from the user's instruction, 26 October 2026.
+
+Complete monitoring, bounded scheduled expiry, persistent inventory renewal, guarded releases and a measured isolated recovery drill before starting payments. Actual desktop/mobile browser use leads acceptance; SQL and two-instance contention checks prove transaction properties the browser cannot establish alone. All synthetic service/seat/fare data lives in PostgreSQL. An admin panel is the final slice after the customer lifecycle and portfolio release, with fresh MFA before privileged mutations.
+
+Expiry runs through the same trip-lock/post-lock DB-time policy as customer commands. Renewal snapshots at most five departures from persistent definitions in one statement. The API stays private behind the web service binding. CI uses disposable PostgreSQL; real Neon evidence is recorded separately. Release requires clean pushed source, exact-revision green CI, serialized operators/migrations and native URL-query redaction in both Workers. Recovery never replaces production data during a drill. [Evidence and measured limits](p0-hardening.md).

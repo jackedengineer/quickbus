@@ -10,14 +10,14 @@ See [compatibility](../docs/compatibility.md), [reservation proof](../docs/reser
 
 ## Active delivery order — reconciled 26 October 2026
 
-The user has prioritised [five P0 operational slices](p0-hardening.md): monitoring → scheduled expiry → database-backed inventory renewal → release safeguards → recovery drill. Real browser acceptance leads each usable change; focused SQL/concurrency checks supplement it. Use focused commits of roughly 300–400 lines, with a working application after each slice. Admin authoring/dashboard and its required MFA stay at the end of the roadmap. All synthetic inventory must be stored in PostgreSQL and served through the API; no client-only catalog or invented availability.
+The [five P0 operational slices](p0-hardening.md) are complete with production evidence: monitoring → scheduled expiry → database-backed inventory renewal → release safeguards → recovery drill. Real browser acceptance leads each usable change; focused SQL/concurrency checks supplement it. Use focused commits of roughly 300–400 lines, with a working application after each slice. Admin authoring/dashboard and its required MFA stay at the end of the roadmap. All synthetic inventory must be stored in PostgreSQL and served through the API; no client-only catalog or invented availability.
 
-Completed independently of the original sequence: T01, T03 customer authentication, T04, T06, T07, T12 and T13's unpaid concurrency proof. Partial tasks retain unchecked boxes until their remaining criteria pass. Production hosting, the owned domain and real email delivery are complete; they are not future launch blockers.
+Completed independently of the original sequence: T01, T03 customer authentication, T04, T05, T06, T07, T12 and T13's unpaid concurrency proof. Partial tasks retain unchecked boxes until their remaining criteria pass. Production hosting, the owned domain and real email delivery are complete; they are not future launch blockers.
 
 | Task | Reconciled status / remaining work |
 |---|---|
 | T03 / T07 | Customer Google/email OTP, hashed single-use codes, session renewal/isolation and owned-domain browser flows complete. Admin MFA moves to the deferred admin gate. |
-| T05 | Worker adapter, validated config, request-scoped bounded DB pools, health and real-Neon harness exist. Correlated telemetry is implemented; native provider URL-query redaction is undergoing final production verification in P0-01. Persistent-server shutdown requirements do not apply to Workers. |
+| T05 | Worker adapter, validated config, request-scoped bounded DB pools, health and real-Neon harness exist. Correlated telemetry is implemented; native provider URL-query redaction is deployed and verified in both Workers. Persistent-server shutdown requirements do not apply to Workers. |
 | T06 | Responsive shell, clean install/build/type/lint/audit CI exist. Isolated PostgreSQL integration/contention CI passes. Turbo rebuilds environment-sensitive Worker outputs explicitly instead of reusing undeclared cached inputs. |
 | T08 / T09 | Search and suggestions use database trips. Normalised catalog/aliases, server search contract/pagination and full acceptance remain P1. |
 | T10 / T11 | DB seat/booking/allocation constraints exist. Editable catalog, stop snapshots and publication service remain P1. |
@@ -59,7 +59,7 @@ Historical baseline: [V0](../docs/release-v0.md). Current deployed state: [P0 op
   - Verify: clean install and a task-graph/build smoke test.
   - Depends: T01. Targets: root package/workspace/Turbo/TS/runtime configuration, split scaffolder output as needed. Size: M.
 
-- [ ] **T05 — Backend bootstraps and database harness**
+- [x] **T05 — Backend bootstraps and database harness**
   - Accept: API/worker consume a shared server-only backend package; validated config, bounded pools, redacted request/trace logs, health, graceful shutdown, and isolated real-Postgres test setup exist.
   - Verify: `pnpm test:integration` for rollback/health/start-stop; no frontend import of DB code.
   - Depends: T04. Targets: API entry, worker entry, DB client, config loader, harness test. Size: M.
@@ -184,15 +184,10 @@ Historical baseline: [V0](../docs/release-v0.md). Current deployed state: [P0 op
   - Verify: crash/restart and mixed-state cancellation integration tests plus invariant audit.
   - Depends: T11, T21, T24. Targets: sale-state/cancel service, drain handler, progress query, tests. Size: M.
 
-- [ ] **T26 — Admin authoring and exception UI**
-  - Accept: provisioned admin can draft/publish/close/cancel trips, inspect redacted timelines/cases, and request allowlisted safe rechecks; every command is audited and MFA-protected.
-  - Verify: admin browser journey, non-admin rejection, role-escalation and replay tests.
-  - Depends: T03, T11, T21, T25. Targets: admin route/components, command composition, audit integration, tests; split authoring and cases if over five files. Size: M.
-
 - [ ] **T27 — Lifecycle usability and accessibility pass**
   - Accept: mobile/desktop, keyboard/screen reader, seat list, form errors, timer warnings, print, and payment recovery meet the tested accessibility criteria; findings are fixed or explicitly release-blocking.
   - Verify: `pnpm test:a11y`, manual screen-reader record, focused browser regressions.
-  - Depends: T22, T24, T26. Targets: affected UI components, focused browser tests, accessibility report; split fixes by page. Size: M.
+  - Depends: T22, T24. Admin accessibility follows deferred T26 separately. Targets: affected UI components, focused browser tests, accessibility report; split fixes by page. Size: M.
 
 **Gate I:** customer lifecycle usable and accessible. The admin portion is deferred until after the customer/P0/P1 scope; when introduced, admin recovery must be operationally meaningful and MFA-protected.
 
@@ -209,8 +204,16 @@ Historical baseline: [V0](../docs/release-v0.md). Current deployed state: [P0 op
   - Depends: T28. Targets: deployment configuration, release workflow, operating/restore runbook, evidence. Size: M per focused subtask.
 
 - [ ] **T30 — Portfolio release package**
-  - Accept: working sandbox URL, README walkthrough, API docs, ERD/ADRs, successful and failure-path demos, CI/test/load/restore evidence, and honest limitations are linked. All PRD release criteria reviewed.
+  - Accept: working sandbox URL, README walkthrough, API docs, ERD/ADRs, successful and failure-path demos, CI/test/load/restore evidence, and honest limitations are linked. All agreed customer-release criteria reviewed; admin is a separate later release.
   - Verify: a fresh reviewer can run seeded demo and reproduce the last-seat scenario using documented commands; scan public media for personal/payment secrets.
   - Depends: T29. Targets: README, evidence index, generated API documentation, demo media references. Size: M.
 
 **Gate J:** release evidence reviewed, unresolved correctness/security failures closed, SLO claims match measurements. Deferred features remain deferred until this gate passes.
+
+
+## Deferred final slice — Admin after the customer release
+
+- [ ] **T26 — Admin authoring and exception UI**
+  - Accept: provisioned admin can draft/publish/close/cancel trips, inspect redacted timelines/cases, and request allowlisted safe rechecks; every command is audited and MFA-protected.
+  - Verify: admin browser journey, non-admin rejection, role-escalation and replay tests.
+  - Depends: T03, T11, T21, T25, T30. Targets: admin route/components, command composition, audit integration, tests; split authoring and cases if over five files. Size: M.

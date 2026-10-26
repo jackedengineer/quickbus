@@ -45,3 +45,5 @@ pnpm exec wrangler rollback <previous-web-version> -c apps/web/wrangler.jsonc
 Check normal HTTPS and a real browser flow. To restore the exact newer versions without rebuilding, use `wrangler versions deploy <version>@100% --yes` for API then web with the corresponding config/environment. Trigger configuration is separate operational state: an older Worker without a scheduled handler cannot process the newer cron schedules. Keep such a drill brief and restore the scheduled-handler version promptly; investigate failed Cron events rather than ignoring them.
 
 A live compatibility drill records actual times and source/Worker IDs. The separate [database recovery drill](recovery.md) restores only to an isolated disposable target.
+
+Retain the P0 release as a known-good baseline for later rollbacks. Its native query-redaction policy must remain enabled as well as canonical origins, private API routing and schema compatibility. Versions predating that fix are not an approved authentication-logging baseline; verify provider settings after a rollback. Do not restore an old environment file or weaken monitoring to recover application code.

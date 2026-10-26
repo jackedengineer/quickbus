@@ -2,7 +2,7 @@
 
 ## Delivery strategy
 
-Implementation update: Cloudflare Workers is the required backend runtime. Follow [ADR 010](../docs/decisions.md) and the updated architecture. The unpaid real-Neon/two-Workers concurrency proof and customer identity slice have passed. The immediate order is the [P0 hardening plan](p0-hardening.md), followed by catalog/publication and checkout review. Admin stays at the end. T02 payment research is eligible after P0; public payments still require reconciliation and refund recovery. Browser usage is a required verification step for every usable slice.
+Implementation update: Cloudflare Workers is the required backend runtime. Follow [ADR 010](../docs/decisions.md) and the updated architecture. The unpaid real-Neon/two-Workers concurrency proof, customer identity and [five P0 hardening slices](p0-hardening.md) have passed production acceptance. Next are catalog/publication and passenger/checkout review; T02 provider research is eligible, while public payments still require reconciliation and refund recovery. Admin is the final slice after the customer lifecycle and portfolio package. Browser usage is a required verification step for every usable slice.
 
 
 Build the smallest complete system that can sell a seat correctly, then prove it can recover failures. Retain the requested TanStack Start/Express/Turborepo/Neon/Drizzle stack. Use the [PRD](../PRD.md) for scope and the [correctness protocol](../docs/booking-correctness.md) as the transaction contract.
@@ -41,9 +41,9 @@ flowchart TD
   pay --> reconcile[Status recovery and reconciliation]
   reconcile --> ticket[Ticket and notification]
   reconcile --> refund[Cancellation and refund recovery]
-  refund --> admin[Trip cancellation and admin cases]
-  ticket --> release[Fault tests load accessibility deploy restore]
-  admin --> release
+  refund --> release[Customer fault tests load accessibility deploy restore]
+  ticket --> release
+  release --> admin[Deferred final slice: MFA admin authoring and cases]
 ```
 
 Within each slice, implement migration/contract, transaction behavior, HTTP endpoint, UI, and its proof as small linked tasks. Never complete the entire backend and leave UI integration to the end. DB migrations/shared contracts follow dependency order. UI on a frozen DTO can be developed separately from provider adapter work; this is an implementation option, not a requirement to add more developers.
