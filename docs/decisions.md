@@ -97,3 +97,11 @@ This supersedes the earlier generic visual direction in the UX spec. It does not
 Use Better Auth with Google sign-in and email OTP; do not expose passwords, password reset, magic links or unused OTP inspection endpoints. V0 remains an unpaid reservation preview. Google is published on the temporary Workers domain. The user chose to wait for `kwikbus.in` before public OTP email rather than use another verified sender. Public email controls therefore stay disabled until real delivery is configured and verified.
 
 Use **KwikBus** in app and service/project branding. The canonical domain will be `kwikbus.in` after ownership and DNS setup. Preserve historical evidence and existing internal development identifiers rather than rewriting migrations/history. No admin surface is exposed; fresh admin MFA remains a gate for that later capability. See [authentication](authentication.md) and [V0 evidence](release-v0.md).
+
+## ADR 013 — Use an owned subdomain and preserve access during DNS propagation
+
+**Status:** accepted from the user's change of plan, 26 October 2026.
+
+Use **kwikbus.jacked.dev**, rather than purchasing `kwikbus.in`. GoDaddy remains the registrar; the user approved moving authoritative DNS to Cloudflare after comparing the original export with all 21 application/email records in the pending zone. Existing web records remain DNS-only, and the new Worker hostname is the only new proxied endpoint. A separate Resend sending-only credential restricted to the already verified `jacked.dev` domain sends customer OTPs.
+
+Switch backend APP_ORIGIN and frontend PUBLIC_ORIGIN together. Keep the existing preview canonical while local/user DNS still resolves the former Railway wildcard. New-host browser verification is a release gate; a successful TLS check using an explicit Cloudflare address is useful evidence but does not satisfy that gate. Do not broaden trusted origins or weaken TLS to work around propagation. [Cutover record](domain-cutover.md).

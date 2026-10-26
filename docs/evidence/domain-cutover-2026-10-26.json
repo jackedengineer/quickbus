@@ -1,0 +1,86 @@
+{
+  "date": "2026-10-26",
+  "targetOrigin": "https://kwikbus.jacked.dev",
+  "temporaryLiveOrigin": "https://kwikbus.ichiragbhugra.workers.dev",
+  "status": "DNS and custom hostname configured; final canonical switch waits for normal browser DNS/HTTPS verification",
+  "nameservers": ["brett.ns.cloudflare.com", "isla.ns.cloudflare.com"],
+  "dnsRecordsPreserved": 21,
+  "originalExportRecordsIncludingSoaAndNs": 24,
+  "authoritativeDnsAudit": {
+    "queryGroups": 19,
+    "records": 21,
+    "valuesMatchOriginal": true,
+    "mismatches": [],
+    "authoritativeServer": "brett.ns.cloudflare.com"
+  },
+  "ttlAdjustment": {
+    "name": "chat.jacked.dev",
+    "oldSeconds": 604800,
+    "newSeconds": 86400,
+    "reason": "Cloudflare UI maximum TTL"
+  },
+  "newHostnameTls": "Validated with certificate verification enabled against Cloudflare 104.21.17.206; local resolver/browser still returns prior Railway address",
+  "google": {
+    "callbackAdded": "https://kwikbus.jacked.dev/api/auth/callback/google",
+    "existingCallbacksPreserved": true,
+    "brandingUrlsUpdated": true,
+    "scopesChanged": false,
+    "temporaryOriginBrowserSignIn": "passed; same reservation visible after email OTP and Google sign-in",
+    "brandVerification": "Not completed; basic identity sign-in remains published"
+  },
+  "email": {
+    "sender": "KwikBus <signin@jacked.dev>",
+    "provider": "Resend",
+    "credential": "Separate sending-only key restricted to jacked.dev; ignored local file and private API Worker secret",
+    "providerReportedDelivery": true,
+    "wrongCodeRejected": true,
+    "resendRotatedCode": true,
+    "earlierCodeAfterResendRejected": true,
+    "latestCodeAcceptedInBrowser": true,
+    "seatSelectionRestored": true,
+    "reservationSurvivedReload": true,
+    "reservationReleased": true,
+    "proofSeat": "5A",
+    "inboxPlacement": "Not independently certified; delivery status and message preview checked in Resend"
+  },
+  "workers": {
+    "webVersion": "eeb6bd4c-d8ad-4e97-abeb-dcc06e4e30fc",
+    "apiVersion": "34beac93-2cf4-4b41-af09-d65fdc8d4f5e",
+    "builtRevision": "afe3d18abcfe17b13604fe600a49777bc3da85cf",
+    "configurationRevision": "f8ea91809f830612fabbac5533c35aace43f19bc",
+    "apiPublicRoutes": false
+  },
+  "redirectRuntimeChecks": [
+    {
+      "path": "/",
+      "method": "GET",
+      "status": 308,
+      "location": "https://kwikbus.jacked.dev/"
+    },
+    {
+      "path": "/?view=results&adults=2",
+      "method": "GET",
+      "status": 308,
+      "location": "https://kwikbus.jacked.dev/?view=results&adults=2"
+    },
+    {
+      "path": "//example.com/path?next=https%3A%2F%2Fexample.com",
+      "method": "GET",
+      "status": 308,
+      "location": "https://kwikbus.jacked.dev//example.com/path?next=https%3A%2F%2Fexample.com"
+    },
+    {
+      "path": "/?view=bookings",
+      "method": "HEAD",
+      "status": 308,
+      "location": "https://kwikbus.jacked.dev/?view=bookings"
+    },
+    {
+      "path": "/api/auth/sign-in/social",
+      "method": "POST",
+      "status": 421,
+      "location": null
+    }
+  ],
+  "cloudflareZoneActive": true
+}

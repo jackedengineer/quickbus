@@ -2,7 +2,7 @@
 
 A small bus-booking portfolio application built around correct seat ownership, retry behavior, and failure recovery.
 
-**Live V0 preview:** [Open KwikBus](https://kwikbus.ichiragbhugra.workers.dev/). TanStack Start and Express run on Cloudflare Workers with a private API service binding and Neon/Drizzle transactions. Google sign-in, responsive search, seat selection, reloadable unpaid holds and release are live. Email OTP works locally and is intentionally disabled publicly until `kwikbus.in` sender verification. No live tickets or payments. See the [release evidence and operations guide](docs/release-v0.md).
+**Live V0 preview:** [Open KwikBus](https://kwikbus.ichiragbhugra.workers.dev/). TanStack Start and Express run on Cloudflare Workers with a private API service binding and Neon/Drizzle transactions. Google and email OTP sign-in, responsive search, seat selection, reloadable unpaid holds and release are live. OTP sends through the verified `jacked.dev` domain. The owned hostname `kwikbus.jacked.dev` is configured; the preview stays canonical during DNS propagation. See the [domain cutover status](docs/domain-cutover.md). No live tickets or payments. See the [release evidence and operations guide](docs/release-v0.md).
 
 ## Run locally
 
