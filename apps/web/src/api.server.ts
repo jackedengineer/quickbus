@@ -3,7 +3,7 @@ import { requestId, timed } from '@kwikbus/backend/telemetry';
 
 export async function apiFetch(request: Request): Promise<Response> {
   const bindings = env as unknown as { API: Fetcher };
-  if (request.method === 'POST' && request.body) {
+  if (['POST', 'PATCH'].includes(request.method) && request.body) {
     // The backend is private, so enforce a byte limit at its only public entry.
     // Checking Content-Length alone would miss streamed/chunked request bodies.
     const reader = request.body.getReader();

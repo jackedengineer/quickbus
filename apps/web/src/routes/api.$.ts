@@ -6,6 +6,7 @@ export const Route = createFileRoute('/api/$')({
     handlers: {
       GET: ({ request }) => apiFetch(request),
       POST: ({ request }) => apiFetch(request),
+      PATCH: ({ request }) => apiFetch(request),
     },
   },
 });

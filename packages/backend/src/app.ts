@@ -1,4 +1,4 @@
-import { searchInput } from '@kwikbus/contracts';
+import { reservationDetailsInput, searchInput } from '@kwikbus/contracts';
 import { sql } from '@kwikbus/db/schema';
 import { fromNodeHeaders, toNodeHandler } from 'better-auth/node';
 import express from 'express';
@@ -14,6 +14,10 @@ import {
 import { catalog, citySuggestions, searchTrips, tripDetails } from './catalog';
 import { context } from './context';
 import { maintenanceHealth } from './maintenance';
+import {
+  reservationReview,
+  saveReservationDetails,
+} from './reservation-details';
 import { reportFailure, timed } from './telemetry';
 
 async function readSession(
@@ -145,7 +149,7 @@ export function createApp() {
     async (request, response, next) => {
       const { environment } = context();
       if (
-        request.method === 'POST' &&
+        !['GET', 'HEAD'].includes(request.method) &&
         request.headers.origin !== environment.APP_ORIGIN
       ) {
         response.status(403).json({ code: 'ORIGIN_REJECTED' });
@@ -172,8 +176,11 @@ export function createApp() {
           .refine((s) => new Set(s).size === s.length),
         expectedTotalMinor: z.number().int().positive().max(10000000),
         currency: z.literal('INR'),
+        pickupStopId: uuid.optional(),
+        dropStopId: uuid.optional(),
       })
       .strict()
+      .refine((v) => Boolean(v.pickupStopId) === Boolean(v.dropStopId))
       .safeParse(request.body);
     if (!key.success || !input.success)
       return response.status(400).json({
@@ -198,12 +205,45 @@ export function createApp() {
     const id = uuid.safeParse(request.params.id);
     if (!id.success)
       return response.status(400).json({ code: 'INVALID_REQUEST' });
-    const booking = (
-      await getBookings(context().db, response.locals.userId, id.data)
-    )[0];
+    const booking = await reservationReview(
+      context().db,
+      response.locals.userId,
+      id.data,
+    );
     return booking
       ? response.json(booking)
       : response.status(404).json({ code: 'BOOKING_NOT_FOUND' });
+  });
+  app.patch('/api/v1/bookings/:id/details', async (request, response) => {
+    const id = uuid.safeParse(request.params.id),
+      key = uuid.safeParse(request.headers['idempotency-key']);
+    const version = request.headers['if-match'];
+    if (version === undefined)
+      return response.status(428).json({ code: 'VERSION_REQUIRED' });
+    const input = reservationDetailsInput.safeParse(request.body);
+    if (
+      !id.success ||
+      !key.success ||
+      typeof version !== 'string' ||
+      !/^"[1-9][0-9]{0,8}"$/.test(version) ||
+      !input.success
+    )
+      return response
+        .status(400)
+        .json({
+          code: 'INVALID_DETAILS',
+          detail:
+            'Enter a name for each seat, valid stops and an optional international phone number.',
+        });
+    const result = await saveReservationDetails(
+      context().db,
+      response.locals.userId,
+      id.data,
+      key.data,
+      Number(version.slice(1, -1)),
+      input.data,
+    );
+    return response.status(result.status).json(result.body);
   });
   app.post('/api/v1/bookings/:id/release', async (request, response) => {
     const id = uuid.safeParse(request.params.id),

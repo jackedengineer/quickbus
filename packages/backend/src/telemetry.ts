@@ -31,6 +31,8 @@ export function routeLabel(path: string) {
   if (/^\/api\/v1\/trips\/[^/]+\/seats$/.test(path))
     return '/api/v1/trips/:id/seats';
   if (/^\/api\/v1\/trips\/[^/]+$/.test(path)) return '/api/v1/trips/:id';
+  if (/^\/api\/v1\/bookings\/[^/]+\/details$/.test(path))
+    return '/api/v1/bookings/:id/details';
   if (/^\/api\/v1\/bookings\/[^/]+\/release$/.test(path))
     return '/api/v1/bookings/:id/release';
   if (/^\/api\/v1\/bookings\/[^/]+$/.test(path)) return '/api/v1/bookings/:id';
@@ -125,7 +127,9 @@ export async function observeRequest(
           requestId: value.requestId,
           service,
           route: value.route,
-          method: ['GET', 'HEAD', 'POST', 'OPTIONS'].includes(request.method)
+          method: ['GET', 'HEAD', 'POST', 'PATCH', 'OPTIONS'].includes(
+            request.method,
+          )
             ? request.method
             : 'other',
           status,

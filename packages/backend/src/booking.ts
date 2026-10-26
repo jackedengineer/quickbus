@@ -1,13 +1,15 @@
 import { randomUUID } from 'node:crypto';
 import type { Database } from '@kwikbus/db';
 import { sql } from '@kwikbus/db/schema';
-import { failure, idempotent, lockTrip } from './commands';
+import { failure, idempotent, lockTrip, validStops } from './commands';
 
 export type HoldInput = {
   tripId: string;
   seatLabels: string[];
   expectedTotalMinor: number;
   currency: 'INR';
+  pickupStopId?: string;
+  dropStopId?: string;
 };
 const scope = 'POST /api/v1/holds';
 
@@ -37,6 +39,21 @@ export async function holdSeats(
           'Reservations for this trip have closed.',
         );
       }
+      if (
+        input.pickupStopId &&
+        input.dropStopId &&
+        !(await validStops(
+          tx,
+          input.tripId,
+          input.pickupStopId,
+          input.dropStopId,
+        ))
+      )
+        return failure(
+          'INVALID_STOPS',
+          'Choose pickup and drop locations for this journey.',
+          422,
+        );
       const pending = await tx.execute(
         sql`SELECT id FROM bookings WHERE trip_id=${input.tripId} AND user_id=${userId} AND status='HELD'`,
       );
@@ -77,8 +94,8 @@ export async function holdSeats(
           Date.parse(trip.sales_close_at),
         ),
       ).toISOString();
-      await tx.execute(sql`INSERT INTO bookings(id,trip_id,user_id,reference,total_minor,expires_at)
-      VALUES(${id},${input.tripId},${userId},${reference},${total},${expiresAt})`);
+      await tx.execute(sql`INSERT INTO bookings(id,trip_id,user_id,reference,total_minor,expires_at,pickup_stop_id,drop_stop_id)
+      VALUES(${id},${input.tripId},${userId},${reference},${total},${expiresAt},${input.pickupStopId ?? null},${input.dropStopId ?? null})`);
       await tx.execute(sql`INSERT INTO booking_items(booking_id,trip_id,seat_label,fare_minor) VALUES
       ${sql.join(
         selected.rows.map(

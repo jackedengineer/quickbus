@@ -83,3 +83,18 @@ export async function idempotent(
     }),
   );
 }
+
+export async function validStops(
+  tx: Transaction,
+  tripId: string,
+  pickup: string,
+  drop: string,
+) {
+  return Boolean(
+    (
+      await tx.execute(sql`SELECT p.id FROM trip_stops p JOIN trip_stops d ON d.trip_id=p.trip_id
+    WHERE p.trip_id=${tripId} AND p.id=${pickup} AND d.id=${drop} AND p.role='PICKUP' AND d.role='DROP'
+    AND p.sequence<d.sequence AND p.scheduled_at<d.scheduled_at`)
+    ).rowCount,
+  );
+}
