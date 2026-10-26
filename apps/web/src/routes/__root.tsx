@@ -15,7 +15,10 @@ export const Route = createRootRoute({
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       { title: 'KwikBus · Book your next journey' },
     ],
-    links: [{ rel: 'stylesheet', href: stylesheet }],
+    links: [
+      { rel: 'stylesheet', href: stylesheet },
+      { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
+    ],
   }),
   errorComponent: () => (
     <main id="main" className="empty-state">
