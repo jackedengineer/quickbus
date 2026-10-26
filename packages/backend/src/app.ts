@@ -117,13 +117,11 @@ export function createApp() {
       return response.json({ trips: await listTrips(context().db) });
     const input = searchInput.safeParse(request.query);
     if (!input.success)
-      return response
-        .status(400)
-        .json({
-          trips: [],
-          code: 'INVALID_SEARCH',
-          detail: 'Choose two cities, a valid date and one to four adults.',
-        });
+      return response.status(400).json({
+        trips: [],
+        code: 'INVALID_SEARCH',
+        detail: 'Choose two cities, a valid date and one to four adults.',
+      });
     const result = await searchTrips(context().db, input.data);
     return response.status(result.status).json(result.body);
   });

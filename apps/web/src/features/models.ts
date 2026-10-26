@@ -4,17 +4,7 @@ export type Session = {
   emailEnabled: boolean;
   user: { id: string; email: string; emailVerified: boolean } | null;
 };
-export type Trip = {
-  id: string;
-  origin: string;
-  destination: string;
-  operatorName: string;
-  vehicleLabel: string;
-  departureAt: string;
-  arrivalAt: string;
-  fareMinor: number;
-  seatCount: number;
-};
+export type { Trip } from '@kwikbus/contracts';
 export type Seat = {
   label: string;
   position: number;

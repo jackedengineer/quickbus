@@ -1,3 +1,4 @@
+import type { City } from '@kwikbus/contracts';
 import { useEffect, useId, useState } from 'react';
 import { Icon } from './icon';
 export function CityInput({
@@ -8,7 +9,7 @@ export function CityInput({
 }: {
   label: string;
   value: string;
-  cities: string[];
+  cities: City[];
   onChoose: (city: string) => void;
 }) {
   const id = useId(),
@@ -16,11 +17,39 @@ export function CityInput({
     [open, setOpen] = useState(false),
     [active, setActive] = useState(0);
   useEffect(() => setDraft(value), [value]);
-  const matches = cities.filter(
-    (city) =>
-      draft === value ||
-      city.toLocaleLowerCase().includes(draft.trim().toLocaleLowerCase()),
-  );
+  const [matches, setMatches] = useState(cities);
+  const [loading, setLoading] = useState(false),
+    [error, setError] = useState('');
+  useEffect(() => {
+    if (!open) return;
+    const controller = new AbortController();
+    setLoading(true);
+    setError('');
+    setMatches([]);
+    const timer = window.setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `/api/v1/cities?q=${encodeURIComponent(draft === value ? '' : draft.trim())}`,
+          { signal: controller.signal },
+        );
+        if (!response.ok) throw new Error('City lookup unavailable.');
+        const result = (await response.json()) as { cities: City[] };
+        if (!controller.signal.aborted) {
+          setMatches(result.cities);
+          setActive(0);
+        }
+      } catch {
+        if (!controller.signal.aborted)
+          setError('City lookup unavailable. Try again.');
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    }, 150);
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [draft, value, open]);
   const choose = (city: string) => {
     setDraft(city);
     setOpen(false);
@@ -68,7 +97,7 @@ export function CityInput({
             );
           } else if (e.key === 'Enter' && open) {
             e.preventDefault();
-            if (matches[active]) choose(matches[active]);
+            if (matches[active]) choose(matches[active].name);
           } else if (e.key === 'Escape') {
             e.preventDefault();
             setOpen(false);
@@ -83,11 +112,13 @@ export function CityInput({
           role="listbox"
           aria-label={`${label} cities`}
         >
-          {matches.length ? (
+          {loading || error ? (
+            <p role="status">{error || 'Loading cities…'}</p>
+          ) : matches.length ? (
             matches.map((city, i) => (
               <button
                 type="button"
-                key={city}
+                key={city.id}
                 id={`${id}-${i}`}
                 role="option"
                 tabIndex={-1}
@@ -95,12 +126,12 @@ export function CityInput({
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={(e) => {
                   e.preventDefault();
-                  choose(city);
+                  choose(city.name);
                 }}
               >
                 <Icon name="pin" size={22} />
                 <span>
-                  {city}
+                  {city.name}
                   <small>India</small>
                 </span>
               </button>

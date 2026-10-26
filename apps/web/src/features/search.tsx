@@ -1,7 +1,8 @@
+import type { Catalog } from '@kwikbus/contracts';
 import { useEffect, useState } from 'react';
 import { CityInput } from './city-input';
 import { Icon } from './icon';
-import { day, type Trip } from './models';
+import { day } from './models';
 export type SearchValues = {
   from: string;
   to: string;
@@ -11,12 +12,12 @@ export type SearchValues = {
 export function SearchForm({
   initial,
   autoSearch = false,
-  trips,
+  catalog,
   onSearch,
 }: {
   initial: SearchValues;
   autoSearch?: boolean;
-  trips: Trip[];
+  catalog: Catalog;
   onSearch: (values: SearchValues) => void;
 }) {
   const [values, setValues] = useState(initial);
@@ -28,9 +29,6 @@ export function SearchForm({
         : { ...previous, adults: initialAdults },
     );
   }, [initialAdults]);
-  const cities = [
-    ...new Set(trips.flatMap((t) => [t.origin, t.destination])),
-  ].sort();
   const [calendar, setCalendar] = useState(false);
   const [passengers, setPassengers] = useState(false);
   const [month, setMonth] = useState(initial.date.slice(0, 7));
@@ -55,12 +53,7 @@ export function SearchForm({
       first.getUTCMonth() + 1,
       0,
     ).getDate();
-  const today = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Kolkata',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(new Date());
+  const today = catalog.today;
   return (
     <form
       className={autoSearch ? 'search-form automatic' : 'search-form'}
@@ -98,7 +91,7 @@ export function SearchForm({
                 <CityInput
                   label={field === 'from' ? 'From' : 'To'}
                   value={values[field]}
-                  cities={cities}
+                  cities={catalog.cities}
                   onChoose={(city) => update({ ...values, [field]: city })}
                 />
               </div>
@@ -143,6 +136,7 @@ export function SearchForm({
               type="button"
               className="icon-button"
               aria-label="Next day"
+              disabled={values.date >= catalog.through}
               onClick={() => changeDay(1)}
             >
               <Icon name="chevron" size={17} />
@@ -195,7 +189,7 @@ export function SearchForm({
                       key={date}
                       aria-label={day(date)}
                       aria-pressed={values.date === date}
-                      disabled={date < today}
+                      disabled={date < today || date > catalog.through}
                       onClick={() => {
                         update({ ...values, date });
                         setCalendar(false);

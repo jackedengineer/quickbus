@@ -1,31 +1,30 @@
+import type { SearchPage } from '@kwikbus/contracts';
 import { Link } from '@tanstack/react-router';
-import { useState } from 'react';
 import { Icon } from './icon';
-import { dateInIndia, day, money, type Trip, time } from './models';
+import { dateInIndia, day, money, time } from './models';
 import type { SearchValues } from './search';
 export function TripResults({
-  trips,
+  page,
   search,
   onDay,
+  order,
+  onOrder,
+  onNext,
+  onFirst,
+  hasCursor,
+  through,
 }: {
-  trips: Trip[];
+  page: SearchPage;
+  order: 'departure' | 'price';
+  onOrder: (order: 'departure' | 'price') => void;
+  onNext: () => void;
+  onFirst: () => void;
+  hasCursor: boolean;
+  through: string;
   search: SearchValues;
   onDay: (date: string) => void;
 }) {
-  const [order, setOrder] = useState('departure');
-  const matches = trips
-    .filter(
-      (t) =>
-        t.origin === search.from &&
-        t.destination === search.to &&
-        t.seatCount >= search.adults &&
-        dateInIndia(t.departureAt) === search.date,
-    )
-    .sort((a, b) =>
-      order === 'price'
-        ? a.fareMinor - b.fareMinor
-        : Date.parse(a.departureAt) - Date.parse(b.departureAt),
-    );
+  const matches = page.trips;
   return (
     <section className="results-content" aria-label="Search results">
       <div className="date-switcher">
@@ -38,7 +37,7 @@ export function TripResults({
               type="button"
               key={date}
               aria-pressed={offset === 0}
-              disabled={date < dateInIndia(new Date())}
+              disabled={date < dateInIndia(new Date()) || date > through}
               onClick={() => onDay(date)}
             >
               {day(date)}
@@ -49,7 +48,10 @@ export function TripResults({
       <div className="results-sort">
         <label>
           Sort by{' '}
-          <select value={order} onChange={(e) => setOrder(e.target.value)}>
+          <select
+            value={order}
+            onChange={(e) => onOrder(e.target.value as 'departure' | 'price')}
+          >
             <option value="departure">Departure time</option>
             <option value="price">Lowest price</option>
           </select>
@@ -57,9 +59,15 @@ export function TripResults({
       </div>
       <div className="results-tools">
         <h1>
-          {matches.length} {matches.length === 1 ? 'result' : 'results'}
+          {matches.length} {matches.length === 1 ? 'journey' : 'journeys'} on
+          this page
         </h1>
       </div>
+      {page.detail && (
+        <p className="error" role="alert">
+          {page.detail}
+        </p>
+      )}
       {matches.length ? (
         matches.map((trip) => {
           const duration = Math.round(
@@ -111,12 +119,17 @@ export function TripResults({
                 </span>
                 <span className="seat-count">
                   <Icon name="seat" size={19} />
-                  {trip.seatCount} seats total
+                  {trip.availableSeats} seats available
                 </span>
                 <Link
                   className="continue-button"
                   to="/"
-                  search={{ view: 'results', ...search, trip: trip.id }}
+                  search={(previous) => ({
+                    ...previous,
+                    view: 'results',
+                    ...search,
+                    trip: trip.id,
+                  })}
                 >
                   Continue
                   <Icon name="chevron" size={24} />
@@ -133,6 +146,20 @@ export function TripResults({
             Try another day or route. The preview has a small curated timetable.
           </p>
         </div>
+      )}
+      {(page.nextCursor || hasCursor) && (
+        <nav className="results-pagination" aria-label="Search pages">
+          {hasCursor && (
+            <button className="text-button" onClick={onFirst} type="button">
+              First page
+            </button>
+          )}
+          {page.nextCursor && (
+            <button className="continue-button" onClick={onNext} type="button">
+              Next page
+            </button>
+          )}
+        </nav>
       )}
     </section>
   );

@@ -1,10 +1,11 @@
+import type { Catalog, SearchPage } from '@kwikbus/contracts';
 import { createFileRoute, useRouter } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { appendResponseHeader, getRequest } from '@tanstack/react-start/server';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../api.server';
 import { Legal } from '../features/legal';
-import { dateInIndia, type Session, type Trip } from '../features/models';
+import { type Session } from '../features/models';
 import { MyBookings } from '../features/reservations';
 import { SearchForm, type SearchValues } from '../features/search';
 import { SeatPicker } from '../features/seat-picker';
@@ -16,31 +17,76 @@ import {
 } from '../features/site-shell';
 import { TripResults } from '../features/trip-results';
 
-const getInitialData = createServerFn({ method: 'GET' }).handler(async () => {
-  const [sessionResponse, tripsResponse] = await Promise.all([
-    apiFetch(
-      new Request('http://kwikbus.internal/api/v1/session', {
-        headers: { cookie: getRequest().headers.get('cookie') ?? '' },
-      }),
-    ),
-    apiFetch(new Request('http://kwikbus.internal/api/v1/trips')),
-  ]);
-  if (!sessionResponse.ok || !tripsResponse.ok)
-    throw new Error('Journeys are temporarily unavailable.');
-  for (const cookie of sessionResponse.headers.getSetCookie())
-    appendResponseHeader('Set-Cookie', cookie);
-  return {
-    session: (await sessionResponse.json()) as Session,
-    trips: ((await tripsResponse.json()) as { trips: Trip[] }).trips,
-    today: dateInIndia(new Date()),
-  };
-});
+const getInitialData = createServerFn({ method: 'GET' })
+  .validator(
+    (input: {
+      from?: string;
+      to?: string;
+      date?: string;
+      adults?: number;
+      sort?: string;
+      cursor?: string;
+      results: boolean;
+    }) => {
+      if (
+        Object.values(input).some(
+          (v) => typeof v === 'string' && v.length > 1200,
+        )
+      )
+        throw new Error('Invalid search.');
+      return input;
+    },
+  )
+  .handler(async ({ data }) => {
+    const query = new URLSearchParams();
+    for (const field of [
+      'from',
+      'to',
+      'date',
+      'adults',
+      'sort',
+      'cursor',
+    ] as const)
+      if (data[field] !== undefined) query.set(field, String(data[field]));
+    const [sessionResponse, catalogResponse, tripsResponse] = await Promise.all(
+      [
+        apiFetch(
+          new Request('http://kwikbus.internal/api/v1/session', {
+            headers: { cookie: getRequest().headers.get('cookie') ?? '' },
+          }),
+        ),
+        apiFetch(new Request('http://kwikbus.internal/api/v1/catalog')),
+        data.results
+          ? apiFetch(
+              new Request(`http://kwikbus.internal/api/v1/trips?${query}`),
+            )
+          : null,
+      ],
+    );
+    if (
+      !sessionResponse.ok ||
+      !catalogResponse.ok ||
+      (tripsResponse && tripsResponse.status >= 500)
+    )
+      throw new Error('Journeys are temporarily unavailable.');
+    for (const cookie of sessionResponse.headers.getSetCookie())
+      appendResponseHeader('Set-Cookie', cookie);
+    return {
+      session: (await sessionResponse.json()) as Session,
+      catalog: (await catalogResponse.json()) as Catalog,
+      page: tripsResponse
+        ? ((await tripsResponse.json()) as SearchPage)
+        : ({ trips: [] } as SearchPage),
+    };
+  });
 type PageSearch = {
   view?: 'results' | 'bookings' | 'help' | 'privacy' | 'terms';
   authError?: boolean;
   from?: string;
   to?: string;
   date?: string;
+  sort?: 'departure' | 'price';
+  cursor?: string;
   adults?: number;
   trip?: string;
   seats?: string;
@@ -81,6 +127,11 @@ export const Route = createFileRoute('/')({
       /^[0-9]{1,2}[A-D](,[0-9]{1,2}[A-D]){0,3}$/.test(input.seats)
         ? input.seats
         : undefined,
+    sort: input.sort === 'price' ? 'price' : undefined,
+    cursor:
+      typeof input.cursor === 'string' && input.cursor.length <= 1200
+        ? input.cursor
+        : undefined,
     adults:
       Number.isInteger(Number(input.adults)) &&
       Number(input.adults) >= 1 &&
@@ -88,16 +139,26 @@ export const Route = createFileRoute('/')({
         ? Number(input.adults)
         : undefined,
   }),
-  loader: () => getInitialData(),
+  loaderDeps: ({ search }) => ({
+    from: search.from,
+    to: search.to,
+    date: search.date,
+    adults: search.adults,
+    sort: search.sort,
+    cursor: search.cursor,
+    results: search.view === 'results',
+  }),
+  loader: ({ deps }) => getInitialData({ data: deps }),
   component: Home,
 });
 function Home() {
   const router = useRouter();
-  const { session, trips, today } = Route.useLoaderData(),
+  const { session, catalog, page } = Route.useLoaderData(),
     search = Route.useSearch(),
     navigate = Route.useNavigate();
   const [accountOpen, setAccountOpen] = useState(Boolean(search.authError));
-  const selectedTrip = trips.find((trip) => trip.id === search.trip) ?? null;
+  const selectedTrip =
+    page.trips.find((trip) => trip.id === search.trip) ?? null;
   useEffect(() => {
     const refresh = () => {
       if (document.visibilityState === 'visible') void router.invalidate();
@@ -127,9 +188,9 @@ function Home() {
     }
   }, [session.user, search, navigate]);
   const values: SearchValues = {
-    from: search.from ?? trips[0]?.origin ?? '',
-    to: search.to ?? trips[0]?.destination ?? '',
-    date: search.date ?? (trips[0] ? dateInIndia(trips[0].departureAt) : today),
+    from: search.from ?? catalog.defaults?.from ?? '',
+    to: search.to ?? catalog.defaults?.to ?? '',
+    date: search.date ?? catalog.defaults?.date ?? catalog.today,
     adults: search.adults ?? 1,
   };
   const show = (view: PageSearch['view']) => {
@@ -181,7 +242,7 @@ function Home() {
                 <SearchForm
                   key={`home-${values.from}-${values.to}-${values.date}`}
                   initial={values}
-                  trips={trips}
+                  catalog={catalog}
                   onSearch={doSearch}
                 />
               </div>
@@ -198,13 +259,40 @@ function Home() {
                 autoSearch
                 key={`${values.from}-${values.to}-${values.date}`}
                 initial={values}
-                trips={trips}
+                catalog={catalog}
                 onSearch={doSearch}
               />
             </div>
             <div className="results-background">
               <TripResults
-                trips={trips}
+                page={page}
+                order={search.sort ?? 'departure'}
+                onOrder={(sort) =>
+                  void navigate({
+                    search: {
+                      ...search,
+                      sort,
+                      cursor: undefined,
+                      trip: undefined,
+                      seats: undefined,
+                    },
+                  })
+                }
+                onNext={() =>
+                  void navigate({
+                    search: {
+                      ...search,
+                      cursor: page.nextCursor,
+                      trip: undefined,
+                      seats: undefined,
+                    },
+                  })
+                }
+                onFirst={() =>
+                  void navigate({ search: { ...search, cursor: undefined } })
+                }
+                hasCursor={Boolean(search.cursor)}
+                through={catalog.through}
                 search={values}
                 onDay={(date) => doSearch({ ...values, date })}
               />
