@@ -6,32 +6,32 @@ Commands refer to the [proposed command interface](plan.md). Before those script
 
 ## Current slice evidence
 
-See [compatibility](../docs/compatibility.md), [reservation proof](../docs/reservation-proof.md), and [UI/browser reference](../docs/ui-reference.md). The real Neon/Workers seat proof and a usable search/reserve/release UI were brought forward. The [V0 preview](../docs/release-v0.md) now has published Google login, locally verified hashed/single-use email OTP, SSR isolation and cookie renewal. Public OTP now sends through the verified `jacked.dev` sender and has passed browser verification; the [owned-domain cutover](../docs/domain-cutover.md) is complete, with mobile Google and desktop OTP reservation/reload/release verified on `kwikbus.jacked.dev`. Fresh admin MFA remains open for future admin routes. T02 remains unimplemented. Later reservation/search items remain unchecked because catalog publication, stop snapshots, telemetry, and full acceptance have not all landed. The UI reference is now FlixBus, with per-page visual comparison required.
+See [compatibility](../docs/compatibility.md), [reservation proof](../docs/reservation-proof.md), and [UI/browser reference](../docs/ui-reference.md). The real Neon/Workers seat proof and a usable search/reserve/release UI were brought forward. The [V0 preview](../docs/release-v0.md) now has published Google login, locally verified hashed/single-use email OTP, SSR isolation and cookie renewal. Public OTP now sends through the verified `jacked.dev` sender and has passed browser verification; the [owned-domain cutover](../docs/domain-cutover.md) is complete, with mobile Google and desktop OTP reservation/reload/release verified on `kwikbus.jacked.dev`. Fresh admin MFA remains open for future admin routes. T02 remains unimplemented. Later reservation/search items remain unchecked because normalised catalog publication, stop snapshots and full lifecycle acceptance have not all landed. The UI reference is now FlixBus, with per-page visual comparison required.
 
 ## Active delivery order — reconciled 26 October 2026
 
 The user has prioritised [five P0 operational slices](p0-hardening.md): monitoring → scheduled expiry → database-backed inventory renewal → release safeguards → recovery drill. Real browser acceptance leads each usable change; focused SQL/concurrency checks supplement it. Use focused commits of roughly 300–400 lines, with a working application after each slice. Admin authoring/dashboard and its required MFA stay at the end of the roadmap. All synthetic inventory must be stored in PostgreSQL and served through the API; no client-only catalog or invented availability.
 
-Completed independently of the original sequence: T01, T03 customer authentication, T04, T07 and T13's unpaid concurrency proof. Partial tasks retain unchecked boxes until their remaining criteria pass. Production hosting, the owned domain and real email delivery are complete; they are not future launch blockers.
+Completed independently of the original sequence: T01, T03 customer authentication, T04, T06, T07, T12 and T13's unpaid concurrency proof. Partial tasks retain unchecked boxes until their remaining criteria pass. Production hosting, the owned domain and real email delivery are complete; they are not future launch blockers.
 
 | Task | Reconciled status / remaining work |
 |---|---|
 | T03 / T07 | Customer Google/email OTP, hashed single-use codes, session renewal/isolation and owned-domain browser flows complete. Admin MFA moves to the deferred admin gate. |
-| T05 | Worker adapter, validated config, request-scoped bounded DB pools, health and real-Neon harness exist. Correlated telemetry remains P0-01. Persistent-server shutdown requirements do not apply to Workers. |
-| T06 | Responsive shell, clean install/build/type/lint/audit CI exist. Isolated PostgreSQL integration/contention CI remains P0-04. |
+| T05 | Worker adapter, validated config, request-scoped bounded DB pools, health and real-Neon harness exist. Correlated telemetry is implemented; native provider URL-query redaction is undergoing final production verification in P0-01. Persistent-server shutdown requirements do not apply to Workers. |
+| T06 | Responsive shell, clean install/build/type/lint/audit CI exist. Isolated PostgreSQL integration/contention CI passes. Turbo rebuilds environment-sensitive Worker outputs explicitly instead of reusing undeclared cached inputs. |
 | T08 / T09 | Search and suggestions use database trips. Normalised catalog/aliases, server search contract/pagination and full acceptance remain P1. |
 | T10 / T11 | DB seat/booking/allocation constraints exist. Editable catalog, stop snapshots and publication service remain P1. |
-| T12 | Atomic party holds, immutable quote/deadline and key/hash replay proved. Lock/command latency instrumentation remains P0-01; publication dependencies are deferred. |
+| T12 | Atomic party holds, immutable quote/deadline and key/hash replay proved. Lock/command latency instrumentation is live; normalised catalog/stop publication dependencies are deferred to P1. |
 | T13 | Nine unpaid two-instance scenarios plus independent SQL audit passed; preserve source-scoped evidence and rerun after mutation changes. |
 | T14 / T15 | Seat selection, login return, unpaid hold/reload/release exist. Boarding/drop-off and passenger/contact review remain P1. |
-| T16 | Durable payment jobs/inbox/outbox remain unbuilt. P0-02 adds bounded scheduled expiry only, not the complete payment job foundation. |
+| T16 | Durable payment jobs/inbox/outbox remain unbuilt. P0-02 delivered bounded scheduled expiry with a real natural-expiry audit; the complete payment job foundation is still future work. |
 | T17–T25 | Payments, reconciliation, ticket delivery, cancellation/refunds and trip drain remain unimplemented. |
 | T26 | Deferred to the end: no admin dashboard or admin endpoint in the active P0/P1 scope. Fresh MFA is mandatory before any admin mutation. |
 | T27 / T28 | Responsive widths and reservation/auth browser flows proved; full accessibility, performance budgets and lifecycle fault/load evidence remain open. |
-| T29 | Public/private Workers routing, runtime secrets and serialized migrations exist. Automated release safeguards and an isolated restore/rollback drill remain P0-04/05. |
+| T29 | Public/private Workers routing, runtime secrets and serialized migrations exist. Guarded exact-revision releases, tested error/health monitors and an isolated restore/compatible rollback drill passed. Full paid-lifecycle reconciliation/fault coverage is still future work. |
 | T30 | Public unpaid V0, README, ADRs and browser/concurrency evidence exist. Complete paid-lifecycle portfolio package remains future work. |
 
-Historical baseline: [V0](../docs/release-v0.md). Current deployed state: [owned-domain release](../docs/domain-cutover.md). The original phase gates below describe the complete product, not a claim that every prerequisite was implemented before the intentionally smaller V0 preview.
+Historical baseline: [V0](../docs/release-v0.md). Current deployed state: [P0 operations and browser evidence](../docs/p0-hardening.md); the [owned-domain cutover](../docs/domain-cutover.md) is preserved separately. The original phase gates below describe the complete product, not a claim that every prerequisite was implemented before the intentionally smaller V0 preview.
 
 ## Phase 0 — Verify the assumptions
 
@@ -64,7 +64,7 @@ Historical baseline: [V0](../docs/release-v0.md). Current deployed state: [owned
   - Verify: `pnpm test:integration` for rollback/health/start-stop; no frontend import of DB code.
   - Depends: T04. Targets: API entry, worker entry, DB client, config loader, harness test. Size: M.
 
-- [ ] **T06 — Web shell and CI baseline**
+- [x] **T06 — Web shell and CI baseline**
   - Accept: Start shell renders responsively; CI runs install/check/unit/build and the PostgreSQL harness; task caching respects environment/database inputs.
   - Verify: `pnpm build`, first browser smoke, clean CI on an empty test DB.
   - Depends: T04, T05. Targets: web entry/root route, CI workflow, test configuration, import-boundary rule. Size: M.
@@ -100,7 +100,7 @@ Historical baseline: [V0](../docs/release-v0.md). Current deployed state: [owned
   - Verify: publication and search integration/contract tests; seed uses the same publication service; search browser flow runs on published DB data.
   - Depends: T09, T10. Targets: publication service, published-trip query/HTTP adapter, fixture update, integration/browser tests; split publication and read binding if scope expands. Size: M per focused subtask.
 
-- [ ] **T12 — Atomic hold and command replay**
+- [x] **T12 — Atomic hold and command replay**
   - Accept: per-trip lock, post-lock time check, expired-claim retirement, whole-party allocation, immutable quote/deadline, and same-key/hash replay are implemented in one transaction; record lock/command latency from this slice onward.
   - Verify: focused hold/idempotency integration tests including injected rollback and response-loss recovery.
   - Depends: T07, T10, T11. Targets: hold service, booking repository, command-key helper, HTTP route, tests. Size: M.
