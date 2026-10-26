@@ -3,9 +3,11 @@ import { createCipheriv, createHash, randomBytes } from 'node:crypto';
 import { createReadStream, createWriteStream } from 'node:fs';
 import { chmod, mkdir, open, readFile, rm, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { getgid, getuid } from 'node:process';
 import { pipeline } from 'node:stream/promises';
 import { setTimeout } from 'node:timers/promises';
-import { parseEnv } from 'node:util';
+import { rootCertificates } from 'node:tls';
+import { isDeepStrictEqual, parseEnv } from 'node:util';
 import pg from 'pg';
 import {
   countsQuery,
@@ -80,7 +82,12 @@ try {
   const expectedInvariants = (await source.query(invariantQuery)).rows[0].value;
   if (Object.values(expectedInvariants).some((v) => v !== 0))
     throw new Error('Source invariants failed; no restore is promoted.');
-  const service = `[source]\nhost=${sourceUrl.hostname}\nport=${sourceUrl.port || 5432}\ndbname=kwikbus_v0\nuser=${decodeURIComponent(sourceUrl.username)}\nsslmode=verify-full\nsslrootcert=system\n`;
+  // The pinned minimal PostgreSQL image has no system CA bundle. Supply Node's
+  // bundled public trust roots explicitly; never downgrade verify-full.
+  await writeFile(`${directory}/roots.pem`, rootCertificates.join('\n'), {
+    mode: 0o600,
+  });
+  const service = `[source]\nhost=${sourceUrl.hostname}\nport=${sourceUrl.port || 5432}\ndbname=kwikbus_v0\nuser=${decodeURIComponent(sourceUrl.username)}\nsslmode=verify-full\nsslrootcert=/evidence/roots.pem\n`;
   const password = [
     sourceUrl.hostname,
     sourceUrl.port || '5432',
@@ -98,6 +105,8 @@ try {
   run([
     'run',
     '--rm',
+    '--user',
+    `${getuid?.() ?? 0}:${getgid?.() ?? 0}`,
     '-v',
     `${directory}:/evidence`,
     '-e',
@@ -194,9 +203,9 @@ try {
     actualSchema = target(schemaQuery),
     actualInvariants = target(invariantQuery);
   if (
-    JSON.stringify(actualCounts) !== JSON.stringify(expectedCounts) ||
-    JSON.stringify(actualSchema) !== JSON.stringify(expectedSchema) ||
-    JSON.stringify(actualInvariants) !== JSON.stringify(expectedInvariants)
+    !isDeepStrictEqual(actualCounts, expectedCounts) ||
+    !isDeepStrictEqual(actualSchema, expectedSchema) ||
+    !isDeepStrictEqual(actualInvariants, expectedInvariants)
   )
     throw new Error('Restored schema/count/invariant audit mismatch.');
   const restoreAndAuditMs = Math.round(performance.now() - restoreStarted);
@@ -258,7 +267,7 @@ try {
   await source.end();
   spawnSync('docker', ['rm', '-f', container], { stdio: 'ignore' });
   await Promise.all(
-    ['pg_service.conf', 'source.pgpass'].map((name) =>
+    ['pg_service.conf', 'source.pgpass', 'roots.pem'].map((name) =>
       rm(`${directory}/${name}`, { force: true }),
     ),
   );

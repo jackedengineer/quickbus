@@ -1,0 +1,22 @@
+{
+  "source": "consistent read-only production snapshot; direct verified TLS",
+  "target": "disposable PostgreSQL 18 container with --network none; never promoted",
+  "snapshotAt": "2026-10-26T11:22:58.350Z",
+  "verifiedAt": "2026-10-26T11:23:09.263Z",
+  "snapshotAgeAtVerificationMs": 10913,
+  "backupMs": 8825,
+  "restoreAndAuditMs": 1715,
+  "totalDrillMs": 11690,
+  "tablesCompared": 17,
+  "rowsCompared": 4013,
+  "schemaSha256": "763b2719b454a96e09719bc3dcb5069dd6996894e47bda4c81f21cac98a5d342",
+  "schemaCountsAndInvariantsMatch": true,
+  "invariants": {
+    "missingHeldAllocations": 0,
+    "terminalAllocations": 0,
+    "incorrectQuotes": 0,
+    "partialServiceTrips": 0
+  },
+  "encryptedArchive": "private ignored AES-256-GCM archive; key stored separately in the same restricted local directory",
+  "limits": "One portable snapshot drill, not continuous offsite backup or an RPO/RTO service guarantee. No production database was replaced."
+}

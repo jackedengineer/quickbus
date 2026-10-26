@@ -11,7 +11,7 @@ export const schemaQuery = `SELECT json_build_object(
     WHERE n.nspname IN ('public','drizzle') AND c.relkind='r' AND a.attnum>0 AND NOT a.attisdropped
     ORDER BY n.nspname,c.relname,a.attnum) x),
   'constraints',(SELECT json_agg(row_to_json(x)) FROM (
-    SELECT n.nspname schema,c.relname tab,k.conname name,pg_get_constraintdef(k.oid) definition
+    SELECT n.nspname schema,c.relname tab,k.conname name,pg_get_constraintdef(k.oid,true) definition
     FROM pg_constraint k JOIN pg_class c ON c.oid=k.conrelid JOIN pg_namespace n ON n.oid=c.relnamespace
     WHERE n.nspname IN ('public','drizzle') ORDER BY n.nspname,c.relname,k.conname) x),
   'indexes',(SELECT json_agg(row_to_json(x)) FROM (
