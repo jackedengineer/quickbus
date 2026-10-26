@@ -2,7 +2,7 @@
 
 **Version:** proposal 1 · **Date:** 25 October 2026 · **Owner:** portfolio developer
 
-**Delivery update, 26 October 2026:** the unpaid V0 is live on `kwikbus.jacked.dev`, with Google/email OTP, database-backed journeys, party seat holds/release and operational hardening. The full paid lifecycle below remains the target product. Admin authoring/dashboard is explicitly last, after customer/P0/P1 work; synthetic inventory is persisted in PostgreSQL and served through the API. [Current backlog](tasks/todo.md), [production evidence](docs/p0-hardening.md).
+**Delivery update, 27 October 2026:** the unpaid V0 is live on `kwikbus.jacked.dev`, with Google/email OTP, normalized catalog/stop publication, server-side search/pagination, accessible map/list seats, party holds/release, conditional passenger/contact review and operational hardening. The full paid lifecycle below remains the target product. Admin authoring/dashboard is explicitly last, after customer/P0/P1 work; synthetic inventory is persisted in PostgreSQL and served through the API. [Current backlog](tasks/todo.md), [production evidence](docs/p1-customer-journey.md).
 
 ## Objective
 

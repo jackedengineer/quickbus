@@ -1,0 +1,195 @@
+{
+  "verifiedAt": "2026-10-26T20:05:24.501Z",
+  "release": "v0.1.0-preview",
+  "runtimeSource": "3bbc9369329583882c76df27a63f31be850219b5",
+  "canonicalOrigin": "https://kwikbus.jacked.dev",
+  "deployment": {
+    "revision": "3bbc9369329583882c76df27a63f31be850219b5",
+    "ciRun": "40389175566",
+    "startedAt": "2026-10-26T19:45:24.011Z",
+    "state": "production browser acceptance complete",
+    "previous": {
+      "api": "3f886a3d-6bd5-49f4-8b6e-488f635ff285",
+      "web": "1e7f5b0c-dd84-4643-a89d-27a93356dae0"
+    },
+    "deployed": {
+      "api": "f0645d72-5337-43a0-814f-77da8cb9fc9a",
+      "web": "ee0fa374-c5e3-47b4-b956-e22f11a5956e"
+    },
+    "verifiedAt": "2026-10-26T20:05:24.501Z"
+  },
+  "githubCi": {
+    "releaseGateRun": 40389175566,
+    "mainRun": 40389455610,
+    "exactSource": "3bbc9369329583882c76df27a63f31be850219b5",
+    "bothConclusions": "success"
+  },
+  "migrations": [
+    "0004_thick_mentor.sql",
+    "0005_loose_salo.sql",
+    "0006_fluffy_giant_man.sql"
+  ],
+  "inventory": {
+    "cities": 5,
+    "operators": 3,
+    "routes": 4,
+    "stops": 10,
+    "active_services": 5,
+    "catalog_trips": 156,
+    "published_stops": 624
+  },
+  "runtimePrivileges": {
+    "catalog_read": true,
+    "catalog_edit": false,
+    "publish_stops": true
+  },
+  "invariants": {
+    "missingHeldAllocations": 0,
+    "terminalAllocations": 0,
+    "incorrectQuotes": 0,
+    "crossTripStopChoices": 0,
+    "missingDetailEvents": 0,
+    "incompleteCatalogSnapshots": 0,
+    "partialServiceTrips": 0
+  },
+  "browser": {
+    "googleDesktop": [
+      "Madras alias → Chennai",
+      "price sort in URL",
+      "choose pickup/drop and seats 1A/1B",
+      "map/list selection persists",
+      "Google account chooser → restored seats and stops",
+      "hold → review ₹1,298",
+      "save two synthetic names",
+      "full reload restores names",
+      "release confirmed"
+    ],
+    "emailMobile": {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "flow": [
+        "Pune → Mumbai search",
+        "list/keyboard seat selection",
+        "choose pickup/drop",
+        "Resend delivery observed",
+        "redeem OTP without exporting code",
+        "restore selection",
+        "hold → review ₹499",
+        "save synthetic passenger",
+        "reload restores passenger",
+        "release confirmed"
+      ],
+      "horizontalOverflow": false
+    },
+    "productionAudit": {
+      "reservationsChecked": 2,
+      "bothReleased": true,
+      "bothDetailsVersion": 2,
+      "remainingAllocations": 0,
+      "releaseEvents": 2
+    },
+    "guestMobile": [
+      "invalid cursor alert → First page recovery",
+      "pagination ₹749 → ₹899",
+      "unserved route empty state",
+      "map/list toggle and Escape focus recovery"
+    ],
+    "console": {
+      "freshMobileErrors": 0,
+      "freshMobileWarnings": 0,
+      "authenticatedJourneyWarningsOrErrors": 0
+    },
+    "localOnly": [
+      "two independent customers contend for one seat",
+      "partial-party conflict retains unaffected selection",
+      "stale-version draft recovery",
+      "offline same-intent retry",
+      "phone validation",
+      "natural ten-minute expiry and under-90-second notice",
+      "320 px layout and reduced-motion checks"
+    ]
+  },
+  "performance": {
+    "tool": "Chrome DevTools CLI 1.12.0; actual isolated Chrome",
+    "fieldData": false,
+    "desktop": {
+      "cpu": 1,
+      "network": "unthrottled",
+      "lcpMs": 731,
+      "ttfbMs": 587,
+      "cls": 0
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "cpu": 4,
+      "network": "Fast 4G",
+      "lcpMs": 839,
+      "ttfbMs": 559,
+      "loadMs": 1127,
+      "cls": 0
+    },
+    "interactions": {
+      "cpu": 4,
+      "network": "Fast 4G",
+      "observedInpMs": [114, 138, 213, 43],
+      "repeatedMapListInpMs": 82,
+      "cls": 0,
+      "coldSwitchLayoutMs": 102,
+      "followup": "One cold map/list interaction exceeded the 200 ms target. Retain this observed layout cost for later profiling; no field percentile or sustained-load claim."
+    },
+    "sameOriginTimingSamples": {
+      "searchLoaderWallMs": 649,
+      "searchLoaderWebMs": 533,
+      "seatMapWallMs": 398,
+      "seatMapApiMs": 330,
+      "tripDetailsWallMs": 426,
+      "tripDetailsApiMs": 398,
+      "note": "Server-Timing nesting is not additive; summed concurrent binding time is not wall-clock latency."
+    }
+  },
+  "security": {
+    "privateApiPublicHostnameStatus": 404,
+    "legacyReadStatus": 308,
+    "legacyMutationStatus": 421,
+    "wrongOriginPatchStatus": 403,
+    "nativeQueryRedaction": true,
+    "invocationLogs": false,
+    "knownSensitiveValuesScanned": 12,
+    "sourceHistoryClean": true,
+    "productionClientBundleClean": true,
+    "providerCredentialsAndCallbacks": "unchanged"
+  },
+  "verification": {
+    "realNeonIntegration": {
+      "files": 13,
+      "checks": 19
+    },
+    "isolatedPostgresIntegration": {
+      "files": 13,
+      "checks": 19
+    },
+    "contention": {
+      "implementationSha256": "4113b4690e0ff089b7f073c8885c053fcf0938840919aeb592335d308d69f4ac",
+      "scenarios": 9,
+      "winners": 1,
+      "conflictsAfterSameKeyRecovery": 99,
+      "initialBusy": 93
+    },
+    "recovery": {
+      "tablesCompared": 26,
+      "rowsCompared": 7437,
+      "totalMs": 13915,
+      "schemaCountsAndInvariantsMatch": true,
+      "productionRestore": false
+    }
+  },
+  "scope": {
+    "admin": "excluded and deferred last",
+    "payments": "disabled",
+    "paymentStartBuffer": "visible only; future T17 command must enforce ≥90 seconds using DB time before provider checkout exists"
+  },
+  "artifactPolicy": "Only sanitized summaries and reviewed UI captures are committed. Traces, logs, credentials, cookies, codes and encrypted backups remain private/ignored."
+}

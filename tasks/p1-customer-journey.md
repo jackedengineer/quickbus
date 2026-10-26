@@ -2,6 +2,8 @@
 
 Scope: finish catalog/stops → server search → passenger review → customer usability. Keep the live unpaid preview, existing bookings, Google/email OTP, native URL-query redaction and private API intact. No admin surface, payment integration or new service/credential is part of this batch. Use existing production rollout safeguards after browser acceptance. All demo entities are synthetic rows in PostgreSQL, never client-side catalog/availability fixtures.
 
+Completed: [production acceptance, source/CI identity, performance and limits](../docs/p1-customer-journey.md). The one observed 213 ms cold 4× interaction remains a measured follow-up; no universal performance claim is made.
+
 ## 1. Catalog and publication (T08/T10/T11)
 
 - [x] Add normalized cities/aliases, operators, directional routes, layouts/seats and city stops. Extend existing service definitions with nullable catalog references for expand/contract compatibility.
@@ -34,11 +36,11 @@ Names are 2–100 trimmed Unicode characters without control characters. The acc
 
 ## 4. Customer acceptance and release
 
-- [ ] Browser-first desktop/mobile journey: alias search → trip/stops/seats → login restoration → hold → names/contact review → save → reload → edit/release. Also exercise keyboard/focus, interruption, validation, stale tabs and natural expiry.
-- [ ] Chrome DevTools: fresh console/network, normal and throttled interactions, small widths, reduced motion and restrained existing transitions. Publish sanitized evidence only.
-- [ ] SQL supplements browser checks for cross-trip stop IDs, ownership, atomic publication, version/idempotency races, release/expiry races, migrations and least-privilege runtime behavior. Re-run real-Neon contention after mutation changes.
-- [ ] Reviewed commits aim for 300–400 changed source lines per coherent slice. Generated complete Drizzle snapshots may be larger. Build/type/lint/CI, exact source proof, secret scan and guarded production rollout remain required.
-- [ ] Reconcile backlog, source/deployment evidence, operating docs and changelog. Keep partial full-lifecycle tasks open; admin remains the final roadmap slice.
+- [x] Browser-first desktop/mobile journey: alias search → trip/stops/seats → login restoration → hold → names/contact review → save → reload → edit/release. Also exercise keyboard/focus, interruption, validation, stale tabs and natural expiry.
+- [x] Chrome DevTools: fresh console/network, normal and throttled interactions, small widths, reduced motion and restrained existing transitions. Publish sanitized evidence only.
+- [x] SQL supplements browser checks for cross-trip stop IDs, ownership, atomic publication, version/idempotency races, release/expiry races, migrations and least-privilege runtime behavior. Re-run real-Neon contention after mutation changes.
+- [x] Reviewed commits aim for 300–400 changed source lines per coherent slice. Generated complete Drizzle snapshots may be larger. Build/type/lint/CI, exact source proof, secret scan and guarded production rollout remain required.
+- [x] Reconcile backlog, source/deployment evidence, operating docs and changelog. Keep partial full-lifecycle tasks open; admin remains the final roadmap slice.
 
 ## Migration policy
 

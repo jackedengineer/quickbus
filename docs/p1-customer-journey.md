@@ -1,6 +1,6 @@
 # P1 customer journey
 
-Implementation is complete on `codex/p1-customer-journey`; local browser and real-Neon acceptance passed. Production rollout and its browser/performance checks are still pending. The live site remains the P0 baseline until the guarded deployment completes.
+**v0.1.0-preview is live at [kwikbus.jacked.dev](https://kwikbus.jacked.dev/).** Reviewed source `3bbc9369329583882c76df27a63f31be850219b5` passed exact-revision CI and the guarded production rollout. [Deployment/browser evidence](evidence/p1-deployment-2026-10-27.json) records Worker versions, source proof, timings and limits.
 
 ## Delivered behavior
 
@@ -28,9 +28,19 @@ Chrome DevTools CLI 1.12.0 controlled isolated Chrome contexts on the developmen
 
 Reviewed captures: [mobile seat list](evidence/p1-2026-10-27/mobile-seat-list.png), [mobile conflict](evidence/p1-2026-10-27/mobile-seat-conflict.png), [expired mobile review](evidence/p1-2026-10-27/mobile-expired-review.png), [saved desktop review](evidence/p1-2026-10-27/desktop-saved-review.png). Addresses/names in those captures are synthetic development data.
 
+## Production browser acceptance
+
+On normal HTTPS, the existing authorized Google account completed a guest Bengaluru→Chennai two-passenger journey: alias lookup, price sort, map/list persistence, chosen stops, Google return, ₹1,298 hold, names saved, full reload and release. A separate 390 px mobile Pune→Mumbai journey used a real Resend-delivered email OTP, restored the selected seat/stops, saved a ₹499 reservation, reloaded its passenger and released it. Codes, cookies and contact addresses were never exported to evidence. Both customer records reached version 2, then CANCELLED, with two release events and zero allocations in an independent read-only SQL audit.
+
+A fresh guest mobile browser recovered an invalid cursor through First page, paginated from ₹749 to ₹899, showed an unserved route's empty state and exercised the list/map toggle plus Escape focus recovery. Fresh mobile and authenticated console checks found no warnings/errors. The [production seat-list capture](evidence/p1-2026-10-27/production-mobile-seat-list.png) contains public synthetic catalog data only.
+
+Production contains five cities, three operators, four routes, ten stops, five active service definitions and 156 catalog trips/624 stop snapshots at verification. Runtime can read definitions and publish stop snapshots, but cannot update catalog definitions. The [read-only audit](evidence/p1-2026-10-27/production-audit.json) found seven zero-valued invariants. The [new restore drill](evidence/p1-2026-10-27/recovery.json) matched 26 tables/7,437 rows in 13.9 seconds using one consistent snapshot and a disconnected disposable target; it is not an offsite-backup/RPO guarantee. Production was never a restore destination.
+
+Legacy reads redirect with 308, legacy mutations reject with 421, wrong-origin PATCH rejects with 403 and the API's public hostname returns 404. Native query redaction/private bindings persist. Known-secret scans found no matches in tracked files, new Git history or production client bundles. No credentials, callbacks or DNS records were changed for P1.
+
 ## Supporting correctness and release evidence
 
-The final real-Neon integration run passed all 19 checks across 13 files, including the edit/release race and labeled partial-party conflict. A fresh isolated PostgreSQL 18 migration/replay plus two-Worker run passed all 19 integration checks after adding the explicit edit/release race and PATCH origin/body-limit cases. Its contention proof passed too. Exact-revision GitHub CI must pass before rollout.
+The final real-Neon integration run passed all 19 checks across 13 files, including the edit/release race and labeled partial-party conflict. A fresh isolated PostgreSQL 18 migration/replay plus two-Worker run passed all 19 integration checks after adding the explicit edit/release race and PATCH origin/body-limit cases. Its contention proof passed too. Exact-source Quality runs [40389175566](https://github.com/jackedengineer/quickbus/actions/runs/40389175566) and [40389455610](https://github.com/jackedengineer/quickbus/actions/runs/40389455610) passed before final acceptance.
 
 The [real-Neon contention artifact](evidence/p1-neon-concurrency-2026-10-27.json) records nine scenarios against the implementation hash, including shared contracts and the PATCH bridge. The final 100-customer burst had one success, six seat conflicts and 93 bounded `RESOURCE_BUSY` responses. Retrying original keys converged to one winner/99 conflicts and one allocation; no dependency retry was required. This proves correctness under that scenario, not sustained throughput.
 
@@ -40,7 +50,9 @@ Owner backfill takes bounded trip locks, inserts only missing menus and preserve
 
 ## Performance
 
-One local development review interaction trace observed INP 22 ms and CLS 0.02 at 1× CPU without network throttling. This includes a real save and subsequent status refresh. It is a small lab sample, not field data or a production performance claim. Raw traces remain ignored because request bodies may contain customer data. Production desktop and throttled mobile measurements are pending.
+One local development review interaction trace observed INP 22 ms and CLS 0.02 at 1× CPU without network throttling. This includes a real save and subsequent status refresh. It is a small lab sample, not field data or a production performance claim. Raw traces remain ignored because request bodies may contain customer data. Production desktop LCP was 731 ms (TTFB 587 ms); 390 px/4× CPU/Fast 4G LCP was 839 ms (TTFB 559 ms, load 1,127 ms). Both measured CLS 0. A live search loader took 649 ms at the browser/533 ms in the web Worker; seat-map reads took 398 ms/330 ms in the API, and trip-detail reads 426 ms/398 ms. Nested Server-Timing values and concurrent binding totals must not be added as wall-clock latency.
+
+Throttled interaction samples observed 114, 138, 213 and 43 ms INP; repeated map/list switching measured 82 ms. The one cold 213 ms interaction exceeded the 200 ms target and included 102 ms of layout. Keep that measured cold-layout cost as a follow-up; do not claim every interaction meets the target or infer field percentiles from these samples. Existing feedback uses short opacity/transform/press effects and reduced-motion controls; no animation library was added.
 
 ## Remaining boundary
 

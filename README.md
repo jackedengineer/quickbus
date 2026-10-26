@@ -2,9 +2,11 @@
 
 A small bus-booking portfolio application built around correct seat ownership, retry behavior, and failure recovery.
 
-**Live V0 preview:** [Open KwikBus](https://kwikbus.jacked.dev/). TanStack Start and Express run on Cloudflare Workers with a private API service binding and Neon/Drizzle transactions. Google and email OTP sign-in, responsive search, seat selection, reloadable unpaid holds and release are live. OTP sends through the verified `jacked.dev` domain. The owned hostname is live, with Google and email OTP verified through real mobile and desktop booking flows. See the [domain cutover evidence](docs/domain-cutover.md). No live tickets or payments. See the [release evidence and operations guide](docs/release-v0.md).
+**Live v0.1 preview:** [Open KwikBus](https://kwikbus.jacked.dev/). TanStack Start and Express run on Cloudflare Workers with a private API service binding and Neon/Drizzle transactions. Google and email OTP sign-in, responsive search, seat selection, reloadable unpaid holds and release are live. OTP sends through the verified `jacked.dev` domain. The owned hostname is live, with Google and email OTP verified through real mobile and desktop booking flows. See the [domain cutover evidence](docs/domain-cutover.md). No live tickets or payments. See the [release evidence and operations guide](docs/release-v0.md).
 
 **P0 operational baseline · v0.0.3-preview:** correlated/private logs and tested monitors, minute-by-minute expiry, hourly renewal from persisted service/seat definitions, isolated PostgreSQL/Workers CI, guarded releases and a measured restore/rollback drill are complete. Real browser flows lead acceptance; the 100-customer Neon proof supplements them. [Current evidence and limits](docs/p0-hardening.md), [browser performance](docs/p0-performance.md), [release runbook](docs/releasing.md). Admin stays at the end of the roadmap.
+
+**P1 customer journey · v0.1.0-preview:** normalized database catalog/stops, real server search and pagination, equivalent seat map/list, stop restoration and versioned passenger/contact review are live. Production Google and mobile email OTP journeys passed save/reload/release; 19 integration checks and the updated 100-customer Neon proof supplement real browser acceptance. [Evidence, performance measurements and remaining limits](docs/p1-customer-journey.md). Payments remain disabled; admin is deferred.
 
 ## Run locally
 

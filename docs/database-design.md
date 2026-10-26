@@ -1,28 +1,31 @@
 # KwikBus relational database design
 
-This document describes the full target product. The deployed unpaid subset uses the Drizzle sources in `packages/db/src`; payment/refund, normalised catalog and stop tables below are future work. [Task ledger](../tasks/todo.md).
+This document describes the full target product. The deployed unpaid subset uses the Drizzle sources in `packages/db/src`; the deployed P1 includes normalized catalog and stop snapshots. Payment/refund tables below remain target work. [Task ledger](../tasks/todo.md).
 
-## Current P0 schema
+## Current P1 schema
 
-The restore drill compared 17 tables including the migration ledger: six Better Auth tables, seven trip/booking/command tables, two inventory-definition tables and one maintenance heartbeat table. The presence of the auth library's two-factor table does not mean an admin MFA flow is exposed.
+The P1 restore drill compared 26 tables including the migration ledger: six Better Auth tables, eight trip/booking/command tables, seven catalog tables, three inventory-definition tables and one maintenance heartbeat table. The presence of the auth library's two-factor table does not mean an admin MFA flow is exposed.
 
 | Table / relationship | Current responsibility |
 |---|---|
+| `cities` / `city_aliases` / `operators` / `routes` | Stable catalog IDs, normalized alias keys and directional route uniqueness. Runtime read-only. Trip route/city references share a composite FK. |
+| `layouts` / `layout_seats` / `stops` | Reusable 2+2 seat geometry and city-bound stop definitions. Owner tooling supplies synthetic definitions. |
+| `inventory_service_stops` | Ordered pickup/drop definitions with departure-relative offsets. Publication validates endpoint cities, chronology, complete geometry and fares. |
 | `inventory_services` | Persistent synthetic route/operator/vehicle/local departure, journey duration, sales lead and active flag; bounded fields and distinct cities. Owner tooling edits definitions. |
 | `inventory_service_seats` | Service FK plus unique label and unique position, positive integer-paise fare; renewal validates a complete contiguous layout. Runtime can read, not edit. |
 | `trips.source_service_id` | Nullable service FK for historical compatibility; unique `(source_service_id, departure_at)` makes concurrent renewal converge. Existing trips were adopted without replacing IDs. |
-| `trips` → `trip_seats` | Published trip/seat snapshots are inserted by one statement. A seat-insert failure rolls back every trip/seat in that statement. Existing quotes and reservations are retained. |
-| `bookings` → `booking_items` / `seat_allocations` | Immutable fare/seat history plus current unique allocation ownership. Every hold/release/expiry mutation uses the same trip-row serialization lock and post-lock DB time. |
-| `idempotency_keys` / `booking_events` | Command replay commits with the booking transaction; terminal expiry inserts one unique event while deleting allocations atomically. |
+| `trips` → `trip_seats` / `trip_stops` | Published trip/seat/stop snapshots are inserted by one statement. Either snapshot-insert failure rolls back the whole publication. Trip-stop identity includes the trip; source stop/city references share a composite FK. Existing quotes and reservations are retained. |
+| `bookings` → `booking_items` / `seat_allocations` | Immutable fare/seat history plus current unique allocation ownership. Selected stop FKs include the trip; passenger names and contact snapshots are nullable for legacy holds. Every hold/details/release/expiry mutation uses the same trip-row serialization lock and post-lock DB time. |
+| `idempotency_keys` / `booking_events` | Command replay commits with the booking transaction. Event identity is unique `(booking_id,type,version)`; legacy lifecycle events use version 0, detail saves the new booking version. Expiry releases ownership atomically. |
 | `maintenance_jobs` | `expiry` / `inventory` started/succeeded/failed timestamps and bounded aggregate processed counts; no job payload, user data or credential. |
 
-Renewal materialises the next 30 India service days in batches of at most five missing departures. Expiry sweeps at most ten due trips, skips busy locks and retains lazy expiry as the correctness fallback. These definitions are the V0 renewal model; normalised cities/aliases/stops, draft authoring, publication audit commands and an admin UI remain separate future tasks. [Operational thresholds](operations.md), [schema/restore audit](recovery.md).
+Renewal materialises the next 30 India service days in batches of at most five missing departures. Expiry sweeps at most ten due trips, skips busy locks and retains lazy expiry as the correctness fallback. Owner tooling now fills normalized references and missing menus through bounded trip-locked backfill. Existing snapshots, quotes and customer choices are preserved. A separate mutable draft/admin authoring surface and paid-lifecycle policies remain future work. [P1 source and production evidence](p1-customer-journey.md). [Operational thresholds](operations.md), [schema/restore audit](recovery.md).
 
 ## Modeling principles
 
 Use normalized relational tables for identity, inventory, bookings, and money. Use JSON only for bounded immutable snapshots, versioned event payloads, and validated provider evidence. Drizzle describes the schema and executes parameterized SQL; PostgreSQL constraints remain the final guard.
 
-All business identifiers are UUIDs generated by the application, except auth-library IDs, whose supported type must be retained or explicitly mapped. IDs are opaque, not authorization secrets. Use a separately generated random booking reference with a unique constraint. Store times as `timestamptz`; store the trip's IANA timezone and local `service_date` explicitly. Use a single `Asia/Kolkata` timezone in v1. Date searches use the published service date, never the browser's implicit timezone.
+Current catalog/service identifiers are stable owner-managed text slugs; published trip/stop and reservation identifiers are UUIDs. Auth-library IDs retain their supported type. Other target transactional identifiers below are UUIDs generated by the application. IDs are opaque, not authorization secrets. Use a separately generated random booking reference with a unique constraint. Store times as `timestamptz`; store the trip's IANA timezone and local `service_date` explicitly. Use a single `Asia/Kolkata` timezone in v1. P1 date searches use a bounded `departure_at` range calculated in PostgreSQL for `Asia/Kolkata`, never the browser's implicit timezone; a stored service-date column remains a target modeling option.
 
 Store expected INR amounts as positive integer paise: proposed v1 limits are 2,500,000 paise per seat and 10,000,000 paise per booking. API amounts are safe JSON integers within that bound. Never use binary floating point for fare arithmetic. Use `text` plus CHECK constraints for evolving business states, `NOT NULL` for required fields, and explicit `created_at`/`updated_at` where applicable. No cascade deletes for booking, payment, refund, or audit history.
 

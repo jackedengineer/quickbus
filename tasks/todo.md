@@ -1,37 +1,37 @@
 # KwikBus task backlog
 
-Implementation has started. Items remain unchecked until their full acceptance criteria have evidence. Cloudflare Workers is required (ADR 010). The unpaid seat-concurrency proof has passed; payment task T02 is eligible after the current P0 operational work. Each task targets one focused session. Paths in future tasks are planned; the repository and evidence documents identify landed files. Keep a task to roughly 2–5 implementation/test files; split it further if scaffolding or integration expands that scope. Gates are review points, not permission requests embedded in application flows.
+Implementation has started. Items remain unchecked until their full acceptance criteria have evidence. Cloudflare Workers is required (ADR 010). The unpaid seat-concurrency proof has passed; payment task T02 is eligible now that the P0 baseline and unpaid P1 journey are complete. Each task targets one focused session. Paths in future tasks are planned; the repository and evidence documents identify landed files. Keep a task to roughly 2–5 implementation/test files; split it further if scaffolding or integration expands that scope. Gates are review points, not permission requests embedded in application flows.
 
 Commands refer to the [proposed command interface](plan.md). Before those scripts exist, a spike records its exact reproducible commands and output. Every later task also runs `pnpm check` and the affected build; focused verification is listed below.
 
 ## Current slice evidence
 
-See [compatibility](../docs/compatibility.md), [reservation proof](../docs/reservation-proof.md), and [UI/browser reference](../docs/ui-reference.md). The real Neon/Workers seat proof and a usable search/reserve/release UI were brought forward. The [V0 preview](../docs/release-v0.md) now has published Google login, locally verified hashed/single-use email OTP, SSR isolation and cookie renewal. Public OTP now sends through the verified `jacked.dev` sender and has passed browser verification; the [owned-domain cutover](../docs/domain-cutover.md) is complete, with mobile Google and desktop OTP reservation/reload/release verified on `kwikbus.jacked.dev`. Fresh admin MFA remains open for future admin routes. T02 remains unimplemented. Later reservation/search items remain unchecked because normalised catalog publication, stop snapshots and full lifecycle acceptance have not all landed. The UI reference is now FlixBus, with per-page visual comparison required.
+See [compatibility](../docs/compatibility.md), [reservation proof](../docs/reservation-proof.md), and [UI/browser reference](../docs/ui-reference.md). The real Neon/Workers seat proof and a usable search/reserve/release UI were brought forward. The [V0 preview](../docs/release-v0.md) now has published Google login, locally verified hashed/single-use email OTP, SSR isolation and cookie renewal. Public OTP now sends through the verified `jacked.dev` sender and has passed browser verification; the [owned-domain cutover](../docs/domain-cutover.md) is complete, with mobile Google and desktop OTP reservation/reload/release verified on `kwikbus.jacked.dev`. Fresh admin MFA remains open for future admin routes. T02 remains unimplemented. The [P1 customer journey](../docs/p1-customer-journey.md) now completes normalized catalog publication, stop snapshots, real server search, seat list/map selection and conditional passenger review. Full payment initiation/lifecycle acceptance remains open. The UI reference is now FlixBus, with per-page visual comparison required.
 
-## Active delivery order — reconciled 26 October 2026
+## Active delivery order — reconciled 27 October 2026
 
 The [five P0 operational slices](p0-hardening.md) are complete with production evidence: monitoring → scheduled expiry → database-backed inventory renewal → release safeguards → recovery drill. Real browser acceptance leads each usable change; focused SQL/concurrency checks supplement it. Use focused commits of roughly 300–400 lines, with a working application after each slice. Admin authoring/dashboard and its required MFA stay at the end of the roadmap. All synthetic inventory must be stored in PostgreSQL and served through the API; no client-only catalog or invented availability.
 
-Completed independently of the original sequence: T01, T03 customer authentication, T04, T05, T06, T07, T12 and T13's unpaid concurrency proof. Partial tasks retain unchecked boxes until their remaining criteria pass. Production hosting, the owned domain and real email delivery are complete; they are not future launch blockers.
+Completed independently of the original sequence: T01, T03 customer authentication, T04–T14 (including T13's unpaid concurrency proof). T15's unpaid review is delivered; its future payment-initiation guard remains open. Partial tasks retain unchecked boxes until their remaining criteria pass. Production hosting, the owned domain and real email delivery are complete; they are not future launch blockers.
 
 | Task | Reconciled status / remaining work |
 |---|---|
 | T03 / T07 | Customer Google/email OTP, hashed single-use codes, session renewal/isolation and owned-domain browser flows complete. Admin MFA moves to the deferred admin gate. |
 | T05 | Worker adapter, validated config, request-scoped bounded DB pools, health and real-Neon harness exist. Correlated telemetry is implemented; native provider URL-query redaction is deployed and verified in both Workers. Persistent-server shutdown requirements do not apply to Workers. |
 | T06 | Responsive shell, clean install/build/type/lint/audit CI exist. Isolated PostgreSQL integration/contention CI passes. Turbo rebuilds environment-sensitive Worker outputs explicitly instead of reusing undeclared cached inputs. |
-| T08 / T09 | Search and suggestions use database trips. Normalised catalog/aliases, server search contract/pagination and full acceptance remain P1. |
-| T10 / T11 | DB seat/booking/allocation constraints exist. Editable catalog, stop snapshots and publication service remain P1. |
-| T12 | Atomic party holds, immutable quote/deadline and key/hash replay proved. Lock/command latency instrumentation is live; normalised catalog/stop publication dependencies are deferred to P1. |
+| T08 / T09 | Complete: normalized cities/aliases/routes/operators/layouts, real API suggestions, server-side date/party/capacity search, filter-bound pagination and actual desktop/mobile/empty/error browser acceptance. |
+| T10 / T11 | Complete: additive composite constraints, owner-managed definitions, validated atomic trip/seat/stop publication and bounded backfill. Snapshot fault/replay checks pass; admin authoring remains deferred. |
+| T12 | Atomic party holds, immutable quote/deadline and key/hash replay proved. Lock/command latency instrumentation is live; normalized catalog and stop publication dependencies are now delivered. |
 | T13 | Nine unpaid two-instance scenarios plus independent SQL audit passed; preserve source-scoped evidence and rerun after mutation changes. |
-| T14 / T15 | Seat selection, login return, unpaid hold/reload/release exist. Boarding/drop-off and passenger/contact review remain P1. |
+| T14 / T15 | T14 complete: accessible map/list, stop choices, selection restoration and partial-party conflict recovery. T15 unpaid review, versioned/idempotent edits, names/contact, reload/release and expiry are complete; its server-enforced payment-start buffer awaits T17. |
 | T16 | Durable payment jobs/inbox/outbox remain unbuilt. P0-02 delivered bounded scheduled expiry with a real natural-expiry audit; the complete payment job foundation is still future work. |
 | T17–T25 | Payments, reconciliation, ticket delivery, cancellation/refunds and trip drain remain unimplemented. |
 | T26 | Deferred to the end: no admin dashboard or admin endpoint in the active P0/P1 scope. Fresh MFA is mandatory before any admin mutation. |
-| T27 / T28 | Responsive widths and reservation/auth browser flows proved; full accessibility, performance budgets and lifecycle fault/load evidence remain open. |
+| T27 / T28 | Current customer flows, keyboard list/focus, 320/390 px widths, stale/offline recovery and DevTools traces are evidenced. One cold 4× interaction was 213 ms (repeat 82 ms); retain strict cold-layout optimization and full paid-lifecycle accessibility/fault/load acceptance. |
 | T29 | Public/private Workers routing, runtime secrets and serialized migrations exist. Guarded exact-revision releases, tested error/health monitors and an isolated restore/compatible rollback drill passed. Full paid-lifecycle reconciliation/fault coverage is still future work. |
 | T30 | Public unpaid V0, README, ADRs and browser/concurrency evidence exist. Complete paid-lifecycle portfolio package remains future work. |
 
-Historical baseline: [V0](../docs/release-v0.md). Current deployed state: [P0 operations and browser evidence](../docs/p0-hardening.md); the [owned-domain cutover](../docs/domain-cutover.md) is preserved separately. The original phase gates below describe the complete product, not a claim that every prerequisite was implemented before the intentionally smaller V0 preview.
+Historical baseline: [V0](../docs/release-v0.md). Current deployed state: [P1 customer/browser/recovery evidence](../docs/p1-customer-journey.md), retaining the [P0 operational baseline](../docs/p0-hardening.md); the [owned-domain cutover](../docs/domain-cutover.md) is preserved separately. The original phase gates below describe the complete product, not a claim that every prerequisite was implemented before the intentionally smaller V0 preview.
 
 ## Phase 0 — Verify the assumptions
 
@@ -76,26 +76,26 @@ Historical baseline: [V0](../docs/release-v0.md). Current deployed state: [P0 op
   - Verify: focused identity integration/E2E tests, CSRF and invalid-link cases.
   - Depends: T03, T06. Targets: generated auth schema migration, identity adapter, login route, auth integration/E2E test. Size: M.
 
-- [ ] **T08 — Seeded catalog read slice**
+- [x] **T08 — Seeded catalog read slice**
   - Accept: cities/aliases/routes/operators/templates and a deterministic synthetic fixture support real city suggestions; published-trip search DTOs define date/ID validation and stable pagination for the next slices.
-  - Verify: `pnpm test:contracts` and catalog SQL tests; search-contract cases include overnight dates and invalid routes.
+  - Verify: catalog/search/constraint integration cases in Quality CI plus actual alias, overnight-date and invalid-route browser flows; [P1 evidence](../docs/p1-customer-journey.md).
   - Depends: T05, T07. Targets: catalog schema/migration, fixture, query/handler, contract test. Size: M.
 
-- [ ] **T09 — Responsive search vertical slice**
+- [x] **T09 — Responsive search vertical slice**
   - Accept: city suggestions use the real API; date/party, URL state, result cards, and empty/error states use deterministic trip-contract fixtures until T11 binds published data. Arrival dates and fares are unambiguous.
-  - Verify: `pnpm test:e2e` for search/reload/back and mobile/desktop screenshots.
+  - Verify: actual Chrome search/reload/back, cursor recovery and mobile/desktop captures; server-contract cases in the real PostgreSQL/Workers harness.
   - Depends: T06, T08. Targets: search route, search form, result/filter components, browser test. Size: M.
 
-**Gate C:** city suggestions are real and the departure UI is contract-tested; URL/timezone behavior verified. Trip results remain explicitly fixture-backed until publication and real search in T11.
+**Gate C passed for the unpaid scope:** city suggestions and result rows come from PostgreSQL; server contracts, URL/timezone behavior, pagination and real browser usage are verified. T11 has replaced the originally planned temporary trip fixtures.
 
 ## Phase 2 — Reserve correctly
 
-- [ ] **T10 — Inventory and booking constraints**
+- [x] **T10 — Inventory and booking constraints**
   - Accept: trip/stop/seat snapshots, booking/items, current allocations, and command keys have reviewed migrations and composite/unique constraints. No deferred-feature tables.
   - Verify: migration up-from-empty/upgrade tests; invalid cross-trip FK and duplicate-allocation tests.
   - Depends: T08. Targets: booking schema, migration, fixture adapter, constraint tests. Size: M.
 
-- [ ] **T11 — Atomic trip publication**
+- [x] **T11 — Atomic trip publication**
   - Accept: a valid draft publishes every stop/seat atomically; invalid/repeated publication cannot create partial/duplicate inventory. Replace T09 trip fixtures with booking-owned published-trip queries, without a reverse catalog dependency.
   - Verify: publication and search integration/contract tests; seed uses the same publication service; search browser flow runs on published DB data.
   - Depends: T09, T10. Targets: publication service, published-trip query/HTTP adapter, fixture update, integration/browser tests; split publication and read binding if scope expands. Size: M per focused subtask.
@@ -112,12 +112,13 @@ Historical baseline: [V0](../docs/release-v0.md). Current deployed state: [P0 op
   - Verify: `pnpm test:contention`; persist seed/environment/result artifact.
   - Depends: T12. Targets: contention runner, barrier/fault fixture, invariant audit, result documentation. Size: M.
 
-- [ ] **T14 — Seat-selection and hold UI**
+- [x] **T14 — Seat-selection and hold UI**
   - Accept: trip details, stop choices, graphical/list seat selection, login return, conflict handling, and successful hold navigation work; no optimistic reservation claim.
   - Verify: browser flow with two customers contending; keyboard selection and party-limit checks.
   - Depends: T09, T12, T13. Targets: trip route, seat picker/list, reserve action, browser/a11y test. Size: M.
 
 - [ ] **T15 — Checkout details and deadline**
+  - P1 delivered: owned unpaid names/contact/stop review, conditional/idempotent saves, reloadable countdown, natural expiry and the visible 90-second rule. Full acceptance stays open because no payment-initiation command exists to enforce that rule; carry the server guard into T17 before checkout is exposed.
   - Accept: names/contact/stop review and conditional detail edits work; timer survives reload/focus; expiry and <90-second initiation restriction are visible and server-enforced.
   - Verify: checkout E2E and stale-version/deadline integration cases.
   - Depends: T14. Targets: checkout route/form, details command, timer helper, tests. Size: M.

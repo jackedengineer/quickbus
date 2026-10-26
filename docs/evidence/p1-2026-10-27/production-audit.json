@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-10-26T19:55:02.915Z",
+  "target": "Neon production; read-only consistent snapshot",
+  "counts": {
+    "cities": 5,
+    "operators": 3,
+    "routes": 4,
+    "stops": 10,
+    "active_services": 5,
+    "catalog_trips": 156,
+    "published_stops": 624
+  },
+  "privileges": {
+    "catalog_read": true,
+    "catalog_edit": false,
+    "publish_stops": true
+  },
+  "invariants": {
+    "missingHeldAllocations": 0,
+    "terminalAllocations": 0,
+    "incorrectQuotes": 0,
+    "crossTripStopChoices": 0,
+    "missingDetailEvents": 0,
+    "incompleteCatalogSnapshots": 0,
+    "partialServiceTrips": 0
+  }
+}

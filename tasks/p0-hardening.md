@@ -44,4 +44,4 @@ Add only restrained transitions in the existing CSS: short press/hover feedback,
 
 ## Delivery discipline
 
-Keep commits focused at roughly 300–400 changed lines. Each slice records what actually passed; partial acceptance remains unchecked. No admin work or public payments are included. The P1 catalog/publication and passenger-review tasks remain next after P0, rather than being silently pulled into this batch.
+Keep commits focused at roughly 300–400 changed lines. Each slice records what actually passed; partial acceptance remains unchecked. No admin work or public payments are included. Catalog/publication and passenger review were deliberately kept outside P0 and have since shipped in the separate [P1 customer journey](../docs/p1-customer-journey.md).

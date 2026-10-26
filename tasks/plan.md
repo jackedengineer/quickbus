@@ -2,7 +2,7 @@
 
 ## Delivery strategy
 
-Implementation update: Cloudflare Workers is the required backend runtime. Follow [ADR 010](../docs/decisions.md) and the updated architecture. The unpaid real-Neon/two-Workers concurrency proof, customer identity and [five P0 hardening slices](p0-hardening.md) have passed production acceptance. Next are catalog/publication and passenger/checkout review; T02 provider research is eligible, while public payments still require reconciliation and refund recovery. Admin is the final slice after the customer lifecycle and portfolio package. Browser usage is a required verification step for every usable slice.
+Implementation update: Cloudflare Workers is the required backend runtime. Follow [ADR 010](../docs/decisions.md) and the updated architecture. The unpaid real-Neon/two-Workers concurrency proof, customer identity and [five P0 hardening slices](p0-hardening.md) have passed production acceptance. The [unpaid P1 catalog/search/passenger journey](../docs/p1-customer-journey.md) is now deployed and browser-verified. Next are T02 provider research and T16 durable payment jobs; T17 must enforce the remaining T15 payment-start buffer before public checkout. Public payments still require reconciliation and refund recovery. Admin is the final slice after the customer lifecycle and portfolio package. Browser usage is a required verification step for every usable slice.
 
 
 Build the smallest complete system that can sell a seat correctly, then prove it can recover failures. Retain the requested TanStack Start/Express/Turborepo/Neon/Drizzle stack. Use the [PRD](../PRD.md) for scope and the [correctness protocol](../docs/booking-correctness.md) as the transaction contract.

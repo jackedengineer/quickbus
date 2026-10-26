@@ -1,6 +1,9 @@
 # KwikBus architecture
 
-Implementation status, 26 October 2026: the unpaid customer app is live on `kwikbus.jacked.dev`. Google/email OTP, private API routing, transactional holds/release, scheduled expiry and database-backed renewal are implemented. Queues, payment workflows and admin below describe later capabilities. [P0 runtime evidence](p0-hardening.md) and [task ledger](../tasks/todo.md) distinguish completed work from the target architecture.
+Implementation status, 27 October 2026: the unpaid customer app is live on `kwikbus.jacked.dev`. Google/email OTP, private API routing, transactional holds/release, scheduled expiry, normalized catalog/stop publication, server search and conditional passenger review are implemented. Queues, payment workflows and admin below describe later capabilities. [P1 production evidence](p1-customer-journey.md), the retained [P0 runtime evidence](p0-hardening.md), and [task ledger](../tasks/todo.md) distinguish completed work from the target architecture.
+
+
+P1 adds `packages/contracts` for public Zod inputs and DTO types; web consumers import types, not database entities. `packages/backend` composes public browsing query adapters with owned booking commands. The current `catalog.ts` file is a read adapter across catalog definitions and booking-owned published snapshots, not an editable catalog domain service. Owner seed/import tooling manages definitions; no admin API is exposed. Shared command primitives serialize on a trip row, and the details command atomically saves version, event and replay alongside passenger/contact rows. [ADR 015](decisions.md), [current relational schema](database-design.md).
 
 ## Architectural choice
 
