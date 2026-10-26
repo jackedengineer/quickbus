@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { apiFetch } from '../api.server';
 import { Legal } from '../features/legal';
 import { type Session } from '../features/models';
+import { ReservationReviewScreen } from '../features/reservation-review';
 import { MyBookings } from '../features/reservations';
 import { SearchForm, type SearchValues } from '../features/search';
 import { SeatPicker } from '../features/seat-picker';
@@ -80,8 +81,9 @@ const getInitialData = createServerFn({ method: 'GET' })
     };
   });
 type PageSearch = {
-  view?: 'results' | 'bookings' | 'help' | 'privacy' | 'terms';
+  view?: 'results' | 'bookings' | 'help' | 'privacy' | 'terms' | 'review';
   authError?: boolean;
+  bookingId?: string;
   from?: string;
   to?: string;
   date?: string;
@@ -93,9 +95,14 @@ type PageSearch = {
 };
 export const Route = createFileRoute('/')({
   validateSearch: (input: Record<string, unknown>): PageSearch => ({
-    view: ['results', 'bookings', 'help', 'privacy', 'terms'].includes(
-      String(input.view),
-    )
+    view: [
+      'results',
+      'bookings',
+      'help',
+      'privacy',
+      'terms',
+      'review',
+    ].includes(String(input.view))
       ? (input.view as PageSearch['view'])
       : undefined,
     authError:
@@ -114,6 +121,11 @@ export const Route = createFileRoute('/')({
       !Number.isNaN(Date.parse(input.date)) &&
       new Date(input.date).toISOString().slice(0, 10) === input.date
         ? input.date
+        : undefined,
+    bookingId:
+      typeof input.bookingId === 'string' &&
+      /^[0-9a-f-]{36}$/i.test(input.bookingId)
+        ? input.bookingId
         : undefined,
     trip:
       typeof input.trip === 'string' &&
@@ -298,10 +310,21 @@ function Home() {
               />
             </div>
           </>
+        ) : search.view === 'review' && search.bookingId ? (
+          <ReservationReviewScreen
+            key={`${session.user?.id ?? 'guest'}-${search.bookingId}`}
+            id={search.bookingId}
+            signedIn={Boolean(session.user)}
+            onSignIn={() => setAccountOpen(true)}
+            onBack={() => show('bookings')}
+          />
         ) : search.view === 'bookings' ? (
           <MyBookings
             key={session.user?.id ?? 'guest'}
             signedIn={Boolean(session.user)}
+            onReview={(bookingId) =>
+              void navigate({ search: { view: 'review', bookingId } })
+            }
             onSignIn={() => setAccountOpen(true)}
           />
         ) : search.view === 'privacy' || search.view === 'terms' ? (

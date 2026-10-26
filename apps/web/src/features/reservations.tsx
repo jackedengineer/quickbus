@@ -2,29 +2,21 @@ import { useRouter } from '@tanstack/react-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from './icon';
 import { type Booking, money } from './models';
+import { useRemaining } from './remaining';
 
-function HoldCard({
+export function HoldCard({
   booking,
   onChange,
+  onReview,
 }: {
   booking: Booking;
   onChange: () => void;
+  onReview?: () => void;
 }) {
-  const [remaining, setRemaining] = useState<number | null>(null),
-    [busy, setBusy] = useState(false),
+  const remaining = useRemaining(booking.expiresAt, booking.serverTime);
+  const [busy, setBusy] = useState(false),
     [error, setError] = useState('');
   const key = useRef<string | null>(null);
-  useEffect(() => {
-    const start = Date.now(),
-      initial = Date.parse(booking.expiresAt) - Date.parse(booking.serverTime);
-    const tick = () =>
-      setRemaining(
-        Math.max(0, Math.ceil((initial - (Date.now() - start)) / 1000)),
-      );
-    tick();
-    const timer = setInterval(tick, 1000);
-    return () => clearInterval(timer);
-  }, [booking.expiresAt, booking.serverTime]);
   const held =
     booking.status === 'HELD' && (remaining === null || remaining > 0);
   return (
@@ -52,6 +44,11 @@ function HoldCard({
         Seats {booking.seatLabels.join(', ')} · {money(booking.totalMinor)}
       </p>
       <small className="reference">{booking.reference}</small>
+      {onReview && (
+        <button className="continue-button" type="button" onClick={onReview}>
+          Review reservation
+        </button>
+      )}
       {held && (
         <>
           <p>
@@ -106,9 +103,11 @@ function HoldCard({
 export function MyBookings({
   signedIn,
   onSignIn,
+  onReview,
 }: {
   signedIn: boolean;
   onSignIn: () => void;
+  onReview: (id: string) => void;
 }) {
   const router = useRouter();
   const latestRequest = useRef(0);
@@ -180,7 +179,12 @@ export function MyBookings({
         </p>
       ) : bookings.length ? (
         bookings.map((b) => (
-          <HoldCard key={b.id} booking={b} onChange={() => void load()} />
+          <HoldCard
+            key={b.id}
+            booking={b}
+            onChange={() => void load()}
+            onReview={() => onReview(b.id)}
+          />
         ))
       ) : (
         <div className="empty-state">
