@@ -14,16 +14,21 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { user } from './auth-schema';
+import { cities, operators, routes, stops } from './catalog-schema';
 import { inventoryServices } from './service-schema';
 
 const instant = (name: string) =>
   timestamp(name, { withTimezone: true, mode: 'date' });
 
-// Published snapshots. Editable city/operator/template catalogs arrive in the next slice.
+// Published snapshots retain their labels when catalog definitions change.
 export const trips = pgTable(
   'trips',
   {
     id: uuid('id').primaryKey(),
+    routeId: text('route_id').references(() => routes.id),
+    originCityId: text('origin_city_id').references(() => cities.id),
+    destinationCityId: text('destination_city_id').references(() => cities.id),
+    operatorId: text('operator_id').references(() => operators.id),
     origin: text('origin').notNull(),
     destination: text('destination').notNull(),
     operatorName: text('operator_name').notNull(),
@@ -46,6 +51,12 @@ export const trips = pgTable(
       sql`${t.salesState} IN ('OPEN', 'CLOSED', 'CANCELLED')`,
     ),
     index('trip_departure').on(t.departureAt),
+    index('trip_route_departure').on(
+      t.originCityId,
+      t.destinationCityId,
+      t.departureAt,
+      t.id,
+    ),
     unique('trip_service_departure').on(t.sourceServiceId, t.departureAt),
   ],
 );
@@ -180,4 +191,33 @@ export const bookingEvents = pgTable(
     createdAt: instant('created_at').notNull().defaultNow(),
   },
   (t) => [unique('booking_event_type').on(t.bookingId, t.type)],
+);
+
+export const tripStops = pgTable(
+  'trip_stops',
+  {
+    id: uuid('id').primaryKey(),
+    tripId: uuid('trip_id')
+      .notNull()
+      .references(() => trips.id),
+    sourceStopId: text('source_stop_id')
+      .notNull()
+      .references(() => stops.id),
+    cityId: text('city_id')
+      .notNull()
+      .references(() => cities.id),
+    name: text('name').notNull(),
+    address: text('address').notNull(),
+    role: text('role').notNull(),
+    sequence: integer('sequence').notNull(),
+    scheduledAt: instant('scheduled_at').notNull(),
+  },
+  (t) => [
+    unique('trip_stop_identity').on(t.tripId, t.id),
+    unique('trip_stop_sequence').on(t.tripId, t.sequence),
+    check(
+      'trip_stop_bounds',
+      sql`${t.role} IN ('PICKUP','DROP') AND ${t.sequence} BETWEEN 1 AND 20`,
+    ),
+  ],
 );
