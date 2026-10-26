@@ -15,6 +15,13 @@
       "when": 1792922720401,
       "tag": "0001_premium_franklin_storm",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793009408805,
+      "tag": "0002_maintenance_jobs",
+      "breakpoints": true
     }
   ]
 }
