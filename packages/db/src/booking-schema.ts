@@ -93,6 +93,11 @@ export const bookings = pgTable(
       .references(() => user.id),
     reference: text('reference').notNull().unique(),
     status: text('status').notNull().default('HELD'),
+    version: integer('version').notNull().default(1),
+    pickupStopId: uuid('pickup_stop_id'),
+    dropStopId: uuid('drop_stop_id'),
+    contactEmail: text('contact_email'),
+    contactPhone: text('contact_phone'),
     totalMinor: integer('total_minor').notNull(),
     currency: text('currency').notNull().default('INR'),
     expiresAt: instant('expires_at').notNull(),
@@ -100,6 +105,18 @@ export const bookings = pgTable(
   },
   (t) => [
     unique('booking_id_trip').on(t.id, t.tripId),
+    foreignKey({
+      columns: [t.tripId, t.pickupStopId],
+      foreignColumns: [tripStops.tripId, tripStops.id],
+    }),
+    foreignKey({
+      columns: [t.tripId, t.dropStopId],
+      foreignColumns: [tripStops.tripId, tripStops.id],
+    }),
+    check(
+      'booking_details_bounds',
+      sql`${t.version}>0 AND ((${t.pickupStopId} IS NULL AND ${t.dropStopId} IS NULL) OR (${t.pickupStopId} IS NOT NULL AND ${t.dropStopId} IS NOT NULL AND ${t.pickupStopId}<>${t.dropStopId})) AND (${t.contactEmail} IS NULL OR length(${t.contactEmail}) BETWEEN 3 AND 254) AND (${t.contactPhone} IS NULL OR ${t.contactPhone} ~ '^[+][1-9][0-9]{6,14}$')`,
+    ),
     uniqueIndex('one_pending_booking_per_customer_trip')
       .on(t.tripId, t.userId)
       .where(sql`${t.status} = 'HELD'`),
@@ -124,8 +141,13 @@ export const bookingItems = pgTable(
     tripId: uuid('trip_id').notNull(),
     seatLabel: text('seat_label').notNull(),
     fareMinor: integer('fare_minor').notNull(),
+    passengerName: text('passenger_name'),
   },
   (t) => [
+    check(
+      'passenger_name_bounds',
+      sql`${t.passengerName} IS NULL OR (length(${t.passengerName}) BETWEEN 2 AND 100 AND ${t.passengerName}=btrim(${t.passengerName}) AND ${t.passengerName} !~ '[[:cntrl:]]')`,
+    ),
     primaryKey({ columns: [t.bookingId, t.seatLabel] }),
     unique('booking_item_identity').on(t.bookingId, t.tripId, t.seatLabel),
     foreignKey({
@@ -188,9 +210,10 @@ export const bookingEvents = pgTable(
       .notNull()
       .references(() => bookings.id),
     type: text('type').notNull(),
+    version: integer('version').notNull().default(0),
     createdAt: instant('created_at').notNull().defaultNow(),
   },
-  (t) => [unique('booking_event_type').on(t.bookingId, t.type)],
+  (t) => [unique('booking_event_version').on(t.bookingId, t.type, t.version)],
 );
 
 export const tripStops = pgTable(

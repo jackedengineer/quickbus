@@ -36,6 +36,13 @@
       "when": 1793040710876,
       "tag": "0004_thick_mentor",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793041075245,
+      "tag": "0005_loose_salo",
+      "breakpoints": true
     }
   ]
 }
