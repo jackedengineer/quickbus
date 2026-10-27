@@ -15,6 +15,7 @@ import { catalog, citySuggestions, searchTrips, tripDetails } from './catalog';
 import { context } from './context';
 import { maintenanceHealth } from './maintenance';
 import { receivePaymentWebhook } from './payment-inbox';
+import { paymentRoutes } from './payment-routes';
 import {
   reservationReview,
   saveReservationDetails,
@@ -216,6 +217,7 @@ export function createApp() {
     );
     return response.status(result.status).json(result.body);
   });
+  paymentRoutes(app);
   app.get('/api/v1/bookings', async (_request, response) =>
     response.json({
       bookings: await getBookings(context().db, response.locals.userId),

@@ -36,6 +36,14 @@ export function routeLabel(path: string) {
     return '/api/v1/bookings/:id/details';
   if (/^\/api\/v1\/bookings\/[^/]+\/release$/.test(path))
     return '/api/v1/bookings/:id/release';
+  for (const action of [
+    'checkout',
+    'payment',
+    'payment/verify',
+    'payment/refresh',
+  ])
+    if (new RegExp(`^/api/v1/bookings/[^/]+/${action}$`).test(path))
+      return `/api/v1/bookings/:id/${action}`;
   if (/^\/api\/v1\/bookings\/[^/]+$/.test(path)) return '/api/v1/bookings/:id';
   if (path.startsWith('/_server/') || path.startsWith('/_serverFn/'))
     return '/_server/:function';
