@@ -97,3 +97,17 @@ Compatible disabled rollback baseline: API
 `4bb3c9dd-7ca2-4a8d-80ff-754a35c50a0c`.
 [Deployment evidence](evidence/payments-2026-10-27/staged-release.json).
 Public sandbox enablement is the next deployment; live money stays unavailable.
+
+## Production-only hosted-frame failure
+
+The first enabled HTTPS browser attempt created one provider order but displayed
+an empty hosted frame. Its document remained about:blank. The official SDK submits
+a form into that initially blank frame, which inherits the parent document's CSP;
+allowing frame-src alone was insufficient with form-action restricted to self.
+Local HTTP acceptance did not exercise the production HTTPS policy.
+
+New admission was paused by deploying the compatible disabled API version. The
+web fix adds only https://api.razorpay.com to form-action; nonce scripts, fixed
+frame/connect hosts, frame-ancestors, HTTPS, Origin and private API protections
+remain. Acceptance requires repeating the actual HTTPS hosted flow after this
+narrow change, rather than treating a static header check as a working payment.

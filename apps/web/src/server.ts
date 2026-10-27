@@ -63,7 +63,9 @@ const web = createServerEntry({
           'frame-src https://api.razorpay.com https://checkout.razorpay.com',
           "object-src 'none'",
           "base-uri 'none'",
-          "form-action 'self'",
+          // Checkout posts into its initially blank iframe, which inherits this
+          // policy. frame-src alone does not permit that form navigation.
+          "form-action 'self' https://api.razorpay.com",
           "frame-ancestors 'none'",
           'upgrade-insecure-requests',
         ].join('; '),
