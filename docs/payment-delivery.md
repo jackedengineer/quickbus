@@ -81,3 +81,19 @@ state transitions alone remain writable. Release and recovery audits check money
 fulfillment, allocations, refunds and durable recovery linkage. Failed intake
 cannot ACK, and payment heartbeat/backlog/failure/case signals feed health checks.
 Production enablement remains test-only; live keys are rejected in every adapter.
+
+## Production staging baseline
+
+`v0.2.0-rc.1` / `fe18c70` deployed after exact-revision Quality run
+[40469809338](https://github.com/jackedengineer/quickbus/actions/runs/40469809338).
+The API/web understand payment states and have the approved test credentials, with
+checkout admission disabled. A real production browser search/reserve/release
+showed the explicit unavailable state. All five HTTP probes passed; legacy reads
+redirect 308, legacy mutations reject 421, wrong-origin mutations reject 403 and
+the API workers.dev endpoint stays 404. All 17 independent invariants were zero.
+
+Compatible disabled rollback baseline: API
+`0b893555-0000-486c-9c73-f3a5461d0aa8`, web
+`4bb3c9dd-7ca2-4a8d-80ff-754a35c50a0c`.
+[Deployment evidence](evidence/payments-2026-10-27/staged-release.json).
+Public sandbox enablement is the next deployment; live money stays unavailable.

@@ -21,7 +21,7 @@
       "vars": {
         "APP_ORIGIN": "https://kwikbus.jacked.dev",
         "DEPLOYMENT_ENV": "production",
-        "PAYMENTS_ENABLED": "false",
+        "PAYMENTS_ENABLED": "true",
         "EMAIL_FROM": "KwikBus <signin@jacked.dev>"
       }
     }

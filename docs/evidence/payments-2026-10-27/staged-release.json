@@ -1,0 +1,33 @@
+{
+  "revision": "fe18c70e478f69b2c4acab85ad411bc9e2d7cd5c",
+  "ciRun": "40469809338",
+  "startedAt": "2026-10-27T07:55:41.338Z",
+  "state": "http-verified; real browser acceptance still required",
+  "previous": {
+    "api": "719d55b1-89c1-418d-8e88-41b74c19c16d",
+    "web": "ee0fa374-c5e3-47b4-b956-e22f11a5956e"
+  },
+  "financialAndInventoryAudit": {
+    "missingHeldAllocations": 0,
+    "terminalAllocations": 0,
+    "incorrectQuotes": 0,
+    "crossTripStopChoices": 0,
+    "missingDetailEvents": 0,
+    "incompleteCatalogSnapshots": 0,
+    "partialServiceTrips": 0,
+    "intentQuoteMismatch": 0,
+    "confirmedWithoutMoney": 0,
+    "fulfillmentWithoutBooking": 0,
+    "refundQuoteMismatch": 0,
+    "captureWithoutDisposition": 0,
+    "compensationWithoutRefund": 0,
+    "refundWithoutJob": 0,
+    "checkoutWithoutRecovery": 0,
+    "inboxWithoutJob": 0,
+    "processedRefundWithoutIdentity": 0
+  },
+  "deployed": {
+    "api": "0b893555-0000-486c-9c73-f3a5461d0aa8",
+    "web": "4bb3c9dd-7ca2-4a8d-80ff-754a35c50a0c"
+  }
+}
