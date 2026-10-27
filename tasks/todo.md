@@ -1,18 +1,18 @@
 # KwikBus task backlog
 
-Implementation has started. Items remain unchecked until their full acceptance criteria have evidence. Cloudflare Workers is required (ADR 010). The unpaid seat-concurrency proof has passed; payment task T02 is eligible now that the P0 baseline and unpaid P1 journey are complete. Each task targets one focused session. Paths in future tasks are planned; the repository and evidence documents identify landed files. Keep a task to roughly 2–5 implementation/test files; split it further if scaffolding or integration expands that scope. Gates are review points, not permission requests embedded in application flows.
+Implementation has started. Items remain unchecked until their full acceptance criteria have evidence. Cloudflare Workers is required (ADR 010). The seat-concurrency proof and test-payment delivery have passed; ticket/notification delivery is the next customer slice. Each task targets one focused session. Paths in future tasks are planned; the repository and evidence documents identify landed files. Keep a task to roughly 2–5 implementation/test files; split it further if scaffolding or integration expands that scope. Gates are review points, not permission requests embedded in application flows.
 
 Commands refer to the [proposed command interface](plan.md). Before those scripts exist, a spike records its exact reproducible commands and output. Every later task also runs `pnpm check` and the affected build; focused verification is listed below.
 
 ## Current slice evidence
 
-See [compatibility](../docs/compatibility.md), [reservation proof](../docs/reservation-proof.md), and [UI/browser reference](../docs/ui-reference.md). The real Neon/Workers seat proof and a usable search/reserve/release UI were brought forward. The [V0 preview](../docs/release-v0.md) now has published Google login, locally verified hashed/single-use email OTP, SSR isolation and cookie renewal. Public OTP now sends through the verified `jacked.dev` sender and has passed browser verification; the [owned-domain cutover](../docs/domain-cutover.md) is complete, with mobile Google and desktop OTP reservation/reload/release verified on `kwikbus.jacked.dev`. Fresh admin MFA remains open for future admin routes. T02 remains unimplemented. The [P1 customer journey](../docs/p1-customer-journey.md) now completes normalized catalog publication, stop snapshots, real server search, seat list/map selection and conditional passenger review. Full payment initiation/lifecycle acceptance remains open. The UI reference is now FlixBus, with per-page visual comparison required.
+See [compatibility](../docs/compatibility.md), [reservation proof](../docs/reservation-proof.md), and [UI/browser reference](../docs/ui-reference.md). The real Neon/Workers seat proof and a usable search/reserve/release UI were brought forward. The [V0 preview](../docs/release-v0.md) now has published Google login, locally verified hashed/single-use email OTP, SSR isolation and cookie renewal. Public OTP now sends through the verified `jacked.dev` sender and has passed browser verification; the [owned-domain cutover](../docs/domain-cutover.md) is complete, with mobile Google and desktop OTP reservation/reload/release verified on `kwikbus.jacked.dev`. Fresh admin MFA remains open for future admin routes. T02 now has observed provider-contract and sandbox replay evidence. The [P1 customer journey](../docs/p1-customer-journey.md) now completes normalized catalog publication, stop snapshots, real server search, seat list/map selection and conditional passenger review. Test checkout, signed intake, capture/refund recovery and mobile/desktop browser acceptance are delivered; paid cancellation and ticket delivery remain open. The UI reference is now FlixBus, with per-page visual comparison required.
 
 ## Active delivery order — reconciled 27 October 2026
 
 The [five P0 operational slices](p0-hardening.md) are complete with production evidence: monitoring → scheduled expiry → database-backed inventory renewal → release safeguards → recovery drill. Real browser acceptance leads each usable change; focused SQL/concurrency checks supplement it. Use focused commits of roughly 300–400 lines, with a working application after each slice. Admin authoring/dashboard and its required MFA stay at the end of the roadmap. All synthetic inventory must be stored in PostgreSQL and served through the API; no client-only catalog or invented availability.
 
-Completed independently of the original sequence: T01, T03 customer authentication, T04–T14 (including T13's unpaid concurrency proof). T15's unpaid review is delivered; its future payment-initiation guard remains open. Partial tasks retain unchecked boxes until their remaining criteria pass. Production hosting, the owned domain and real email delivery are complete; they are not future launch blockers.
+Completed independently of the original sequence: T01, T03 customer authentication, T04–T14 (including T13's unpaid concurrency proof). T15's server-enforced 90-second initiation guard and T16–T21 test-payment scope are delivered. Partial tasks retain unchecked boxes until their remaining criteria pass. Production hosting, the owned domain and real email delivery are complete; they are not future launch blockers.
 
 | Task | Reconciled status / remaining work |
 |---|---|
@@ -23,15 +23,17 @@ Completed independently of the original sequence: T01, T03 customer authenticati
 | T10 / T11 | Complete: additive composite constraints, owner-managed definitions, validated atomic trip/seat/stop publication and bounded backfill. Snapshot fault/replay checks pass; admin authoring remains deferred. |
 | T12 | Atomic party holds, immutable quote/deadline and key/hash replay proved. Lock/command latency instrumentation is live; normalized catalog and stop publication dependencies are now delivered. |
 | T13 | Nine unpaid two-instance scenarios plus independent SQL audit passed; preserve source-scoped evidence and rerun after mutation changes. |
-| T14 / T15 | T14 complete: accessible map/list, stop choices, selection restoration and partial-party conflict recovery. T15 unpaid review, versioned/idempotent edits, names/contact, reload/release and expiry are complete; its server-enforced payment-start buffer awaits T17. |
-| T16 | Durable payment jobs/inbox/outbox remain unbuilt. P0-02 delivered bounded scheduled expiry with a real natural-expiry audit; the complete payment job foundation is still future work. |
-| T17–T25 | Payments, reconciliation, ticket delivery, cancellation/refunds and trip drain remain unimplemented. |
+| T14 / T15 | Complete: accessible map/list, restored stop choices, conflict recovery, versioned passenger/contact edits, reload/release/expiry and server-enforced post-lock 90-second payment-start buffer. |
+| T16 | Complete for payments: transactional durable jobs/inbox, leases/fencing, bounded retries, minute recovery, heartbeat/backlog/failure/case health. Notification delivery remains T22. |
+| T02 / T17–T21 | Complete in Razorpay test mode: observed provider contracts, frozen intents/attempts, common capture finalizer, signed durable intake, explicit hosted checkout and authoritative reconciliation. Actual failure/retry/capture/reload and offline-tab late-refund journeys passed. |
+| T22 / T23 | Next: printable tickets/confirmation delivery, then whole-booking paid cancellation. Owned history already exists; these full tasks stay unchecked. |
+| T24 / T25 | Compensation/excess-capture refund execution and recovery delivered. T24 stays partial until the T23 paid-cancellation branch passes; trip cancellation/drain remains future work. |
 | T26 | Deferred to the end: no admin dashboard or admin endpoint in the active P0/P1 scope. Fresh MFA is mandatory before any admin mutation. |
 | T27 / T28 | Current customer flows, keyboard list/focus, 320/390 px widths, stale/offline recovery and DevTools traces are evidenced. One cold 4× interaction was 213 ms (repeat 82 ms); retain strict cold-layout optimization and full paid-lifecycle accessibility/fault/load acceptance. |
-| T29 | Public/private Workers routing, runtime secrets and serialized migrations exist. Guarded exact-revision releases, tested error/health monitors and an isolated restore/compatible rollback drill passed. Full paid-lifecycle reconciliation/fault coverage is still future work. |
-| T30 | Public unpaid V0, README, ADRs and browser/concurrency evidence exist. Complete paid-lifecycle portfolio package remains future work. |
+| T29 | Guarded exact-revision releases, private API, runtime secrets, monitors and compatible disabled payment rollback exist. Fresh financial-schema restore matched 33 tables/7,613 rows with 17 zero invariants. Full cancellation/trip-drain lifecycle acceptance remains open. |
+| T30 | Public v0.2 sandbox, README, ADRs, API contracts and actual browser/provider/concurrency/recovery evidence exist. Complete ticket/cancellation lifecycle portfolio package remains future work. |
 
-Historical baseline: [V0](../docs/release-v0.md). Current deployed state: [P1 customer/browser/recovery evidence](../docs/p1-customer-journey.md), retaining the [P0 operational baseline](../docs/p0-hardening.md); the [owned-domain cutover](../docs/domain-cutover.md) is preserved separately. The original phase gates below describe the complete product, not a claim that every prerequisite was implemented before the intentionally smaller V0 preview.
+Historical baseline: [V0](../docs/release-v0.md). Current payment state: [test-payment delivery and production acceptance](../docs/payment-delivery.md), [observed provider contracts](../docs/provider-contract.md). Historical customer baseline: [P1 customer/browser/recovery evidence](../docs/p1-customer-journey.md), retaining the [P0 operational baseline](../docs/p0-hardening.md); the [owned-domain cutover](../docs/domain-cutover.md) is preserved separately. The original phase gates below describe the complete product, not a claim that every prerequisite was implemented before the intentionally smaller V0 preview.
 
 ## Phase 0 — Verify the assumptions
 
@@ -40,7 +42,7 @@ Historical baseline: [V0](../docs/release-v0.md). Current deployed state: [P1 cu
   - Verify: reproducible smoke commands, SSR response, transaction rollback and lock timeout evidence.
   - Depends: none. Targets: a disposable spike and `docs/compatibility.md`; retain findings, not a second app architecture. Size: M.
 
-- [ ] **T02 — Payment-provider contract spike**
+- [x] **T02 — Payment-provider contract spike**
   - Accept: test order/receipt lookup, failed-attempt replacement, lost-response recovery, captured-state verification, signed duplicate events, and stable-key refund replay. Resolve documentation differences with observed test-mode behavior.
   - Verify: deterministic adapter tests plus sanitized Razorpay sandbox evidence; no real payment.
   - Depends: none. Targets: provider spike harness, fixtures, `docs/provider-contract.md`. Size: M.
@@ -117,8 +119,8 @@ Historical baseline: [V0](../docs/release-v0.md). Current deployed state: [P1 cu
   - Verify: browser flow with two customers contending; keyboard selection and party-limit checks.
   - Depends: T09, T12, T13. Targets: trip route, seat picker/list, reserve action, browser/a11y test. Size: M.
 
-- [ ] **T15 — Checkout details and deadline**
-  - P1 delivered: owned unpaid names/contact/stop review, conditional/idempotent saves, reloadable countdown, natural expiry and the visible 90-second rule. Full acceptance stays open because no payment-initiation command exists to enforce that rule; carry the server guard into T17 before checkout is exposed.
+- [x] **T15 — Checkout details and deadline**
+  - Delivered: owned versioned/idempotent details, restored timer/expiry, post-trip-lock server buffer and frozen details on payment initiation. Actual production mobile failure/retry/capture/reload verified; deadline/stale-version fault checks supplement browser acceptance.
   - Accept: names/contact/stop review and conditional detail edits work; timer survives reload/focus; expiry and <90-second initiation restriction are visible and server-enforced.
   - Verify: checkout E2E and stale-version/deadline integration cases.
   - Depends: T14. Targets: checkout route/form, details command, timer helper, tests. Size: M.
@@ -127,39 +129,39 @@ Historical baseline: [V0](../docs/release-v0.md). Current deployed state: [P1 cu
 
 ## Phase 3 — Pay and recover
 
-- [ ] **T16 — Durable inbox/outbox/job foundation**
-  - Accept: transactional outbox dispatch, leased job claims, token-checked completion, bounded retry/backoff, and scheduled hold-expiry cleanup work; job locks end before business work; expose backlog age, failures, and worker heartbeat.
+- [x] **T16 — Durable payment inbox/job foundation**
+  - Accept: transactional payment-job dispatch and durable inbox, leased claims, token/expiry-fenced completion, bounded retry/backoff, and scheduled hold-expiry cleanup work; job locks end before business work; expose backlog age, failures, and worker heartbeat. Customer notification outbox remains T22.
   - Verify: worker crash/lease/duplicate-dispatch integration tests.
   - Depends: T10, T12. Targets: infrastructure schema/migration, queue repository, runner, tests. Size: M.
 
-- [ ] **T17 — Logical payment intent and checkout attempt**
+- [x] **T17 — Logical payment intent and checkout attempt**
   - Accept: details freeze, unique logical intent, one unresolved checkout attempt, deterministic receipt, provider creation outside locks, and UNKNOWN handling work. New attempts require verified prior failure.
   - Verify: adapter/DB tests for duplicate commands, declined retry, lost create response, and stale worker.
   - Depends: T02, T15, T16. Targets: payment schema/migration, preparation service, provider adapter, worker handler, tests. Size: M.
 
-- [ ] **T18 — Common capture finalizer**
+- [x] **T18 — Common capture finalizer**
   - Accept: capture observation confirms only live owned inventory with matching money; late/additional captures create one compensation intent; failure cannot downgrade capture.
   - Verify: capture/expiry/reallocation/cancellation-order integration matrix.
   - Depends: T13, T17. Targets: observation contract, finalizer, payment repository, tests. Size: M.
 
 **Gate F:** intent/attempt distinctions and financial invariants reviewed; unknown outcomes cannot create another order.
 
-- [ ] **T19 — Signed webhook and callback intake**
+- [x] **T19 — Signed webhook and callback intake**
   - Accept: raw-body verification, environment isolation, durable inbox ACK, duplicate hash checks, and verified callback-triggered fetch use the same finalizer.
   - Verify: invalid/mutated signature, DB-unavailable ACK behavior, duplicate/out-of-order and wrong-owner tests.
   - Depends: T16, T18. Targets: webhook route/middleware ordering, inbox processor, callback handler, tests. Size: M.
 
-- [ ] **T20 — Hosted checkout and status UI**
+- [x] **T20 — Hosted checkout and status UI**
   - Accept: sandbox checkout launches once per attempt; refresh/close/failure/pending/success/late-refund states have explicit actions and preserve useful details.
   - Verify: controlled-provider browser tests plus sanitized Razorpay sandbox walkthrough.
   - Depends: T17, T19. Targets: checkout launcher, booking detail route, query/status helpers, browser tests. Size: M.
 
-- [ ] **T21 — Payment reconciliation and invariant cases**
+- [x] **T21 — Payment reconciliation and invariant cases**
   - Accept: periodic order/receipt/payment fetch resolves missing callbacks/webhooks, checks earlier attempts, and creates deduplicated owned cases for mismatches/ambiguity.
   - Verify: missing-event, paginated receipt lookup, unknown-order, extra-capture, and exhausted-retry tests.
   - Depends: T18, T19. Targets: reconcile scheduler/handler, case repository, provider fetch adapter, tests. Size: M.
 
-**Gate G:** complete successful booking and late-capture compensation intent demonstrated; every observed capture has a visible disposition. Keep public checkout gated until actual refund execution below passes.
+**Gate G passed for test checkout:** actual successful booking and full release-before-capture refund passed, including a disconnected checkout tab and signed-event recovery. Every observed capture has a visible disposition; no live-money acceptance is claimed.
 
 ## Phase 4 — Complete the lifecycle
 
@@ -174,6 +176,7 @@ Historical baseline: [V0](../docs/release-v0.md). Current deployed state: [P1 cu
   - Depends: T18, T20. Targets: cancellation policy/service, HTTP contract/handler, customer dialog, tests. Size: M.
 
 - [ ] **T24 — Refund execution and recovery**
+  - Partial: compensation/excess-capture full refunds, immutable key/body, unknown-result read recovery, processed UI and actual sandbox same-key replay are delivered. Keep unchecked until T23 paid-cancellation refund acceptance passes.
   - Accept: stable provider key, exact amount, unknown-result reconciliation, processed/refused visibility, and excess-capture refunds work without reviving bookings.
   - Verify: sandbox refund plus lost-response, duplicate job/webhook, stale lease, and overspend guards.
   - Depends: T02, T16, T21, T23. Targets: refund worker/adapter, reconciliation job, refund-status UI, tests. Size: M.

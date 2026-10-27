@@ -168,3 +168,28 @@ schema and invariant audits; production remained online.
 The earlier staging section is historical; public sandbox checkout is now enabled.
 The payment-aware disabled rollback baseline remains the compatible fallback.
 Full paid cancellation, ticket delivery and admin remain future slices.
+
+
+## Measured UI follow-up
+
+Actual DevTools profiling found a 0.19 CLS when opening booking history: the
+loading paragraph briefly exposed the footer, then the fetched rows displaced it.
+The page now reserves initial space and keeps existing rows during refresh; it
+remains keyed by authenticated user. The repeated 390×844 touch/reduced-motion
+review→history→refresh trace measured CLS 0.00 and INP 57 ms (previous 101 ms).
+All 23 rows remained after refresh, with no horizontal overflow. Production guest
+load samples measured LCP 542 ms desktop and 1,041 ms with mobile 4× CPU/Fast 4G;
+both had zero CLS. These are lab samples, not percentiles or field guarantees.
+Owned API reads took 542/1,125 ms in one reload sample; the request/Server-Timing
+breakdown is preserved without identifiers. No normal-animation FPS claim follows
+from reduced-motion measurements.
+
+[Performance evidence](evidence/payments-2026-10-27/performance.json),
+[history fix rollout](evidence/payments-2026-10-27/history-release.json).
+Chrome also reported unnamed review controls; explicit field names preserve the
+existing labels and eliminate that form diagnostic on the follow-up rollout.
+
+Sanitized visual evidence: [desktop confirmation](evidence/payments-2026-10-27/desktop-confirmed.png),
+[mobile confirmation](evidence/payments-2026-10-27/mobile-confirmed.png),
+[mobile processed refund](evidence/payments-2026-10-27/mobile-refunded.png),
+[mobile booking history](evidence/payments-2026-10-27/mobile-history.png).

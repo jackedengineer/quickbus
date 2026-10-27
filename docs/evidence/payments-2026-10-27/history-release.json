@@ -1,0 +1,38 @@
+{
+  "revision": "6e3b633c592c6bf558610ca31c217835c6228acb",
+  "ciRun": "40480705133",
+  "startedAt": "2026-10-27T09:27:43.546Z",
+  "state": "HTTP and mobile history/refund browser verified; named-control follow-up pending",
+  "previous": {
+    "api": "f4937fc1-04a8-4100-9a68-d1db810d0ac7",
+    "web": "f1f8ce00-3431-4659-b1d0-46be3a55bdd5"
+  },
+  "financialAndInventoryAudit": {
+    "missingHeldAllocations": 0,
+    "terminalAllocations": 0,
+    "incorrectQuotes": 0,
+    "crossTripStopChoices": 0,
+    "missingDetailEvents": 0,
+    "incompleteCatalogSnapshots": 0,
+    "partialServiceTrips": 0,
+    "intentQuoteMismatch": 0,
+    "confirmedWithoutMoney": 0,
+    "fulfillmentWithoutBooking": 0,
+    "refundQuoteMismatch": 0,
+    "captureWithoutDisposition": 0,
+    "compensationWithoutRefund": 0,
+    "refundWithoutJob": 0,
+    "checkoutWithoutRecovery": 0,
+    "inboxWithoutJob": 0,
+    "processedRefundWithoutIdentity": 0
+  },
+  "deployed": {
+    "api": "39574cb0-5f8e-41ff-b2fe-22f175a15d3a",
+    "web": "80e50689-1d7f-4042-a65a-a14b4b4a6a95"
+  },
+  "browserVerified": {
+    "mobileHistoryNavigationAndRefresh": true,
+    "refundStatusRestored": true,
+    "productionPaymentFlowRevision": "40077a15edb75920951efff8d36d92d17e1a21f9"
+  }
+}

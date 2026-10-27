@@ -2,11 +2,11 @@
 
 A small bus-booking portfolio application built around correct seat ownership, retry behavior, and failure recovery.
 
-**Live v0.1 preview:** [Open KwikBus](https://kwikbus.jacked.dev/). TanStack Start and Express run on Cloudflare Workers with a private API service binding and Neon/Drizzle transactions. Google and email OTP sign-in, responsive search, seat selection, reloadable unpaid holds and release are live. OTP sends through the verified `jacked.dev` domain. The owned hostname is live, with Google and email OTP verified through real mobile and desktop booking flows. See the [domain cutover evidence](docs/domain-cutover.md). No live tickets or payments. See the [release evidence and operations guide](docs/release-v0.md).
+**Live v0.2 sandbox preview:** [Open KwikBus](https://kwikbus.jacked.dev/). TanStack Start and Express run on Cloudflare Workers with a private API binding and Neon/Drizzle transactions. Google/email OTP, database-backed search, seats, passenger review and Razorpay test checkout are live. Actual desktop/mobile journeys verified failure, explicit retry, confirmation, reload and release-before-capture refund recovery with the checkout tab offline. No real travel tickets or live money. [Payment delivery and evidence](docs/payment-delivery.md), [provider contract and limitations](docs/provider-contract.md).
 
 **P0 operational baseline · v0.0.3-preview:** correlated/private logs and tested monitors, minute-by-minute expiry, hourly renewal from persisted service/seat definitions, isolated PostgreSQL/Workers CI, guarded releases and a measured restore/rollback drill are complete. Real browser flows lead acceptance; the 100-customer Neon proof supplements them. [Current evidence and limits](docs/p0-hardening.md), [browser performance](docs/p0-performance.md), [release runbook](docs/releasing.md). Admin stays at the end of the roadmap.
 
-**P1 customer journey · v0.1.0-preview:** normalized database catalog/stops, real server search and pagination, equivalent seat map/list, stop restoration and versioned passenger/contact review are live. Production Google and mobile email OTP journeys passed save/reload/release; 19 integration checks and the updated 100-customer Neon proof supplement real browser acceptance. [Evidence, performance measurements and remaining limits](docs/p1-customer-journey.md). Payments remain disabled; admin is deferred.
+**P1 customer journey · v0.1.0-preview:** normalized database catalog/stops, real server search and pagination, equivalent seat map/list, stop restoration and versioned passenger/contact review are live. Production Google and mobile email OTP journeys passed save/reload/release; 19 integration checks and the updated 100-customer Neon proof supplement real browser acceptance. [Evidence, performance measurements and remaining limits](docs/p1-customer-journey.md). This is the historical unpaid baseline; the v0.2 sandbox adds payments. Admin is deferred.
 
 ## Run locally
 
@@ -20,7 +20,7 @@ docker run -d --name quickbus-mailpit -p 127.0.0.1:8025:8025 axllent/mailpit:v1.
 pnpm dev
 ```
 
-If the local inbox container already exists, use `docker start quickbus-mailpit` instead of creating it again. Open [KwikBus](http://localhost:3000); the local inbox is at [Mailpit](http://localhost:8025). Seed creates five cities and three explicitly synthetic operators, with four directional routes and stop menus persisted in PostgreSQL. It adds future journeys idempotently without deleting reservations. Local development has no automatic Cron execution; rerun seed when its timetable ages out. Production renewal runs hourly.
+If the local inbox container already exists, use `docker start quickbus-mailpit` instead of creating it again. Open [KwikBus](http://localhost:3000); the local inbox is at [Mailpit](http://localhost:8025). Seed creates five cities and three explicitly synthetic operators, with four directional routes and stop menus persisted in PostgreSQL. It adds future journeys idempotently without deleting reservations. With `PAYMENTS_ENABLED=true` and dedicated test-mode credentials, local development drives minute-by-minute expiry/payment recovery while running. It does not run hourly inventory renewal; rerun seed when its timetable ages out. Production renewal runs hourly. Keep payments disabled when provider credentials are absent.
 
 `pnpm dev` writes only runtime variables to ignored `apps/api/.dev.vars`, starts Express in Wrangler on port 8787, and starts the web Worker on port 3000. The migration owner URL is never copied to the Worker. Ctrl+C stops both processes.
 
@@ -40,6 +40,10 @@ pnpm build
 The contention harness creates only synthetic fixtures, waits for concurrent requests to settle, audits the database independently, and cleans up its own rows. It uses the direct owner connection for fixture setup and a trip-scoped fault trigger; HTTP requests still pass through normal authentication and the restricted runtime role. It refuses to run without explicit local fixture flags. Run it against a disposable development database, never production. While it runs, synthetic trips may briefly appear in the development timetable.
 
 ## Implementation evidence
+
+- [Razorpay test checkout, late-capture refunds and production browser evidence](docs/payment-delivery.md)
+- [Observed provider contracts and safe retry limits](docs/provider-contract.md)
+- [Financial-schema recovery drill](docs/recovery.md)
 
 - [P1 catalog, server search, stops and passenger review](docs/p1-customer-journey.md)
 
@@ -71,7 +75,11 @@ The contention harness creates only synthetic fixtures, waits for concurrent req
 - One modular backend on Workers; separate Start web Worker connected by a service binding. Node is local tooling and compatibility APIs, not a persistent production server.
 - PostgreSQL is the inventory authority. Every trip mutation takes its trip-row lock; allocation uniqueness is enforced in the database. Expiry uses database time read after the lock.
 - The hold and its idempotency response commit together. A party receives every requested seat or no seats. There is no external provider call inside that transaction.
-- Email must be verified before a hold. The first slice stops at an unpaid reservation. Future payment ambiguity, reconciliation, and refund recovery follow the documented protocol before any checkout is exposed.
+- Email must be verified before a hold. Checkout freezes versioned details and persists an intent/attempt before provider I/O. Signed events and authoritative provider reads share a trip-locked finalizer; late captures refund without reviving seats. Unknown order creation never retries its POST. Durable leased jobs recover missed callbacks; immutable refund keys preserve replay identity.
+
+## Next customer slices
+
+Print tickets and deduplicated confirmation delivery come next, followed by whole-booking paid cancellation and its refund policy. Compensation refunds already work; paid cancellation is not exposed. Trip cancellation and full lifecycle accessibility/load acceptance follow. Admin stays last. Live Razorpay keys are rejected; this portfolio release handles test money only.
 
 ## Application identity
 

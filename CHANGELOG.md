@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.2.0-preview — 2026-10-27
+
+### Added
+
+- Razorpay test checkout with explicit launch, failure/retry, restored confirmation and visible refund recovery. No live money or real travel tickets.
+- Transactional payment jobs, signed durable event intake and authoritative reconciliation. A late capture refunds without reviving released seats.
+- Runtime-enforced immutable money/provider identities, account attempt limits and 17 financial/inventory audit checks.
+- Actual desktop/mobile failure→retry→capture and offline-checkout release→capture→processed-refund evidence, refreshed 100-customer Neon contention proof and a 33-table restore drill.
+
+### Fixed
+
+- Allow the hosted SDK's exact HTTPS form destination while retaining nonce/CSP, origin checks and a private API.
+- Use an explicit user action to open a prepared order and reset stale hosted documents safely between attempts.
+- Keep booking history stable while loading/refreshing; measured mobile CLS improved from 0.19 to 0.00.
+- Name labelled booking fields for browser form semantics.
+
+Paid cancellation, print/email tickets, trip drain and the admin dashboard remain future slices.
+[Production delivery, evidence and limits](docs/payment-delivery.md).
+
 ## v0.1.0-preview — 2026-10-27
 
 - Persist normalized cities/aliases, operators, routes, reusable layouts and service stops; atomically publish immutable trip/seat/stop snapshots and backfill existing trips without replacing reservations.

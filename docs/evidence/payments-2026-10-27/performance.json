@@ -1,0 +1,125 @@
+{
+  "checkedAt": "2026-10-27T09:32:06.134Z",
+  "tool": "Chrome DevTools CLI 1.12.0; dedicated isolated profile; authenticated by actual email OTP",
+  "measurements": "Observed lab samples, not field percentiles or an availability/latency guarantee",
+  "guestLoads": {
+    "desktop": {
+      "sourceRevision": "b9dc9b195c3a",
+      "cpuSlowdown": 1,
+      "network": "none",
+      "lcpMs": 542,
+      "ttfbMs": 477,
+      "cls": 0,
+      "privateTraceSha256": "87728d87a34637e8d586d7b58cfbf15ede055a32af4c446cc68031770b936d16"
+    },
+    "mobile": {
+      "sourceRevision": "b9dc9b195c3a",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "touch": true
+      },
+      "reducedMotion": true,
+      "cpuSlowdown": 4,
+      "network": "Fast 4G",
+      "lcpMs": 1041,
+      "ttfbMs": 479,
+      "cls": 0,
+      "privateTraceSha256": "13f24d70845634464bfa200df6202443adab419fb5b368f6ba39938e70636dd7"
+    }
+  },
+  "historyJourney": {
+    "action": "Refunded reservation review → My bookings → Refresh",
+    "viewport": {
+      "width": 390,
+      "height": 844,
+      "touch": true
+    },
+    "reducedMotion": true,
+    "cpuSlowdown": 1,
+    "network": "none",
+    "before": {
+      "sourceRevision": "40077a15edb75920951efff8d36d92d17e1a21f9",
+      "inpMs": 101,
+      "lcpMs": 834,
+      "cls": 0.19,
+      "privateTraceSha256": "7e8f2cd3f050fdf636b26d147dbce73817a0da225e36e55ab9a46911a7493e25"
+    },
+    "after": {
+      "sourceRevision": "6e3b633c592c6bf558610ca31c217835c6228acb",
+      "inpMs": 57,
+      "lcpMs": 589,
+      "cls": 0,
+      "cardsAfterRefresh": 23,
+      "horizontalOverflow": false,
+      "privateTraceSha256": "81ca232d5eb8344befb18fab2232aca9f31b6846f1f5a5c20a85eae3c65e1340"
+    },
+    "fix": "Keep the initial footer below the viewport and retain existing private booking rows while refreshing. The parent is keyed by authenticated user.",
+    "diagnostic": "Chrome reported five unnamed review controls; explicit name attributes were added separately. Final browser verification is recorded in rollout evidence."
+  },
+  "ownedApiReadSample": {
+    "navigationType": "reload",
+    "requests": [
+      {
+        "route": "/api/v1/bookings/:id",
+        "durationMs": 542,
+        "status": 200,
+        "serverTiming": [
+          {
+            "name": "session",
+            "durationMs": 425
+          },
+          {
+            "name": "api",
+            "durationMs": 510
+          },
+          {
+            "name": "binding",
+            "durationMs": 510
+          },
+          {
+            "name": "web",
+            "durationMs": 510
+          },
+          {
+            "name": "cfExtPri",
+            "durationMs": 0
+          }
+        ]
+      },
+      {
+        "route": "/api/v1/bookings/:id/payment",
+        "durationMs": 1125,
+        "status": 200,
+        "serverTiming": [
+          {
+            "name": "session",
+            "durationMs": 465
+          },
+          {
+            "name": "api",
+            "durationMs": 558
+          },
+          {
+            "name": "binding",
+            "durationMs": 558
+          },
+          {
+            "name": "web",
+            "durationMs": 558
+          },
+          {
+            "name": "cfExtPri",
+            "durationMs": 0
+          }
+        ]
+      }
+    ]
+  },
+  "limits": [
+    "No CrUX field data exists for this preview.",
+    "Reduced-motion traces do not establish normal-animation frame rate.",
+    "A pair of owned-read timings is not a p95 or sustained-load result.",
+    "Raw traces remain private because request URLs may contain private references."
+  ]
+}
