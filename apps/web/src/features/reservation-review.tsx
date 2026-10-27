@@ -290,6 +290,7 @@ export function ReservationReviewScreen({
             onSave={save}
           />
           <PaymentPanel
+            key={booking.id}
             booking={booking}
             ready={
               booking.complete &&
