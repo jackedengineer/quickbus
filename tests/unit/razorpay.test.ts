@@ -50,6 +50,23 @@ test('a lost create response is ambiguous and never automatically retried', asyn
   expect(fetcher).toHaveBeenCalledTimes(1);
 });
 
+test('Workers-compatible manual redirects never forward provider credentials', async () => {
+  const fetcher = vi
+    .fn()
+    .mockResolvedValue(
+      new Response(null, {
+        status: 302,
+        headers: { Location: 'https://untrusted.invalid/' },
+      }),
+    );
+  vi.stubGlobal('fetch', fetcher);
+  await expect(
+    razorpay(config).createOrder(receipt, 74900),
+  ).rejects.toMatchObject({ httpStatus: 302, phase: 'http' });
+  expect(fetcher).toHaveBeenCalledTimes(1);
+  expect(fetcher.mock.calls[0][1].redirect).toBe('manual');
+});
+
 test('receipt lookup filters exact matches and follows pagination', async () => {
   const fetcher = vi
     .fn()

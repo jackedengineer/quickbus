@@ -62,7 +62,10 @@ export type RazorpayEnvironment = {
 // No response bodies, request URLs, credentials or provider descriptions in errors.
 // Every failed POST is ambiguous unless a validated response establishes success.
 export class ProviderUnavailable extends Error {
-  constructor(readonly httpStatus?: number) {
+  constructor(
+    readonly httpStatus?: number,
+    readonly phase: 'fetch' | 'http' | 'parse' | 'shape' = 'shape',
+  ) {
     super('Payment provider unavailable. Reconcile before another mutation.');
   }
 }
@@ -90,6 +93,24 @@ export function razorpay(environment: RazorpayEnvironment) {
     body?: object,
     refundKey?: string,
   ): Promise<T> {
+    const unavailable = (
+      phase: 'fetch' | 'http' | 'parse' | 'shape',
+      status?: number,
+    ) => {
+      console.error(
+        JSON.stringify({
+          event: 'payment_provider_unavailable',
+          operation: body
+            ? path === '/orders'
+              ? 'order_create'
+              : 'refund_create'
+            : 'provider_read',
+          phase,
+          httpStatus: status,
+        }),
+      );
+      return new ProviderUnavailable(status, phase);
+    };
     let response: Response;
     try {
       response = await fetch(`https://api.razorpay.com/v1${path}`, {
@@ -101,19 +122,21 @@ export function razorpay(environment: RazorpayEnvironment) {
         },
         body: body ? JSON.stringify(body) : undefined,
         signal: AbortSignal.timeout(8000),
-        redirect: 'error',
+        // Workers does not implement redirect:'error'. Manual plus !ok rejects
+        // redirects without forwarding Basic credentials to another host.
+        redirect: 'manual',
       });
     } catch {
-      throw new ProviderUnavailable();
+      throw unavailable('fetch');
     }
     if (!response.ok) {
       await response.body?.cancel();
-      throw new ProviderUnavailable(response.status);
+      throw unavailable('http', response.status);
     }
     // Provider payloads include contact details. Strip all fields not used here.
     // Bound reads before parsing, including chunked responses.
     const reader = response.body?.getReader();
-    if (!reader) throw new ProviderUnavailable();
+    if (!reader) throw unavailable('shape');
     let size = 0;
     const chunks: Uint8Array[] = [];
     try {
@@ -127,7 +150,7 @@ export function razorpay(environment: RazorpayEnvironment) {
       return schema.parse(JSON.parse(Buffer.concat(chunks).toString('utf8')));
     } catch {
       await reader.cancel().catch(() => undefined);
-      throw new ProviderUnavailable();
+      throw unavailable('parse');
     }
   }
   return {
