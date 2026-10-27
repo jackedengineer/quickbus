@@ -98,3 +98,75 @@ test('webhook intake verifies exact bytes and commits one inbox/job before ACK',
     await owner.end();
   }
 });
+
+test('a failed durable inbox write cannot return a successful webhook acknowledgement', async () => {
+  const owner = await fixtureClient(),
+    runtime = createDatabase(
+      process.env.DATABASE_URL ?? '',
+      process.env.CI_DATABASE_PROXY,
+    );
+  const eventId = `evt_${randomUUID().replaceAll('-', '')}`,
+    name = `payment_inbox_fault_${randomUUID().replaceAll('-', '')}`;
+  const secret = 'synthetic-webhook-signing-secret';
+  const raw = Buffer.from(
+    JSON.stringify({
+      event: 'payment.failed',
+      payload: {
+        payment: { entity: { id: 'pay_fixture', order_id: 'order_fixture' } },
+      },
+    }),
+  );
+  const signature = createHmac('sha256', secret).update(raw).digest('hex');
+  try {
+    // Fixed generated identifiers and a UUID-only match scope the fault to this
+    // fixture. Other events can still be accepted while this write fails.
+    await owner.query(
+      `CREATE FUNCTION public.${name}() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.event_id='${eventId}' THEN RAISE EXCEPTION 'inbox write unavailable'; END IF; RETURN NEW; END $$`,
+    );
+    await owner.query(
+      `CREATE TRIGGER ${name} BEFORE INSERT ON payment_inbox FOR EACH ROW EXECUTE FUNCTION public.${name}()`,
+    );
+    await expect(
+      receivePaymentWebhook(
+        runtime.db,
+        { RAZORPAY_WEBHOOK_SECRET: secret },
+        raw,
+        eventId,
+        signature,
+      ),
+    ).rejects.toThrow();
+    expect(
+      (
+        await owner.query('SELECT id FROM payment_inbox WHERE event_id=$1', [
+          eventId,
+        ])
+      ).rowCount,
+    ).toBe(0);
+    await owner.query(`DROP TRIGGER ${name} ON payment_inbox`);
+    const retry = await receivePaymentWebhook(
+      runtime.db,
+      { RAZORPAY_WEBHOOK_SECRET: secret },
+      raw,
+      eventId,
+      signature,
+    );
+    expect(retry.status).toBe(200);
+    expect(
+      (
+        await owner.query('SELECT id FROM payment_inbox WHERE event_id=$1', [
+          eventId,
+        ])
+      ).rowCount,
+    ).toBe(1);
+  } finally {
+    await owner.query(`DROP TRIGGER IF EXISTS ${name} ON payment_inbox`);
+    await owner.query(`DROP FUNCTION IF EXISTS public.${name}()`);
+    await owner.query(
+      'DELETE FROM payment_jobs WHERE resource_id IN(SELECT id FROM payment_inbox WHERE event_id=$1)',
+      [eventId],
+    );
+    await owner.query('DELETE FROM payment_inbox WHERE event_id=$1', [eventId]);
+    await runtime.close();
+    await owner.end();
+  }
+});

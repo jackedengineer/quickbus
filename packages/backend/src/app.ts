@@ -59,7 +59,11 @@ export function createApp() {
     response.json({ status: 'ok', postgresMajor: rows.rows[0]?.major });
   });
   app.get('/api/health/maintenance', async (_request, response) => {
-    const health = await maintenanceHealth(context().db);
+    const { db, environment } = context();
+    const health = await maintenanceHealth(
+      db,
+      Boolean(environment.RAZORPAY_KEY_ID),
+    );
     response.status(health.status === 'ok' ? 200 : 503).json(health);
   });
   // Signature covers the exact bytes. Keep this before JSON parsing and session

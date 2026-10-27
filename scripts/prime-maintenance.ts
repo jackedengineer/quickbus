@@ -15,12 +15,17 @@ const environment: AppEnvironment = {
   DEPLOYMENT_ENV: 'production',
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+  PAYMENTS_ENABLED: process.env.PAYMENTS_ENABLED,
+  RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
+  RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
+  RAZORPAY_WEBHOOK_SECRET: process.env.RAZORPAY_WEBHOOK_SECRET,
 };
 validateEnvironment(environment);
 const database = createDatabase(environment.DATABASE_URL);
 try {
   await runMaintenance(database.db, 'expiry');
   await runMaintenance(database.db, 'inventory');
+  await runMaintenance(database.db, 'payments', undefined, environment);
 } finally {
   await database.close();
 }

@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { parseEnv } from 'node:util';
 import pg from 'pg';
 import { backfillTripCatalog } from './catalog-seed';
+import { invariantQuery } from './recovery-audit';
 
 const canonical = 'https://kwikbus.jacked.dev';
 const git = (...args: string[]) =>
@@ -156,6 +157,7 @@ const evidence: {
   previous?: { api: string; web: string };
   deployed?: { api: string; web: string };
   state: string;
+  financialAndInventoryAudit?: Record<string, number>;
 } = {
   revision,
   ciRun,
@@ -217,6 +219,17 @@ try {
     ],
     { CONFIRM_MAINTENANCE: 'kwikbus_v0' },
   );
+  evidence.financialAndInventoryAudit = (
+    await client.query(invariantQuery)
+  ).rows[0].value;
+  if (
+    Object.values(evidence.financialAndInventoryAudit ?? {}).some(
+      (count) => count !== 0,
+    )
+  )
+    throw new Error(
+      'Inventory or financial audit failed; do not reopen checkout.',
+    );
   evidence.state = 'deploying';
   await save();
   run('pnpm', [
