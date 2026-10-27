@@ -1,0 +1,236 @@
+{
+  "checkedAt": "2026-10-27T09:20:19.532Z",
+  "mode": "Razorpay test; no real money",
+  "sourceRevision": "40077a15edb75920951efff8d36d92d17e1a21f9",
+  "ciRun": "40474259388",
+  "workers": {
+    "api": "f4937fc1-04a8-4100-9a68-d1db810d0ac7",
+    "web": "f1f8ce00-3431-4659-b1d0-46be3a55bdd5"
+  },
+  "browser": {
+    "desktopChrome": true,
+    "mobileChromeDevTools": {
+      "width": 390,
+      "height": 844,
+      "touch": true,
+      "reducedMotion": true,
+      "realEmailOtp": true,
+      "providerDelivery": "Resend delivered; code accepted by KwikBus",
+      "declineExplicitRetryCapture": true,
+      "automaticRecoveryReload": true
+    },
+    "mobileInApp": {
+      "renderedHostedCheckout": true,
+      "providerCancellationVerified": true,
+      "naturalPendingExpiry": true
+    },
+    "lateCapture": {
+      "originalCheckoutTabOfflineUntilRefundProcessed": true,
+      "bankWindowOnline": true,
+      "releaseBeforeBankSuccess": true,
+      "refundVisibleBeforeReconnect": true,
+      "fullReloadRestoresRefund": true
+    },
+    "limitations": [
+      "No live-bank or live-money validation",
+      "UPI collect was not offered by the account UI; no UPI result is claimed",
+      "Direct in-app mock-bank popup was not exposed to automation; controlled outcomes used Chrome",
+      "An abandoned mock-bank window initially appeared uncaptured. The later authoritative audit shows it captured and fully refunded; the controlled offline-tab experiment supplies the explicit release-before-success timeline."
+    ]
+  },
+  "financial": [
+    {
+      "id": "44bd273e-b4ca-4ccf-9385-9c0c2cd557b1",
+      "status": "CANCELLED",
+      "attempt": 1,
+      "checkout_state": "CAPTURED",
+      "payment_id": "pay_TssL0NssHjnZxa",
+      "payment_state": "refunded",
+      "disposition": "REFUND",
+      "refund_key": "2852b573-6461-422d-80d7-3994939349d3",
+      "refund_state": "PROCESSED",
+      "refund_provider_id": "rfnd_TssSgzX8uR9qnl",
+      "refund_amount": 74900,
+      "refund_updated_at": "2026-10-27T09:08:50.559Z",
+      "allocations": 0,
+      "confirmations": 0
+    },
+    {
+      "id": "6641a042-ed37-4c6f-963d-36eddd683b8c",
+      "status": "CONFIRMED",
+      "attempt": 1,
+      "checkout_state": "FAILED",
+      "payment_id": "pay_Tsra5JKJwGKIsZ",
+      "payment_state": "failed",
+      "disposition": "PENDING",
+      "refund_key": null,
+      "refund_state": null,
+      "refund_provider_id": null,
+      "refund_amount": null,
+      "refund_updated_at": null,
+      "allocations": 1,
+      "confirmations": 1
+    },
+    {
+      "id": "6641a042-ed37-4c6f-963d-36eddd683b8c",
+      "status": "CONFIRMED",
+      "attempt": 2,
+      "checkout_state": "CAPTURED",
+      "payment_id": "pay_TsrdsfPbER50qd",
+      "payment_state": "captured",
+      "disposition": "FULFILLED",
+      "refund_key": null,
+      "refund_state": null,
+      "refund_provider_id": null,
+      "refund_amount": null,
+      "refund_updated_at": null,
+      "allocations": 1,
+      "confirmations": 1
+    },
+    {
+      "id": "8d863cc0-68fd-4aef-8fc8-7b658fb08287",
+      "status": "EXPIRED",
+      "attempt": 1,
+      "checkout_state": "FAILED",
+      "payment_id": "pay_Tss2YYBapSmFiI",
+      "payment_state": "failed",
+      "disposition": "PENDING",
+      "refund_key": null,
+      "refund_state": null,
+      "refund_provider_id": null,
+      "refund_amount": null,
+      "refund_updated_at": null,
+      "allocations": 0,
+      "confirmations": 0
+    },
+    {
+      "id": "9b61bb98-aefe-4ca5-a0bb-ffe78f6b437c",
+      "status": "CONFIRMED",
+      "attempt": 1,
+      "checkout_state": "FAILED",
+      "payment_id": "pay_TssE8UsWE9Rq6a",
+      "payment_state": "failed",
+      "disposition": "PENDING",
+      "refund_key": null,
+      "refund_state": null,
+      "refund_provider_id": null,
+      "refund_amount": null,
+      "refund_updated_at": null,
+      "allocations": 1,
+      "confirmations": 1
+    },
+    {
+      "id": "9b61bb98-aefe-4ca5-a0bb-ffe78f6b437c",
+      "status": "CONFIRMED",
+      "attempt": 2,
+      "checkout_state": "CAPTURED",
+      "payment_id": "pay_TssGxMerFnL93Y",
+      "payment_state": "captured",
+      "disposition": "FULFILLED",
+      "refund_key": null,
+      "refund_state": null,
+      "refund_provider_id": null,
+      "refund_amount": null,
+      "refund_updated_at": null,
+      "allocations": 1,
+      "confirmations": 1
+    },
+    {
+      "id": "e93c93d6-9d80-4d01-a8a2-0689a73e5a31",
+      "status": "CANCELLED",
+      "attempt": 1,
+      "checkout_state": "CAPTURED",
+      "payment_id": "pay_Tsrqeno8SkeOi7",
+      "payment_state": "refunded",
+      "disposition": "REFUND",
+      "refund_key": "f0f5b8da-6c06-4af0-b13c-bb382c43ad8b",
+      "refund_state": "PROCESSED",
+      "refund_provider_id": "rfnd_Tsrsx6eUwRaIap",
+      "refund_amount": 74900,
+      "refund_updated_at": "2026-10-27T08:34:59.555Z",
+      "allocations": 0,
+      "confirmations": 0
+    }
+  ],
+  "invariants": {
+    "missingHeldAllocations": 0,
+    "terminalAllocations": 0,
+    "incorrectQuotes": 0,
+    "crossTripStopChoices": 0,
+    "missingDetailEvents": 0,
+    "incompleteCatalogSnapshots": 0,
+    "partialServiceTrips": 0,
+    "intentQuoteMismatch": 0,
+    "confirmedWithoutMoney": 0,
+    "fulfillmentWithoutBooking": 0,
+    "refundQuoteMismatch": 0,
+    "captureWithoutDisposition": 0,
+    "compensationWithoutRefund": 0,
+    "refundWithoutJob": 0,
+    "checkoutWithoutRecovery": 0,
+    "inboxWithoutJob": 0,
+    "processedRefundWithoutIdentity": 0
+  },
+  "runtimePrivileges": {
+    "intent_money_update": false,
+    "refund_money_update": false,
+    "inbox_evidence_update": false,
+    "refund_delete": false,
+    "refund_state_update": true
+  },
+  "signedEventEvidence": [
+    {
+      "event_type": "payment.captured",
+      "received_at": "2026-10-27T09:07:09.231Z",
+      "processed_at": "2026-10-27T09:08:11.099Z"
+    },
+    {
+      "event_type": "payment.authorized",
+      "received_at": "2026-10-27T09:07:09.289Z",
+      "processed_at": "2026-10-27T09:07:16.767Z"
+    },
+    {
+      "event_type": "refund.created",
+      "received_at": "2026-10-27T09:08:24.570Z",
+      "processed_at": "2026-10-27T09:08:27.587Z"
+    },
+    {
+      "event_type": "refund.processed",
+      "received_at": "2026-10-27T09:08:28.051Z",
+      "processed_at": "2026-10-27T09:08:38.498Z"
+    }
+  ],
+  "providerRefundReplay": {
+    "checkedAt": "2026-10-27T09:09:33.551Z",
+    "mode": "test",
+    "payment": {
+      "id": "pay_TssL0NssHjnZxa",
+      "order_id": "order_TssK39BPzNZg3l",
+      "amount": 74900,
+      "currency": "INR",
+      "status": "refunded",
+      "captured": true,
+      "amount_refunded": 74900
+    },
+    "before": [
+      {
+        "id": "rfnd_TssSgzX8uR9qnl",
+        "payment_id": "pay_TssL0NssHjnZxa",
+        "amount": 74900,
+        "currency": "INR",
+        "status": "processed"
+      }
+    ],
+    "replayReturnedSameId": true,
+    "refundCountAfterReplay": 1,
+    "after": [
+      {
+        "id": "rfnd_TssSgzX8uR9qnl",
+        "payment_id": "pay_TssL0NssHjnZxa",
+        "amount": 74900,
+        "currency": "INR",
+        "status": "processed"
+      }
+    ]
+  }
+}

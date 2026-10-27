@@ -132,3 +132,39 @@ click. This removes the delayed automatic launch that was unreliable in Chrome.
 A reopened review always reads the existing attempt; it does not create another
 order. After provider dismissal or authoritative terminal state, a guarded fresh
 document resets the SDK. Switching reservations also remounts payment UI by ID.
+
+
+## Production acceptance — 27 October 2026
+
+Exact source `40077a1` passed Quality run
+[40474259388](https://github.com/jackedengineer/quickbus/actions/runs/40474259388)
+and was deployed with test checkout enabled. The actual 390×844 touch Chrome
+journey used delivered email OTP, database search/reserve/details, explicit bank
+Failure, replacement checkout without manual reload, bank Success and restored
+confirmation. Desktop Chrome passed failure/retry/capture and full reload too.
+The in-app mobile view rendered hosted checkout and verified cancellation; its
+mock-bank popup was not exposed to automation, so controlled outcomes used Chrome.
+No UPI collect or live-bank result is claimed.
+
+For a controlled late capture, the original Chrome checkout tab was set offline
+with per-page DevTools emulation while the separate mock-bank window stayed online.
+The same owner's in-app session released the reservation before bank Success;
+a transient release error safely retried with its existing command key. With zero
+allocations and no browser verification callback, signed provider events recovered
+the capture and issued one full ₹749 refund. The provider reached processed,
+repeat submission of the immutable refund key returned the same ID, and the
+provider listed one refund. Refund state appeared before the original tab was
+reconnected and survived its reload. The booking stayed CANCELLED with zero
+confirmation events. Network emulation was restored after the experiment.
+
+The read-only production audit found zero violations across all 17 inventory and
+financial checks. Runtime grants reject amount/identity/evidence changes while
+allowing required state transitions. A fresh consistent production snapshot
+restored 33 tables / 7,613 rows into an isolated disposable target with matching
+schema and invariant audits; production remained online.
+
+[Production browser/provider/SQL evidence](evidence/payments-2026-10-27/production-acceptance.json),
+[recovery evidence](evidence/payments-2026-10-27/recovery.json).
+The earlier staging section is historical; public sandbox checkout is now enabled.
+The payment-aware disabled rollback baseline remains the compatible fallback.
+Full paid cancellation, ticket delivery and admin remain future slices.

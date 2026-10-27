@@ -27,3 +27,16 @@ For a real recovery incident, isolate the failed service, choose a verified back
 The production snapshot at 11:22:58 UTC restored and passed its audit at 11:23:09 UTC. All 17 tables / 4,013 rows matched, including column/default/constraint/index definitions; all four booking/allocation/quote/service-seat invariant counts were zero. Backup took 8,825 ms, target startup/restore/audit 1,715 ms and total execution 11,690 ms. The snapshot was 10,913 ms old at verification. These are observed local drill timings, not service guarantees. [Sanitised evidence](evidence/p0-2026-10-26/recovery.json).
 
 The initial attempts exposed the missing client CA bundle and representational schema/JSON differences; these were fixed and the entire live-source drill rerun successfully. The disposable target was removed, the successful archive encrypted and earlier failed plaintext copies removed after the successful backup existed. Source credentials were removed in every attempt. Production stayed online and was never a restore destination.
+
+
+## Financial-schema drill — 27 October 2026
+
+A fresh production snapshot at 09:09:32.350 UTC restored and passed its audit at
+09:09:48.384 UTC after actual test captures and refunds. All 33 tables / 7,613 rows
+and schema definitions matched; all 17 inventory, quote, fulfillment, payment,
+refund and recovery-link invariant counts were zero. Backup took 11,099 ms,
+restore/audit 4,351 ms and total execution 16,833 ms. Snapshot age was 16,035 ms.
+The disposable target had no network and was removed; the successful archive was
+encrypted and plaintext/source credentials removed. No production data was
+replaced. These local timings do not establish continuous backup, RPO or RTO.
+[Sanitized financial-schema evidence](evidence/payments-2026-10-27/recovery.json).
