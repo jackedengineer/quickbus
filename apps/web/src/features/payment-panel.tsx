@@ -371,6 +371,7 @@ export function PaymentPanel({
         {notice &&
           !confirmed &&
           !refunding &&
+          !state.checkout?.canOpen &&
           state.checkout?.state !== 'FAILED' && <p>{notice}</p>}
       </div>
       {error && (

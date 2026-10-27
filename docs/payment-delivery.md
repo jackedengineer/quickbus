@@ -125,3 +125,10 @@ or a completed dismissal hint. No new order is inferred from that reset. Callbac
 identity/mount guards suppress old modals affecting another reservation. Passenger
 details are already frozen; all recovery state is database-backed. This behavior
 must pass an actual failure→retry journey after deployment before UI acceptance.
+
+The launch is now explicit: Continue prepares the durable order and preloads the
+public SDK; Open Razorpay test checkout opens the READY order from a direct user
+click. This removes the delayed automatic launch that was unreliable in Chrome.
+A reopened review always reads the existing attempt; it does not create another
+order. After provider dismissal or authoritative terminal state, a guarded fresh
+document resets the SDK. Switching reservations also remounts payment UI by ID.
