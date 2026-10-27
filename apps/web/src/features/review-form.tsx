@@ -124,8 +124,8 @@ export function ReservationReviewForm({
           />
         </label>
         <p className="muted">
-          These details belong only to this reservation. No ticket or payment
-          confirmation will be sent.
+          These details belong only to this reservation. This portfolio demo
+          issues no real travel tickets.
         </p>
       </fieldset>
       <div className="review-total">
@@ -147,8 +147,8 @@ export function ReservationReviewForm({
             : 'Save reservation details'}
       </button>
       <p className="muted">
-        Payments are not available in this preview. A future payment must start
-        with at least 90 seconds left on the reservation.
+        A test payment must start with at least 90 seconds left on the
+        reservation. Passenger details are locked once checkout starts.
       </p>
       {active && remaining !== null && remaining < 90 && (
         <p role="status">
@@ -156,11 +156,12 @@ export function ReservationReviewForm({
           would be too close to expiry to start a payment.
         </p>
       )}
-      {remaining !== null && !active && (
-        <p role="status">
-          This reservation has ended. Its seats are no longer held.
-        </p>
-      )}
+      {remaining !== null &&
+        ['EXPIRED', 'CANCELLED'].includes(booking.status) && (
+          <p role="status">
+            This reservation has ended. Its seats are no longer held.
+          </p>
+        )}
     </form>
   );
 }

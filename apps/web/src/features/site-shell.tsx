@@ -199,9 +199,8 @@ export function Help() {
       <details>
         <summary>Can I pay for my booking?</summary>
         <p>
-          Payments are not available in this development preview. The
-          reservation will expire automatically or you can release it in My
-          bookings.
+          Checkout uses Razorpay test mode with no real money. The reservation
+          will expire automatically or you can release it in My bookings.
         </p>
       </details>
       <details>
@@ -232,7 +231,7 @@ export function SiteFooter() {
         <div className="footer-legal">
           <a href="/?view=privacy">Privacy</a>
           <a href="/?view=terms">Terms</a>
-          <span>V0.1 · Unpaid seat reservations</span>
+          <span>V0.2 · Test checkout preview</span>
         </div>
       </div>
     </footer>

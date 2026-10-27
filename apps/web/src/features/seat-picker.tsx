@@ -352,7 +352,7 @@ export function SeatPicker({
                 : 'Sign in to reserve'}
         </button>
         <small>
-          Temporary reservation only. Payments are not available yet.
+          Seats stay reserved temporarily. Complete test checkout to confirm.
         </small>
       </div>
     </Dialog>
