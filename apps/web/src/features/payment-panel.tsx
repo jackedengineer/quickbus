@@ -384,6 +384,7 @@ export function PaymentPanel({
           <label className="payment-consent">
             <input
               type="checkbox"
+              name="testPaymentConsent"
               checked={accepted}
               onChange={(e) => setAccepted(e.target.checked)}
             />

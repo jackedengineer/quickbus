@@ -173,6 +173,7 @@ export function SeatPicker({
               <label key={role}>
                 {role === 'PICKUP' ? 'Pickup point' : 'Drop point'}
                 <select
+                  name={role === 'PICKUP' ? 'pickupStopId' : 'dropStopId'}
                   value={role === 'PICKUP' ? pickup : drop}
                   disabled={busy || uncertain}
                   onChange={(e) => {

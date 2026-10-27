@@ -49,6 +49,7 @@ export function TripResults({
         <label>
           Sort by{' '}
           <select
+            name="journeySort"
             value={order}
             onChange={(e) => onOrder(e.target.value as 'departure' | 'price')}
           >

@@ -43,6 +43,7 @@ export function ReservationReviewForm({
           <label key={role}>
             {role === 'PICKUP' ? 'Pickup point' : 'Drop point'}
             <select
+              name={role === 'PICKUP' ? 'pickupStopId' : 'dropStopId'}
               required
               value={role === 'PICKUP' ? draft.pickup : draft.drop}
               onChange={(e) =>
@@ -82,6 +83,7 @@ export function ReservationReviewForm({
           <label key={p.seatLabel}>
             Full name · Seat {p.seatLabel} · {money(p.fareMinor)}
             <input
+              name={`passenger-${p.seatLabel}`}
               required
               minLength={2}
               maxLength={100}
@@ -106,6 +108,7 @@ export function ReservationReviewForm({
           Verified email
           <input
             type="email"
+            name="contactEmail"
             value={booking.contactEmail}
             readOnly
             autoComplete="off"
@@ -115,6 +118,7 @@ export function ReservationReviewForm({
           Phone (optional, international format)
           <input
             type="tel"
+            name="contactPhone"
             inputMode="tel"
             autoComplete="off"
             placeholder="+91 98765 43210"
