@@ -10,6 +10,14 @@ export type PaymentJob = {
   attempts: number;
 };
 
+export class StalePaymentLease extends Error {}
+export async function requirePaymentLease(tx: Transaction, job: PaymentJob) {
+  const lease =
+    await tx.execute(sql`SELECT id FROM payment_jobs WHERE id=${job.id} AND state='RUNNING'
+    AND lease_token=${job.leaseToken} AND lease_expires_at>clock_timestamp() FOR UPDATE`);
+  if (!lease.rowCount) throw new StalePaymentLease();
+}
+
 export async function enqueuePaymentJob(
   tx: Transaction,
   kind: JobKind,
