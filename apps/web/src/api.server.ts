@@ -9,11 +9,16 @@ export async function apiFetch(request: Request): Promise<Response> {
     const reader = request.body.getReader();
     const chunks: Uint8Array[] = [];
     let size = 0;
+    const limit =
+      request.method === 'POST' &&
+      new URL(request.url).pathname === '/api/webhooks/razorpay'
+        ? 256 * 1024
+        : 16 * 1024;
     while (true) {
       const chunk = await reader.read();
       if (chunk.done) break;
       size += chunk.value.byteLength;
-      if (size > 16 * 1024) {
+      if (size > limit) {
         await reader.cancel();
         return Response.json({ code: 'REQUEST_TOO_LARGE' }, { status: 413 });
       }

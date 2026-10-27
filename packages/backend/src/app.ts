@@ -14,6 +14,7 @@ import {
 import { catalog, citySuggestions, searchTrips, tripDetails } from './catalog';
 import { context } from './context';
 import { maintenanceHealth } from './maintenance';
+import { receivePaymentWebhook } from './payment-inbox';
 import {
   reservationReview,
   saveReservationDetails,
@@ -60,6 +61,25 @@ export function createApp() {
     const health = await maintenanceHealth(context().db);
     response.status(health.status === 'ok' ? 200 : 503).json(health);
   });
+  // Signature covers the exact bytes. Keep this before JSON parsing and session
+  // middleware; the signed webhook alone is exempt from browser Origin checks.
+  app.post(
+    '/api/webhooks/razorpay',
+    express.raw({ type: 'application/json', limit: '256kb', inflate: false }),
+    async (request, response) => {
+      if (!Buffer.isBuffer(request.body))
+        return response.status(400).json({ code: 'INVALID_EVENT' });
+      const { db, environment } = context();
+      const result = await receivePaymentWebhook(
+        db,
+        environment,
+        request.body,
+        request.get('x-razorpay-event-id') ?? '',
+        request.get('x-razorpay-signature') ?? '',
+      );
+      return response.status(result.status).json(result.body);
+    },
+  );
   // Auth must see the original body stream: https://better-auth.com/docs/integrations/express
   app.all('/api/auth/*splat', (request, response) => {
     const { db, environment } = context();

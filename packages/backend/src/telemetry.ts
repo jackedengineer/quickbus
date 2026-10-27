@@ -19,6 +19,7 @@ const routes = new Set([
   '/api/v1/cities',
   '/api/v1/holds',
   '/api/v1/bookings',
+  '/api/webhooks/razorpay',
   '/api/auth/email-otp/send-verification-otp',
   '/api/auth/sign-in/email-otp',
   '/api/auth/sign-in/social',
