@@ -20,6 +20,7 @@ const order = {
   amount_paid: 0,
   amount_due: 74900,
   attempts: 0,
+  notes: {},
 };
 afterEach(() => vi.unstubAllGlobals());
 

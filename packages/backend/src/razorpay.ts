@@ -14,6 +14,23 @@ const orderSchema = z.object({
   amount_paid: money.nullable(),
   amount_due: money,
   attempts: z.number().int().nonnegative(),
+  notes: z
+    .unknown()
+    .optional()
+    .transform((value) => {
+      if (!value || typeof value !== 'object') return {};
+      return {
+        kwikbus_app:
+          'kwikbus_app' in value && typeof value.kwikbus_app === 'string'
+            ? value.kwikbus_app
+            : undefined,
+        kwikbus_environment:
+          'kwikbus_environment' in value &&
+          typeof value.kwikbus_environment === 'string'
+            ? value.kwikbus_environment
+            : undefined,
+      };
+    }),
 });
 const paymentSchema = z.object({
   id: providerId('pay'),
@@ -35,6 +52,7 @@ export type ProviderOrder = z.infer<typeof orderSchema>;
 export type ProviderPayment = z.infer<typeof paymentSchema>;
 export type ProviderRefund = z.infer<typeof refundSchema>;
 export type RazorpayEnvironment = {
+  DEPLOYMENT_ENV?: string;
   RAZORPAY_KEY_ID?: string;
   RAZORPAY_KEY_SECRET?: string;
   RAZORPAY_WEBHOOK_SECRET?: string;
@@ -122,6 +140,13 @@ export function razorpay(environment: RazorpayEnvironment) {
         currency: 'INR',
         receipt,
         partial_payment: false,
+        notes: {
+          kwikbus_app: 'kwikbus',
+          kwikbus_environment:
+            environment.DEPLOYMENT_ENV === 'production'
+              ? 'production'
+              : 'development',
+        },
       });
     },
     order(id: string) {

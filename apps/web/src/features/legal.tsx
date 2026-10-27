@@ -3,7 +3,7 @@ export function Legal({ kind }: { kind: 'privacy' | 'terms' }) {
     <article className="help-content legal-content">
       <h1>{kind === 'privacy' ? 'Privacy notice' : 'Terms of use'}</h1>
       <p className="muted">
-        KwikBus portfolio preview · Updated 25 October 2026
+        KwikBus portfolio preview · Updated 27 October 2026
       </p>
       {kind === 'privacy' ? (
         <>
@@ -12,8 +12,10 @@ export function Legal({ kind }: { kind: 'privacy' | 'terms' }) {
             Signing in stores your email address, account identifier,
             verified-email status and session. Google sign-in may also provide
             your name and profile image. We store your selected journey, seats
-            and reservation status. Authentication uses an IP address to limit
-            abuse.
+            and reservation status, passenger names, selected stops and an
+            optional contact phone. Test checkout stores provider references,
+            payment/refund states and amounts. Authentication uses an IP address
+            to limit abuse.
           </p>
           <h2>Why we use it</h2>
           <p>
@@ -27,8 +29,10 @@ export function Legal({ kind }: { kind: 'privacy' | 'terms' }) {
             The application uses Cloudflare for hosting, Neon for PostgreSQL,
             Better Auth for authentication, Google when you choose Google
             sign-in, and Resend for production sign-in emails. Local development
-            emails stay in a local test inbox. Service providers process the
-            data needed to deliver their service.
+            emails stay in a local test inbox. Razorpay hosts test checkout and
+            processes the information you enter there. KwikBus does not receive
+            or store card numbers, bank credentials or UPI secrets. Service
+            providers process the data needed to deliver their service.
           </p>
           <h2>Retention and your choices</h2>
           <p>
@@ -51,14 +55,19 @@ export function Legal({ kind }: { kind: 'privacy' | 'terms' }) {
             KwikBus is an independent portfolio project. Journeys, fares and
             seats are demonstration inventory. A reservation temporarily holds
             seats in this application; it does not book a real bus, create a
-            valid ticket or promise transport. Payments are unavailable. Do not
-            use this preview to arrange travel.
+            valid ticket or promise transport. Checkout uses Razorpay test mode;
+            no real money is collected. Use test payment instruments only. Do
+            not use this preview to arrange travel.
           </p>
           <h2>Your account and reservations</h2>
           <p>
             Use an email address you control. Keep sign-in codes private.
             Reservations last up to ten minutes and may expire earlier when
             journey sales close. You may release your seats from My bookings.
+            Confirmation requires server-verified captured test payment before
+            the reservation expires. A payment arriving after expiry or release
+            is refunded instead; it cannot recover reallocated seats. Refunds
+            remain pending until verified with the provider.
           </p>
           <h2>Availability and acceptable use</h2>
           <p>

@@ -62,7 +62,12 @@ export async function processPaymentInbox(
       await tx.execute(
         sql`UPDATE payment_jobs SET available_at=clock_timestamp() WHERE kind='REFUND' AND state='QUEUED' AND resource_id IN(SELECT id FROM payment_refunds WHERE payment_id=${payment.id})`,
       );
-    } else
+    } else if (
+      checkout ||
+      (order?.notes.kwikbus_app === 'kwikbus' &&
+        order.notes.kwikbus_environment ===
+          (env.DEPLOYMENT_ENV === 'production' ? 'production' : 'development'))
+    )
       await paymentCase(
         tx,
         `inbox:${inbox.id}`,
