@@ -51,14 +51,12 @@ test('a lost create response is ambiguous and never automatically retried', asyn
 });
 
 test('Workers-compatible manual redirects never forward provider credentials', async () => {
-  const fetcher = vi
-    .fn()
-    .mockResolvedValue(
-      new Response(null, {
-        status: 302,
-        headers: { Location: 'https://untrusted.invalid/' },
-      }),
-    );
+  const fetcher = vi.fn().mockResolvedValue(
+    new Response(null, {
+      status: 302,
+      headers: { Location: 'https://untrusted.invalid/' },
+    }),
+  );
   vi.stubGlobal('fetch', fetcher);
   await expect(
     razorpay(config).createOrder(receipt, 74900),
