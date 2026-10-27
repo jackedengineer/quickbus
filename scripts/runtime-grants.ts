@@ -19,4 +19,7 @@ export async function applyRuntimeGrants(client: pg.Client, role: string) {
     `GRANT SELECT,INSERT,UPDATE ON maintenance_jobs TO "${role}"`,
   );
   await client.query(`GRANT SELECT,INSERT,UPDATE ON payment_jobs TO "${role}"`);
+  await client.query(
+    `GRANT SELECT,INSERT,UPDATE ON payment_intents,checkout_attempts,provider_payments,payment_refunds,payment_inbox,payment_cases TO "${role}"`,
+  );
 }

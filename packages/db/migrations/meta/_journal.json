@@ -57,6 +57,13 @@
       "when": 1793081249330,
       "tag": "0007_curious_surge",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793081358654,
+      "tag": "0008_concerned_shinobi_shaw",
+      "breakpoints": true
     }
   ]
 }
