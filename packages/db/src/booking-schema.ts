@@ -131,13 +131,13 @@ export const bookings = pgTable(
     ),
     uniqueIndex('one_pending_booking_per_customer_trip')
       .on(t.tripId, t.userId)
-      .where(sql`${t.status} = 'HELD'`),
+      .where(sql`${t.status} IN ('HELD','PAYMENT_PENDING')`),
     index('booking_due_expiry')
       .on(t.tripId, t.expiresAt)
-      .where(sql`${t.status} = 'HELD'`),
+      .where(sql`${t.status} IN ('HELD','PAYMENT_PENDING')`),
     check(
       'booking_unpaid_state',
-      sql`${t.status} IN ('HELD', 'EXPIRED', 'CANCELLED')`,
+      sql`${t.status} IN ('HELD','PAYMENT_PENDING','CONFIRMED','EXPIRED','CANCELLED')`,
     ),
     check(
       'booking_money',

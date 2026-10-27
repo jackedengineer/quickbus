@@ -20,8 +20,8 @@ export const schemaQuery = `SELECT json_build_object(
 ) value`;
 export const invariantQuery = `SELECT json_build_object(
   'missingHeldAllocations',(SELECT count(*)::int FROM booking_items i JOIN bookings b ON b.id=i.booking_id
-    LEFT JOIN seat_allocations a ON a.booking_id=i.booking_id AND a.trip_id=i.trip_id AND a.seat_label=i.seat_label WHERE b.status='HELD' AND a.booking_id IS NULL),
-  'terminalAllocations',(SELECT count(*)::int FROM seat_allocations a JOIN bookings b ON b.id=a.booking_id WHERE b.status<>'HELD'),
+    LEFT JOIN seat_allocations a ON a.booking_id=i.booking_id AND a.trip_id=i.trip_id AND a.seat_label=i.seat_label WHERE b.status IN ('HELD','PAYMENT_PENDING','CONFIRMED') AND a.booking_id IS NULL),
+  'terminalAllocations',(SELECT count(*)::int FROM seat_allocations a JOIN bookings b ON b.id=a.booking_id WHERE b.status IN ('EXPIRED','CANCELLED')),
   'incorrectQuotes',(SELECT count(*)::int FROM bookings b WHERE total_minor<>(SELECT sum(fare_minor) FROM booking_items WHERE booking_id=b.id)),
   'crossTripStopChoices',(SELECT count(*)::int FROM bookings b WHERE
     (pickup_stop_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM trip_stops WHERE trip_id=b.trip_id AND id=b.pickup_stop_id AND role='PICKUP')) OR

@@ -443,8 +443,8 @@ try {
   console.log('PASS: injected write failure rolls back the complete command');
   const invariant = await client.query(
     `SELECT
-    (SELECT count(*)::int FROM booking_items i JOIN bookings b ON b.id=i.booking_id WHERE b.trip_id=ANY($1::uuid[]) AND b.status='HELD' AND NOT EXISTS(SELECT 1 FROM seat_allocations a WHERE a.booking_id=i.booking_id AND a.trip_id=i.trip_id AND a.seat_label=i.seat_label)) AS missing_allocations,
-    (SELECT count(*)::int FROM seat_allocations a JOIN bookings b ON b.id=a.booking_id WHERE a.trip_id=ANY($1::uuid[]) AND b.status<>'HELD') AS terminal_allocations`,
+    (SELECT count(*)::int FROM booking_items i JOIN bookings b ON b.id=i.booking_id WHERE b.trip_id=ANY($1::uuid[]) AND b.status IN ('HELD','PAYMENT_PENDING','CONFIRMED') AND NOT EXISTS(SELECT 1 FROM seat_allocations a WHERE a.booking_id=i.booking_id AND a.trip_id=i.trip_id AND a.seat_label=i.seat_label)) AS missing_allocations,
+    (SELECT count(*)::int FROM seat_allocations a JOIN bookings b ON b.id=a.booking_id WHERE a.trip_id=ANY($1::uuid[]) AND b.status IN ('EXPIRED','CANCELLED')) AS terminal_allocations`,
     [tripIds],
   );
   assert.deepEqual(invariant.rows[0], {

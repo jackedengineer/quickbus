@@ -64,6 +64,13 @@
       "when": 1793081358654,
       "tag": "0008_concerned_shinobi_shaw",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793081442294,
+      "tag": "0009_sharp_lorna_dane",
+      "breakpoints": true
     }
   ]
 }

@@ -11,7 +11,7 @@ export async function expireTripHolds(
   const result = await tx.execute<{ expired: number }>(sql`
     WITH expired AS (
       UPDATE bookings SET status='EXPIRED'
-      WHERE trip_id=${tripId} AND status='HELD' AND expires_at<=${timestamp}::timestamptz RETURNING id
+      WHERE trip_id=${tripId} AND status IN ('HELD','PAYMENT_PENDING') AND expires_at<=${timestamp}::timestamptz RETURNING id
     ), released AS (
       DELETE FROM seat_allocations USING expired WHERE booking_id=expired.id RETURNING booking_id
     ), events AS (
@@ -26,7 +26,7 @@ export async function sweepExpiredHolds(db: Database) {
   // the same serialization lock used by customer hold/release commands.
   const candidates = await db.execute<{ id: string }>(sql`
     SELECT t.id FROM trips t WHERE EXISTS (
-      SELECT 1 FROM bookings b WHERE b.trip_id=t.id AND b.status='HELD' AND b.expires_at<=clock_timestamp()
+      SELECT 1 FROM bookings b WHERE b.trip_id=t.id AND b.status IN ('HELD','PAYMENT_PENDING') AND b.expires_at<=clock_timestamp()
     ) ORDER BY t.id LIMIT 10`);
   let expired = 0;
   for (const trip of candidates.rows)

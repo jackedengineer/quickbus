@@ -15,7 +15,7 @@ export type Booking = {
   id: string;
   tripId: string;
   reference: string;
-  status: 'HELD' | 'EXPIRED' | 'CANCELLED';
+  status: 'HELD' | 'PAYMENT_PENDING' | 'CONFIRMED' | 'EXPIRED' | 'CANCELLED';
   expiresAt: string;
   serverTime: string;
   totalMinor: number;

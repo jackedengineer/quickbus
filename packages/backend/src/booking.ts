@@ -56,7 +56,7 @@ export async function holdSeats(
           422,
         );
       const pending = await tx.execute(
-        sql`SELECT id FROM bookings WHERE trip_id=${input.tripId} AND user_id=${userId} AND status='HELD'`,
+        sql`SELECT id FROM bookings WHERE trip_id=${input.tripId} AND user_id=${userId} AND status IN ('HELD','PAYMENT_PENDING')`,
       );
       if (pending.rowCount)
         return failure(
@@ -157,8 +157,16 @@ export async function releaseHold(
       if (!booking.rows[0])
         return failure('BOOKING_NOT_FOUND', 'Reservation not found.', 404);
       await lockTrip(tx, booking.rows[0].trip_id);
+      const current = await tx.execute<{ status: string }>(
+        sql`SELECT status FROM bookings WHERE id=${id}`,
+      );
+      if (current.rows[0].status === 'CONFIRMED')
+        return failure(
+          'PAID_CANCELLATION_REQUIRED',
+          'A confirmed booking requires the cancellation and refund flow.',
+        );
       const changed = await tx.execute(
-        sql`UPDATE bookings SET status='CANCELLED' WHERE id=${id} AND status='HELD' RETURNING id`,
+        sql`UPDATE bookings SET status='CANCELLED' WHERE id=${id} AND status IN ('HELD','PAYMENT_PENDING') RETURNING id`,
       );
       if (changed.rowCount) {
         await tx.execute(
@@ -189,7 +197,7 @@ export async function listTrips(db: Database) {
 export async function listSeats(db: Database, tripId: string) {
   const result =
     await db.execute(sql`SELECT s.seat_label AS label,s.position,s.fare_minor AS "fareMinor",
-    (b.id IS NULL OR b.status<>'HELD' OR b.expires_at<=statement_timestamp()) AS available
+    (b.id IS NULL OR b.status IN ('EXPIRED','CANCELLED') OR (b.status IN ('HELD','PAYMENT_PENDING') AND b.expires_at<=statement_timestamp())) AS available
     FROM trip_seats s LEFT JOIN seat_allocations a USING(trip_id,seat_label) LEFT JOIN bookings b ON b.id=a.booking_id
     WHERE s.trip_id=${tripId} ORDER BY s.position`);
   return result.rows;
@@ -198,7 +206,7 @@ export async function listSeats(db: Database, tripId: string) {
 export async function getBookings(db: Database, userId: string, id?: string) {
   const result =
     await db.execute(sql`SELECT b.id,b.trip_id AS "tripId",b.reference,
-    CASE WHEN b.status='HELD' AND b.expires_at<=clock_timestamp() THEN 'EXPIRED' ELSE b.status END AS status,
+    CASE WHEN b.status IN ('HELD','PAYMENT_PENDING') AND b.expires_at<=clock_timestamp() THEN 'EXPIRED' ELSE b.status END AS status,
     b.expires_at AS "expiresAt",b.total_minor AS "totalMinor",b.currency,t.origin,t.destination,t.departure_at AS "departureAt",
     ARRAY(SELECT seat_label FROM booking_items WHERE booking_id=b.id ORDER BY seat_label) AS "seatLabels",clock_timestamp() AS "serverTime"
     FROM bookings b JOIN trips t ON t.id=b.trip_id WHERE b.user_id=${userId} ${id ? sql`AND b.id=${id}` : sql``}

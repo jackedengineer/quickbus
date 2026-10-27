@@ -107,7 +107,7 @@ export async function reservationReview(
   // One statement snapshot keeps version, names and lifecycle status consistent.
   const result =
     await db.execute<ReservationReview>(sql`SELECT b.id,b.trip_id AS "tripId",b.reference,b.version,
-    CASE WHEN b.status='HELD' AND b.expires_at<=statement_timestamp() THEN 'EXPIRED' ELSE b.status END status,
+    CASE WHEN b.status IN ('HELD','PAYMENT_PENDING') AND b.expires_at<=statement_timestamp() THEN 'EXPIRED' ELSE b.status END status,
     b.expires_at AS "expiresAt",statement_timestamp() AS "serverTime",b.total_minor AS "totalMinor",b.currency,
     t.origin,t.destination,t.departure_at AS "departureAt",t.arrival_at AS "arrivalAt",t.operator_name AS "operatorName",t.vehicle_label AS "vehicleLabel",
     b.pickup_stop_id AS "pickupStopId",b.drop_stop_id AS "dropStopId",coalesce(b.contact_email,u.email) AS "contactEmail",b.contact_phone AS "contactPhone",

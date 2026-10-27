@@ -118,7 +118,7 @@ export async function searchTrips(
     AND EXISTS(SELECT 1 FROM trip_stops WHERE trip_id=t.id)
   ), availability AS (
     SELECT t.id,s.seat_label,s.fare_minor,
-      b.id IS NULL OR b.status<>'HELD' OR b.expires_at<=statement_timestamp() available
+      b.id IS NULL OR b.status IN ('EXPIRED','CANCELLED') OR (b.status IN ('HELD','PAYMENT_PENDING') AND b.expires_at<=statement_timestamp()) available
     FROM candidates t JOIN trip_seats s ON s.trip_id=t.id
     LEFT JOIN seat_allocations a USING(trip_id,seat_label) LEFT JOIN bookings b ON b.id=a.booking_id
   ), q AS (

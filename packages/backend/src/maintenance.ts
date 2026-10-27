@@ -58,7 +58,7 @@ export async function maintenanceHealth(db: Database) {
     coalesce((SELECT last_succeeded_at>clock_timestamp()-interval '3 hours' FROM maintenance_jobs WHERE name='inventory'),false) AS "inventoryFresh",
     coalesce((SELECT bool_and(coalesce(latest.departure>clock_timestamp()+interval '27 days',false))
       FROM inventory_services s LEFT JOIN LATERAL (SELECT max(departure_at) departure FROM trips WHERE source_service_id=s.id AND sales_state='OPEN') latest ON true WHERE s.active),false) AS "horizonHealthy",
-    (SELECT count(*)::int FROM bookings WHERE status='HELD' AND expires_at<clock_timestamp()-interval '5 minutes') AS "overdueHolds"`);
+    (SELECT count(*)::int FROM bookings WHERE status IN ('HELD','PAYMENT_PENDING') AND expires_at<clock_timestamp()-interval '5 minutes') AS "overdueHolds"`);
   const values = result.rows[0];
   return {
     status:
