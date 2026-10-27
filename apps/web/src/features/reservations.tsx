@@ -165,23 +165,30 @@ export function MyBookings({
       </div>
     );
   return (
-    <section className="bookings-content">
+    <section className="bookings-content booking-history" aria-busy={loading}>
       <div className="section-heading">
         <h1>My bookings</h1>
         <button
           type="button"
           className="text-button"
+          disabled={loading}
           onClick={() => void load()}
         >
           Refresh
         </button>
       </div>
-      {loading ? (
-        <p role="status">Loading your reservations…</p>
-      ) : error ? (
+      {error && (
         <p role="alert" className="error">
           {error}
         </p>
+      )}
+      {loading && bookings.length > 0 && (
+        <p className="sr-only" role="status">
+          Refreshing your reservations…
+        </p>
+      )}
+      {loading && !bookings.length ? (
+        <p role="status">Loading your reservations…</p>
       ) : bookings.length ? (
         bookings.map((b) => (
           <HoldCard
@@ -191,13 +198,13 @@ export function MyBookings({
             onReview={() => onReview(b.id)}
           />
         ))
-      ) : (
+      ) : !error ? (
         <div className="empty-state">
           <Icon name="ticket" size={40} />
           <h2>No reservations yet</h2>
           <p>Find a journey and choose your seats to get started.</p>
         </div>
-      )}
+      ) : null}
     </section>
   );
 }

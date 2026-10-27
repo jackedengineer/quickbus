@@ -199,6 +199,11 @@
   font-size: 28px;
   line-height: 36px;
 }
+.booking-history {
+  /* Keep the footer below the initial viewport while private rows load. */
+  min-height: 100vh;
+  min-height: 100svh;
+}
 .section-heading {
   display: flex;
   justify-content: space-between;
