@@ -61,9 +61,13 @@ test('receipt lookup filters exact matches and follows pagination', async () => 
         })),
       }),
     )
-    .mockResolvedValueOnce(Response.json({ count: 1, items: [order] }));
+    .mockResolvedValueOnce(
+      Response.json({ count: 1, items: [{ ...order, amount_paid: null }] }),
+    );
   vi.stubGlobal('fetch', fetcher);
-  expect(await razorpay(config).findOrders(receipt)).toEqual([order]);
+  expect(await razorpay(config).findOrders(receipt)).toEqual([
+    { ...order, amount_paid: null },
+  ]);
   expect(fetcher.mock.calls[1][0]).toContain('skip=100');
 });
 

@@ -10,7 +10,8 @@ const orderSchema = z.object({
   amount: money,
   currency: z.string().length(3),
   status: z.enum(['created', 'attempted', 'paid']),
-  amount_paid: money,
+  // The list endpoint returns null before any payment in the tested account.
+  amount_paid: money.nullable(),
   amount_due: money,
   attempts: z.number().int().nonnegative(),
 });
