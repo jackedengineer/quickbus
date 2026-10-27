@@ -15,7 +15,7 @@ type CheckoutOptions = {
   retry: { enabled: boolean };
   theme: { color: string };
 };
-type Checkout = {
+export type Checkout = {
   open: () => void;
   close: () => void;
   on: (event: 'payment.failed', listener: () => void) => void;

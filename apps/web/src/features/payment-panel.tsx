@@ -1,7 +1,7 @@
 import type { ReservationReview } from '@kwikbus/contracts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { money } from './models';
-import { checkoutSdk } from './razorpay-checkout';
+import { type Checkout, checkoutSdk } from './razorpay-checkout';
 
 type PaymentState = {
   id: string;
@@ -42,6 +42,7 @@ export function PaymentPanel({
     autoOpen = useRef(false),
     launched = useRef('');
   const flight = useRef(false),
+    checkoutInstance = useRef<Checkout | null>(null),
     latest = useRef(0),
     onChanged = useRef(onChange),
     bookingStatus = useRef(booking.status);
@@ -70,6 +71,24 @@ export function PaymentPanel({
         );
     }
   }, [booking.id]);
+  useEffect(() => {
+    if (
+      state &&
+      (['CONFIRMED', 'EXPIRED', 'CANCELLED'].includes(state.status) ||
+        ['FAILED', 'CAPTURED'].includes(state.checkout?.state ?? ''))
+    ) {
+      checkoutInstance.current?.close();
+      checkoutInstance.current = null;
+      setOpen(false);
+    }
+  }, [state?.status, state?.checkout?.state]);
+  useEffect(
+    () => () => {
+      checkoutInstance.current?.close();
+      checkoutInstance.current = null;
+    },
+    [booking.id],
+  );
   useEffect(() => {
     void reload();
     return () => {
@@ -173,6 +192,7 @@ export function PaymentPanel({
         );
         void hint(c.id);
       });
+      checkoutInstance.current = checkout;
       setOpen(true);
       launched.current = c.id;
       checkout.open();
@@ -297,10 +317,7 @@ export function PaymentPanel({
             Checking your existing payment order. Do not start another payment.
           </p>
         ) : state.checkout?.state === 'FAILED' ? (
-          <p>
-            Razorpay confirmed the attempt failed. You may try again while your
-            reservation is active.
-          </p>
+          <p>Razorpay confirmed the attempt failed. No payment was captured.</p>
         ) : state.status === 'PAYMENT_PENDING' ? (
           <p>
             Passenger details are saved and locked. We will confirm your seats
