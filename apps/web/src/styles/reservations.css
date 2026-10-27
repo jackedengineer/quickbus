@@ -347,6 +347,52 @@
 .drawer-footer .error {
   margin: 0;
 }
+.payment-panel {
+  margin-top: 28px;
+  padding: 24px;
+  border: 1px solid var(--brand-dark);
+  border-radius: 6px;
+  background: #f8fbf1;
+}
+.payment-panel h2 {
+  margin: 16px 0;
+  font-size: 22px;
+}
+.payment-panel p {
+  line-height: 1.6;
+}
+.payment-panel .continue-button {
+  display: block;
+  width: 100%;
+  margin: 20px 0 12px;
+}
+.sandbox-badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: #e1edc8;
+  color: #284500;
+  font-size: 12px;
+  font-weight: 700;
+}
+.payment-consent {
+  display: flex;
+  align-items: start;
+  gap: 12px;
+  line-height: 1.5;
+  font-size: 14px;
+}
+.payment-consent input {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  accent-color: var(--brand-dark);
+}
+@media (max-width: 599px) {
+  .payment-panel {
+    padding: 16px;
+  }
+}
 .seat-view-switch {
   display: flex;
   gap: 8px;

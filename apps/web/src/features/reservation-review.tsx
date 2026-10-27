@@ -2,6 +2,7 @@ import type { ReservationReview } from '@kwikbus/contracts';
 import { useRouter } from '@tanstack/react-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { dateInIndia, day, time } from './models';
+import { PaymentPanel } from './payment-panel';
 import { useRemaining } from './remaining';
 import { HoldCard } from './reservations';
 import { type Draft, ReservationReviewForm } from './review-form';
@@ -287,6 +288,18 @@ export function ReservationReviewScreen({
             remaining={remaining}
             edit={edit}
             onSave={save}
+          />
+          <PaymentPanel
+            booking={booking}
+            ready={
+              booking.complete &&
+              !dirty.current &&
+              !busy &&
+              !conflict &&
+              !uncertain
+            }
+            remaining={remaining}
+            onChange={() => void load(true)}
           />
         </>
       )}
