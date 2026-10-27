@@ -48,3 +48,36 @@ Sources checked 27 October 2026: [orders/create](https://razorpay.com/docs/api/o
 [orders/list](https://razorpay.com/docs/api/orders/fetch-all/),
 [refund replay](https://razorpay.com/docs/api/refunds/normal-refunds-idempotent),
 [checkout/signatures](https://razorpay.com/docs/payments/payment-gateway/web-integration/standard/integration-steps/).
+
+## Local acceptance completed
+
+The original provider spike is now resolved in [the provider contract](provider-contract.md):
+delayed lookup found both duplicate-receipt orders. No receipt uniqueness assumption
+is used. Real hosted success/reload, explicit bank failure, explicit replacement,
+wrong-owner rejection and release-before-capture compensation have passed locally.
+The full ₹749 sandbox refund reached processed; replay returned the same refund ID
+and one refund total. Full reload preserved refunded/released state.
+
+The real Neon proof passed nine scenarios across two independent Workers,
+including 100 last-seat contenders (one winner, 99 final conflicts). The local
+financial/inventory audit returned zero across 17 invariants. Isolated CI also
+passed the integration suite and its independent two-Worker contention run.
+[Sanitized evidence](evidence/payments-2026-10-27/local-acceptance.json).
+
+During actual usage, older recovery jobs delayed a new checkout's request wakeup.
+Request-triggered work now claims only the trusted checkout/inbox resource; cron
+handles the global queue. Successful settled orders back off to hourly reads.
+Browser polling continues after release while checkout/refund exposure remains,
+and authoritative terminal states close a stale hosted overlay.
+
+An account-wide limit admits ten new attempts per ten minutes, under a customer
+`FOR NO KEY UPDATE` lock taken before the trip lock. Stronger FOR UPDATE deadlocked
+with the idempotency foreign key's KEY SHARE; the real two-connection boundary
+check exposed this and now passes. Reusing an HTTP key or resuming an unresolved
+attempt consumes no new slot. Each logical intent still permits at most ten attempts.
+
+Database runtime grants preserve immutable intent/amount/provider/event identity;
+state transitions alone remain writable. Release and recovery audits check money,
+fulfillment, allocations, refunds and durable recovery linkage. Failed intake
+cannot ACK, and payment heartbeat/backlog/failure/case signals feed health checks.
+Production enablement remains test-only; live keys are rejected in every adapter.

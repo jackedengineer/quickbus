@@ -49,3 +49,24 @@ Check normal HTTPS and a real browser flow. To restore the exact newer versions 
 A live compatibility drill records actual times and source/Worker IDs. The separate [database recovery drill](recovery.md) restores only to an isolated disposable target.
 
 Retain the P0 release as a known-good baseline for later rollbacks. Its native query-redaction policy must remain enabled as well as canonical origins, private API routing and schema compatibility. Versions predating that fix are not an approved authentication-logging baseline; verify provider settings after a rollback. Do not restore an old environment file or weaken monitoring to recover application code.
+
+## Payment-aware rollout and rollback
+
+First deploy the payment-aware API/web with PAYMENTS_ENABLED=false and all three
+approved **test** provider secrets. This establishes a compatible rollback version
+before any PAYMENT_PENDING/CONFIRMED state can be created publicly. Then enable
+admission in a second reviewed exact-CI deployment. Keep recovery/webhooks running
+when admission is disabled. The release primes the payment worker and refuses
+nonzero financial/inventory invariant counts before replacing Workers.
+
+Do not roll back a payment-enabled release to the earlier unpaid-only API. Its
+expiry/availability queries do not understand the new booking states. Record the
+payment-aware disabled versions as the rollback baseline; preserve database rows,
+credentials, query redaction and canonical routes. A forced process termination
+can leave a valid lease; allow expiry/reclaim and reconcile provider reads rather
+than manually issuing another financial mutation.
+
+After enabling, repeat real hosted sandbox success, failure, explicit retry,
+late-capture refund, full reload and desktop/mobile HTTPS/CSP acceptance. Provider
+webhook intake and independently fetched financial state must be evidenced.
+Synthetic fault tests supplement these journeys; they do not replace them.

@@ -1,0 +1,91 @@
+{
+  "checkedAt": "2026-10-27T07:48:22.772Z",
+  "scope": "local Workers, dedicated Neon development DB, real Razorpay test API and hosted UI",
+  "mode": "test",
+  "browser": {
+    "desktop": "Chrome and in-app browser",
+    "mobile": "Chrome DevTools 390x844, touch, reduced motion",
+    "successAndReload": true,
+    "wrongOwnerReservationRejected": true,
+    "explicitBankFailure": true,
+    "explicitRetryAfterFailure": true,
+    "releaseBeforeBankSuccess": true,
+    "refundStatusSurvivesFullReload": true
+  },
+  "lateCapture": {
+    "booking": "86fdba98-5ea3-4832-806e-725b5470eb11",
+    "bookingState": "CANCELLED",
+    "allocations": 0,
+    "confirmationEvents": 0,
+    "checkedAt": "2026-10-27T07:31:55.535Z",
+    "mode": "test",
+    "payment": {
+      "id": "pay_TsqmsKjIbIYWoQ",
+      "order_id": "order_TsqmIWhwf6fmpc",
+      "amount": 74900,
+      "currency": "INR",
+      "status": "refunded",
+      "captured": true,
+      "amount_refunded": 74900
+    },
+    "refunds": [
+      {
+        "id": "rfnd_Tsqp6M8Ymvb7oS",
+        "payment_id": "pay_TsqmsKjIbIYWoQ",
+        "amount": 74900,
+        "currency": "INR",
+        "status": "processed"
+      }
+    ],
+    "replayReturnedSameId": true,
+    "refundCountAfterReplay": 1,
+    "refundAfterReplay": {
+      "id": "rfnd_Tsqp6M8Ymvb7oS",
+      "payment_id": "pay_TsqmsKjIbIYWoQ",
+      "amount": 74900,
+      "currency": "INR",
+      "status": "processed"
+    }
+  },
+  "invariants": {
+    "missingHeldAllocations": 0,
+    "terminalAllocations": 0,
+    "incorrectQuotes": 0,
+    "crossTripStopChoices": 0,
+    "missingDetailEvents": 0,
+    "incompleteCatalogSnapshots": 0,
+    "partialServiceTrips": 0,
+    "intentQuoteMismatch": 0,
+    "confirmedWithoutMoney": 0,
+    "fulfillmentWithoutBooking": 0,
+    "refundQuoteMismatch": 0,
+    "captureWithoutDisposition": 0,
+    "compensationWithoutRefund": 0,
+    "refundWithoutJob": 0,
+    "checkoutWithoutRecovery": 0,
+    "inboxWithoutJob": 0,
+    "processedRefundWithoutIdentity": 0
+  },
+  "performance": {
+    "scope": "development build, synthetic lab observations, not field SLO",
+    "desktop": {
+      "lcpMs": 1207,
+      "ttfbMs": 745,
+      "cls": 0
+    },
+    "mobile": {
+      "viewport": "390x844",
+      "cpuSlowdown": 4,
+      "network": "Fast 4G",
+      "lcpMs": 1797,
+      "ttfbMs": 570,
+      "cls": 0
+    }
+  },
+  "limits": [
+    "No live money or bank settlement proof",
+    "No production webhook delivery claimed by local acceptance",
+    "Initial unsupported-redirect orders remain visible local review cases",
+    "Shared database integration faults run serially; concurrency is explicit inside scenarios"
+  ]
+}

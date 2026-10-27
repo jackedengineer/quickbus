@@ -61,3 +61,41 @@ No offsite backup service, field latency SLO, paid Cloudflare plan or automatic 
 - [Workers error fields and outcomes](https://developers.cloudflare.com/workers/observability/errors/)
 - [Cron configuration propagation](https://developers.cloudflare.com/workers/configuration/cron-triggers/)
 - [Scheduled workflow limitations](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule)
+
+## Payment recovery — test checkout
+
+The minute cron runs bounded payment jobs after expiry. A request wakeup targets
+only its trusted checkout/inbox UUID; it cannot spend its budget on older jobs.
+The durable queue claims up to six jobs per scheduled pass, with 45-second fenced
+leases, SKIP LOCKED and bounded error backoff. This is a measured portfolio
+baseline, not unlimited throughput. Observe queue age before increasing bounds.
+
+Maintenance health now also requires a payment success heartbeat within ten
+minutes when provider recovery is configured, no failed jobs/open cases and oldest
+queued work less than 180 seconds overdue. Admission can be disabled without
+stopping recovery. The same external health workflow and native error monitor
+cover these signals. Unknown refunds/orders are deliberately visible failures.
+
+- `ORDER_AMBIGUOUS`: compare the stored UUID receipt, key/environment, exact order
+  matches and every associated payment using provider reads. Empty lookup never
+  authorizes another create. Do not erase a case to make health green.
+- `REFUND_UNCERTAIN` / `REFUND_FAILED`: inspect the stored payment, immutable refund
+  UUID/full amount and provider refund list. Automatic recovery reads after an
+  uncertain submission. Do not change the key, issue a partial replacement or
+  assume a zero-result lookup proves no refund was accepted.
+- `MONEY_MISMATCH` / `ALLOCATION_MISMATCH`: preserve evidence; compare frozen quote,
+  provider IDs/currency, booking state and allocations. No review path may steal a
+  seat from a new owner. An external refund of a fulfilled booking opens a case;
+  paid cancellation is a later customer capability.
+- `RETRY_EXHAUSTED`: inspect bounded failure codes and the current provider state
+  before explicitly requeuing the existing resource. There is no public admin API.
+
+Set the production admission flag false in a reviewed deployment to stop new
+checkout; retain all three provider credentials and the webhook for recovery.
+Never bulk-upload `.env.production`: it contains the migration owner credential.
+An older API that predates payment states is not a compatible rollback once
+PAYMENT_PENDING or CONFIRMED rows exist. Roll back to a compatible payment-aware
+Worker, or disable admission and forward-fix while recovery continues.
+
+Live money, continuous offsite backups, automatic manual-case resolution and
+customer paid cancellation are not enabled by this test checkout release.
