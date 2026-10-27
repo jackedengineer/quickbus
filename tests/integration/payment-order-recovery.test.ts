@@ -136,3 +136,69 @@ test('an expired order worker never creates again and empty receipt lookup stays
     await f.close();
   }
 });
+
+test('settled orders back off and finish the safety window without false ambiguity alerts', async () => {
+  const f = await paymentFixture();
+  try {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) =>
+        Response.json(
+          url.endsWith('/payments')
+            ? { count: 1, items: [f.payment] }
+            : {
+                id: f.payment.order_id,
+                receipt: f.checkout,
+                amount: 74900,
+                currency: 'INR',
+                status: 'paid',
+                amount_paid: 74900,
+                amount_due: 0,
+                attempts: 1,
+              },
+        ),
+      ),
+    );
+    await f.runtime.db.transaction((tx) =>
+      enqueuePaymentJob(tx, 'RECONCILE', f.checkout),
+    );
+    const first = await claimPaymentJob(f.runtime.db, f.checkout);
+    if (!first) throw new Error('Missing reconciliation');
+    await reconcileCheckout(f.runtime.db, config, first);
+    const delay = (
+      await f.owner.query(
+        'SELECT extract(epoch FROM available_at-clock_timestamp())::int seconds FROM payment_jobs WHERE id=$1',
+        [first.id],
+      )
+    ).rows[0].seconds;
+    expect(delay).toBeGreaterThan(3500);
+    await f.owner.query(
+      "UPDATE checkout_attempts SET created_at=clock_timestamp()-interval '31 days' WHERE id=$1",
+      [f.checkout],
+    );
+    await f.owner.query(
+      'UPDATE payment_jobs SET available_at=clock_timestamp() WHERE id=$1',
+      [first.id],
+    );
+    const next = await claimPaymentJob(f.runtime.db, f.checkout);
+    if (!next) throw new Error('Missing final safety read');
+    await reconcileCheckout(f.runtime.db, config, next);
+    expect(
+      (
+        await f.owner.query('SELECT state FROM payment_jobs WHERE id=$1', [
+          first.id,
+        ])
+      ).rows[0].state,
+    ).toBe('DONE');
+    expect(
+      (
+        await f.owner.query(
+          'SELECT count(*)::int n FROM payment_cases WHERE checkout_id=$1',
+          [f.checkout],
+        )
+      ).rows[0].n,
+    ).toBe(0);
+  } finally {
+    await f.close();
+  }
+});

@@ -119,7 +119,18 @@ export async function applyPaymentObservation(
   await tx.execute(
     sql`UPDATE checkout_attempts SET state='CAPTURED' WHERE id=${checkout.id}`,
   );
-  if (prior?.disposition === 'FULFILLED') return;
+  if (prior?.disposition === 'FULFILLED') {
+    // An operator-side refund is outside customer cancellation in this slice.
+    // Preserve inventory and surface the financial inconsistency for review.
+    if (payment.status === 'refunded' || payment.amount_refunded > 0)
+      await paymentCase(
+        tx,
+        `fulfilled-refund:${payment.id}`,
+        'MONEY_MISMATCH',
+        checkout.id,
+      );
+    return;
+  }
   if (prior?.disposition === 'REFUND') {
     await ensureRefund(tx, payment.id, payment.amount);
     return;

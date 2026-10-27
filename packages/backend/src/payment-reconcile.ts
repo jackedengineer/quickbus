@@ -111,20 +111,29 @@ export async function reconcileCheckout(
     await tx.execute(
       sql`UPDATE checkout_attempts SET last_checked_at=clock_timestamp() WHERE id=${checkout.id}`,
     );
+    const settled =
+      order.status === 'paid' &&
+      payments.length > 0 &&
+      payments.every((p) =>
+        ['failed', 'captured', 'refunded'].includes(p.status),
+      );
     // Continue observing earlier failed attempts for surprising later captures.
+    // Settled orders need only an hourly safety read; signed events still wake
+    // their own durable inbox immediately. Avoid a permanent 30-second poll.
     // At the automatic window boundary retain an actionable case, never erase it.
     const age = await tx.execute(
       sql`SELECT id FROM checkout_attempts WHERE id=${checkout.id} AND created_at<clock_timestamp()-interval '30 days'`,
     );
     if (age.rowCount) {
-      await paymentCase(
-        tx,
-        `window:${checkout.id}`,
-        'RETRY_EXHAUSTED',
-        checkout.id,
-      );
+      if (!settled)
+        await paymentCase(
+          tx,
+          `window:${checkout.id}`,
+          'RETRY_EXHAUSTED',
+          checkout.id,
+        );
       if (!(await finishPaymentJob(tx, job))) throw new StalePaymentLease();
-    } else if (!(await finishPaymentJob(tx, job, 30)))
+    } else if (!(await finishPaymentJob(tx, job, settled ? 3600 : 30)))
       throw new StalePaymentLease();
   });
 }
