@@ -94,7 +94,7 @@ export function PaymentPanel({
     return () => {
       latest.current++;
     };
-  }, [reload, booking.version]);
+  }, [reload, booking.version, booking.status]);
   useEffect(() => {
     const focus = () => {
       if (document.visibilityState === 'visible') void reload();
@@ -103,6 +103,9 @@ export function PaymentPanel({
     document.addEventListener('visibilitychange', focus);
     const polling =
       state?.status === 'PAYMENT_PENDING' ||
+      ['PENDING', 'CREATING', 'UNKNOWN', 'READY'].includes(
+        state?.checkout?.state ?? '',
+      ) ||
       state?.refunds.some((s) => !['PROCESSED', 'NEEDS_REVIEW'].includes(s));
     const timer = polling ? window.setInterval(focus, 4000) : undefined;
     return () => {
@@ -110,7 +113,7 @@ export function PaymentPanel({
       document.removeEventListener('visibilitychange', focus);
       if (timer) window.clearInterval(timer);
     };
-  }, [reload, state?.status, state?.refunds.join(',')]);
+  }, [reload, state?.status, state?.checkout?.state, state?.refunds.join(',')]);
   const hint = useCallback(
     async (
       checkoutId: string,
@@ -318,6 +321,11 @@ export function PaymentPanel({
           </p>
         ) : state.checkout?.state === 'FAILED' ? (
           <p>Razorpay confirmed the attempt failed. No payment was captured.</p>
+        ) : ['CANCELLED', 'EXPIRED'].includes(state.status) ? (
+          <p>
+            This reservation has ended. Any payment still in progress is being
+            checked; a late capture will be refunded.
+          </p>
         ) : state.status === 'PAYMENT_PENDING' ? (
           <p>
             Passenger details are saved and locked. We will confirm your seats
