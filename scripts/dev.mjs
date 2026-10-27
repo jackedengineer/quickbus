@@ -39,7 +39,30 @@ const children = [
   ),
   spawn('pnpm', ['--filter', '@kwikbus/web', 'dev'], { stdio: 'inherit' }),
 ];
+// Wrangler exposes local scheduled events but does not run production crons.
+// Keep the real sandbox journey recoverable while the development app is open.
+// The isolated CI environment has payments disabled and drives its own clock.
+let cronRunning = false;
+const cronTimer = /^PAYMENTS_ENABLED=true$/m.test(environment)
+  ? setInterval(async () => {
+      if (cronRunning) return;
+      cronRunning = true;
+      try {
+        const response = await fetch(
+          'http://127.0.0.1:8787/cdn-cgi/local/scheduled?cron=*+*+*+*+*&format=json',
+          { signal: AbortSignal.timeout(55000) },
+        );
+        if (!response.ok)
+          console.error('Local scheduled payment recovery failed.');
+      } catch {
+        console.error('Local scheduled payment recovery unavailable.');
+      } finally {
+        cronRunning = false;
+      }
+    }, 60000)
+  : undefined;
 function stop() {
+  clearInterval(cronTimer);
   for (const child of children) child.kill('SIGTERM');
 }
 process.on('SIGINT', stop);

@@ -109,5 +109,5 @@ export async function paymentHint(
   // booking state or inventory. Coalesce repeated clicks/callback replays.
   await db.execute(sql`UPDATE payment_jobs SET state='QUEUED',attempts=0,available_at=clock_timestamp(),updated_at=clock_timestamp(),failure_code=NULL
     WHERE kind='RECONCILE' AND resource_id=${checkout.id} AND state IN ('QUEUED','DONE') AND updated_at<clock_timestamp()-interval '5 seconds'`);
-  return { status: 202, body: { received: true } };
+  return { status: 202, body: { received: true, checkoutId } };
 }

@@ -61,22 +61,24 @@ export async function receivePaymentWebhook(
   const hash = createHash('sha256').update(raw).digest('hex');
   return db.transaction(async (tx) => {
     const localId = crypto.randomUUID();
+    let jobResourceId: string = localId;
     const inserted =
       await tx.execute(sql`INSERT INTO payment_inbox(id,event_id,event_type,payload_hash,order_id,payment_id,refund_id)
       VALUES(${localId},${eventId},${event},${hash},${payload.payment?.entity.order_id ?? null},${payload.payment?.entity.id ?? payload.refund?.entity.payment_id ?? null},${payload.refund?.entity.id ?? null})
       ON CONFLICT(event_id) DO NOTHING RETURNING id`);
     if (!inserted.rowCount) {
       const prior = (
-        await tx.execute<{ hash: string }>(
-          sql`SELECT payload_hash AS hash FROM payment_inbox WHERE event_id=${eventId}`,
+        await tx.execute<{ hash: string; id: string }>(
+          sql`SELECT id,payload_hash AS hash FROM payment_inbox WHERE event_id=${eventId}`,
         )
       ).rows[0];
+      jobResourceId = prior.id;
       if (prior.hash !== hash) {
         await paymentCase(tx, `event:${eventId}`, 'EVENT_HASH_MISMATCH');
         return failure('EVENT_HASH_MISMATCH', 'Event identity changed.', 409);
       }
     } else await enqueuePaymentJob(tx, 'INBOX', localId);
     // ACK only after this transaction commits. Store no raw webhook/contact data.
-    return { status: 200, body: { received: true } };
+    return { status: 200, body: { received: true, jobResourceId } };
   });
 }

@@ -33,10 +33,11 @@ export async function enqueuePaymentJob(
 // cannot acknowledge work after its lease. Side effects need business guards too.
 export async function claimPaymentJob(
   db: Database,
+  resourceId?: string,
 ): Promise<PaymentJob | undefined> {
   const rows = await db.execute<PaymentJob>(sql`
     WITH candidate AS (
-      SELECT id FROM payment_jobs WHERE attempts<32 AND
+      SELECT id FROM payment_jobs WHERE attempts<32 ${resourceId ? sql`AND resource_id=${resourceId}::uuid` : sql``} AND
       ((state='QUEUED' AND available_at<=clock_timestamp()) OR
        (state='RUNNING' AND lease_expires_at<=clock_timestamp()))
       ORDER BY available_at,id LIMIT 1 FOR UPDATE SKIP LOCKED

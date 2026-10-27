@@ -39,9 +39,10 @@ test('payment outbox rolls back, claims once, and fences stale completion', asyn
       await enqueuePaymentJob(tx, 'ORDER', resource);
       await enqueuePaymentJob(tx, 'ORDER', resource);
     });
+    expect(await claimPaymentJob(a.db, rolledBack)).toBeUndefined();
     const claims = await Promise.all([
-      claimPaymentJob(a.db),
-      claimPaymentJob(b.db),
+      claimPaymentJob(a.db, resource),
+      claimPaymentJob(b.db, resource),
     ]);
     const job = claims.find((j) => j?.resourceId === resource);
     expect(job).toBeDefined();
@@ -54,7 +55,7 @@ test('payment outbox rolls back, claims once, and fences stale completion', asyn
     expect(await a.db.transaction((tx) => finishPaymentJob(tx, job))).toBe(
       false,
     );
-    const replacement = await claimPaymentJob(b.db);
+    const replacement = await claimPaymentJob(b.db, resource);
     expect(replacement?.id).toBe(job.id);
     expect(replacement?.leaseToken).not.toBe(job.leaseToken);
     if (!replacement) throw new Error('Missing replacement');

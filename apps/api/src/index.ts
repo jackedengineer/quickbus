@@ -48,19 +48,31 @@ const api = {
             new URL(request.url).pathname,
           ))
       ) {
-        executionContext.waitUntil(
-          (async () => {
-            const workerDb = createDatabase(
-              environment.DATABASE_URL,
-              environment.CI_DATABASE_PROXY,
-            );
-            try {
-              await runPaymentJobs(workerDb.db, environment, 3);
-            } finally {
-              await workerDb.close();
-            }
-          })(),
-        );
+        const body = (await response
+          .clone()
+          .json()
+          .catch(() => ({}))) as {
+          checkoutId?: unknown;
+          jobResourceId?: unknown;
+        };
+        const resourceId = body.checkoutId ?? body.jobResourceId;
+        if (
+          typeof resourceId === 'string' &&
+          /^[0-9a-f-]{36}$/i.test(resourceId)
+        )
+          executionContext.waitUntil(
+            (async () => {
+              const workerDb = createDatabase(
+                environment.DATABASE_URL,
+                environment.CI_DATABASE_PROXY,
+              );
+              try {
+                await runPaymentJobs(workerDb.db, environment, 3, resourceId);
+              } finally {
+                await workerDb.close();
+              }
+            })(),
+          );
       }
       return response;
     } catch {

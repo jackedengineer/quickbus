@@ -16,12 +16,13 @@ export async function runPaymentJobs(
   db: Database,
   env: RazorpayEnvironment,
   limit = 6,
+  resourceId?: string,
 ) {
   // Disabling new checkout does not disable recovery of existing money exposure.
   if (!env.RAZORPAY_KEY_ID) return 0;
   let processed = 0;
   for (let n = 0; n < limit; n++) {
-    const job = await claimPaymentJob(db);
+    const job = await claimPaymentJob(db, resourceId);
     if (!job) break;
     try {
       if (job.kind === 'ORDER') await createCheckoutOrder(db, env, job);
