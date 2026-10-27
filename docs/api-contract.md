@@ -147,3 +147,31 @@ Shared DTO validation is a developer convenience, not trust in the browser. The 
 The frontend may poll payment/booking status every 2 seconds initially, then back off to 5–10 seconds with jitter. Stop fast polling when hidden, terminal, or rate-limited; refetch on focus. At a deadline, refresh authoritative state. A status GET never issues a provider charge, creates a new hold, or extends the reservation.
 
 Keep the browser-to-app command key, logical payment-intent ID, checkout-attempt ID, worker job identity, provider receipt, payment ID, refund key, and webhook event ID distinct. Each deduplicates a different boundary.
+
+## Implemented test-payment surface (27 October 2026)
+
+These routes describe the landed sandbox slice. Planned cancellation/ticket/admin
+routes elsewhere in this document are not available yet.
+
+| Method / route | Request and authority | Result |
+|---|---|---|
+| GET `/api/v1/bookings/:id/payment` | Verified session, owned booking UUID. | Database status, test admission flag, latest attempt, refund states and review flag. Checkout public key/order/quote appear only while eligible to open. Other owners receive 404. |
+| POST `/api/v1/bookings/:id/checkout` | Exact same Origin, verified session, UUID Idempotency-Key, quoted integer If-Match, strict `{policyAccepted:true}`. No client amount/order fields. | 202 with local checkout UUID after durable intent/jobs; no provider success claim. Stale version 412, missing version 428, incomplete details 422, account budget 429, ended/deadline/unresolved retry 409. |
+| POST `/api/v1/bookings/:id/payment/verify` | Same owned-session/Origin guards; strict checkoutId, paymentId and 64-hex signature. HMAC uses the stored order ID. | 202 read-reconciliation hint. Invalid signature 401. It never confirms inventory directly. |
+| POST `/api/v1/bookings/:id/payment/refresh` | Same guards; strict local checkoutId only. | Coalesced 202 recovery hint; no arbitrary provider-ID lookup. |
+| POST `/api/webhooks/razorpay` | Exact raw JSON bytes, provider signature and bounded event-ID headers. No customer cookie or browser Origin requirement. | 200 only after inbox/job commit. Invalid signature 401, malformed/unsupported event 400, changed bytes for one event ID 409, unavailable persistence/configuration 5xx. |
+
+The webhook alone accepts up to 256 KiB, rejects compressed input and verifies the
+signature before parsing. Other API payloads retain the 16 KiB bound. No card/bank
+fields are accepted by KwikBus. The SDK is lazy-loaded from the official provider;
+client callback data is a hint, not an authoritative payment observation.
+
+Booking states now include PAYMENT_PENDING and CONFIRMED. Availability retains
+CONFIRMED allocations beyond the original hold deadline. The unpaid release
+command accepts PAYMENT_PENDING but rejects CONFIRMED with
+PAID_CANCELLATION_REQUIRED. There is no paid cancellation API in this release.
+
+All responses remain no-store and the backend remains private behind the web
+service binding. Existing wrong-origin and legacy-host mutation rejection remain
+in force. See [delivery evidence](payment-delivery.md) and
+[provider recovery rules](provider-contract.md).

@@ -129,3 +129,55 @@ Search resolves aliases and filters route, India service date, party size and li
 Passenger review uses an owned conditional command with a required quoted integer `If-Match` version and UUID intent key. Its canonical payload includes the expected version. Trip lock, post-lock DB time, expiry cleanup, exact passenger-seat coverage, stop-role/order checks, verified account email, version increment, audit event and stored result share one transaction. Replaying a successful intent after expiry returns its original result without resurrecting ownership; the fresh review remains authoritative. The version is a command precondition, not a strong HTTP ETag for the time-varying representation.
 
 Names/contact details remain in private database rows and page memory. They do not enter URLs, browser storage, event payloads or logs. Unpaid review does not extend a hold, capture payment or issue a ticket. The 90-second payment-start requirement is visible; enforcing it in the future payment command remains T17's prerequisite. Existing V0 reservations with missing choices are explicitly incomplete.
+
+## ADR 016 — Test payments, authoritative capture and conservative compensation
+
+**Status:** implemented for sandbox checkout, 27 October 2026. Production browser
+acceptance and versions are recorded in the payment delivery evidence.
+
+Keep payment orchestration in the modular backend and durable state in PostgreSQL.
+Do not add Redis, a second queue service or a provider SDK dependency. Four job
+kinds cover order creation, read reconciliation, signed inbox processing and full
+refund execution. Network I/O occurs outside inventory transactions. Short queue
+claims commit before work; completion checks both the lease token and its expiry
+inside the trip-locked business transaction. Jobs use bounded retries and expose
+failures rather than dropping work silently.
+
+A booking has one immutable logical payment intent. Sequential checkout attempts
+retain their own UUID receipt, provider order and outcomes. Only verified failure
+permits a new attempt. Actual test-mode duplicate receipts were accepted and list
+reads lagged; therefore an uncertain create cannot be retried as a mutation.
+Zero exact matches remain unknown, multiple matches require review, and one match
+must still agree with the frozen money and configured test key.
+
+Preparation requires verified ownership, saved passenger/stop/contact details,
+conditional version, full seat ownership and at least 90 seconds remaining after
+the trip lock. It freezes details without extending the original deadline. An
+account-wide, database-serialized ten-attempt/ten-minute budget covers new attempts
+across trips; idempotent replay/resume does not consume a new attempt. Customer
+NO KEY UPDATE precedes the trip lock and is compatible with idempotency FK locks.
+
+All authoritative observations converge on one finalizer. It checks provider
+mapping, captured state and exact money, then confirms only live owned inventory.
+A unique fulfilled payment per intent and sticky capture state protect replay and
+out-of-order failure. Late/additional captures persist one full refund obligation;
+released seats are never reacquired. Browser success, close and failure only wake
+provider reads. Exact-byte signed webhook intake ACKs after durable commit and
+strips contact/card payloads. App/environment notes isolate unrelated orders from
+this shared provider account.
+
+The immutable refund UUID is the provider idempotency key and its full amount is
+the stable body. Actual same-key replay returned one processed sandbox refund.
+Because indefinite provider key retention is not established, an uncertain submit
+recovers by reads and opens a review case rather than issuing another mutation.
+Cases, backlog age, exhausted jobs and the recovery heartbeat affect health.
+Settled orders receive hourly safety reads for thirty days; unresolved exposure
+at that boundary retains a case. Signed intake remains active after that window.
+
+Deploy payment-aware code with admission disabled before enabling test checkout,
+so a compatible Worker rollback exists. Disabling admission preserves secrets,
+webhooks and recovery. Runtime column grants prevent rewriting money/identity or
+inbox hashes. The independent release/restore audit now includes financial state
+and durable recovery linkage as well as inventory. Live keys are always rejected.
+Paid cancellation, ticket email, trip cancellation and admin remain later slices.
+[Provider contract and observations](provider-contract.md).
