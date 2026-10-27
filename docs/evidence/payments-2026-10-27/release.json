@@ -1,0 +1,87 @@
+{
+  "revision": "74e06c27283c68e82b59cf317f5840d2bc263236",
+  "ciRun": "40481555709",
+  "startedAt": "2026-10-27T09:34:38.155Z",
+  "state": "HTTP verified; production financial journeys verified on 40077a1; subsequent UI-only fixes verified on 6e3b633 and this revision",
+  "previous": {
+    "api": "39574cb0-5f8e-41ff-b2fe-22f175a15d3a",
+    "web": "80e50689-1d7f-4042-a65a-a14b4b4a6a95"
+  },
+  "financialAndInventoryAudit": {
+    "missingHeldAllocations": 0,
+    "terminalAllocations": 0,
+    "incorrectQuotes": 0,
+    "crossTripStopChoices": 0,
+    "missingDetailEvents": 0,
+    "incompleteCatalogSnapshots": 0,
+    "partialServiceTrips": 0,
+    "intentQuoteMismatch": 0,
+    "confirmedWithoutMoney": 0,
+    "fulfillmentWithoutBooking": 0,
+    "refundQuoteMismatch": 0,
+    "captureWithoutDisposition": 0,
+    "compensationWithoutRefund": 0,
+    "refundWithoutJob": 0,
+    "checkoutWithoutRecovery": 0,
+    "inboxWithoutJob": 0,
+    "processedRefundWithoutIdentity": 0
+  },
+  "deployed": {
+    "api": "0489cddf-d1ef-44d0-82b1-ad9c8f89e341",
+    "web": "4b8d3fc0-e62a-473e-b648-de5a97b35775"
+  },
+  "browserFollowup": {
+    "checkedAt": "2026-10-27T09:37:04.078Z",
+    "viewport": {
+      "width": 390,
+      "height": 844,
+      "touch": true
+    },
+    "reviewLoaded": true,
+    "unnamedControls": 0,
+    "refunded": true,
+    "horizontalOverflow": false,
+    "consoleMessages": 0,
+    "temporaryNetworkAndViewportOverridesRestored": true
+  },
+  "publicGuards": {
+    "checkedAt": "2026-10-27T09:33:11.072Z",
+    "normalDnsAndVerifiedTls": true,
+    "checks": [
+      {
+        "check": "legacy read",
+        "status": 308,
+        "expected": 308,
+        "passed": true,
+        "redirectsToCanonical": true
+      },
+      {
+        "check": "legacy mutation",
+        "status": 421,
+        "expected": 421,
+        "passed": true
+      },
+      {
+        "check": "wrong-origin mutation",
+        "status": 403,
+        "expected": 403,
+        "passed": true
+      },
+      {
+        "check": "private API public endpoint",
+        "status": 404,
+        "expected": 404,
+        "passed": true
+      },
+      {
+        "check": "forged webhook signature",
+        "status": 401,
+        "expected": 401,
+        "passed": true
+      }
+    ]
+  },
+  "acceptanceEvidence": "production-acceptance.json",
+  "performanceEvidence": "performance.json",
+  "limits": "Razorpay test mode only. No live bank, UPI collect, full paid cancellation, ticket delivery or admin acceptance is claimed."
+}

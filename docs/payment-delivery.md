@@ -193,3 +193,16 @@ Sanitized visual evidence: [desktop confirmation](evidence/payments-2026-10-27/d
 [mobile confirmation](evidence/payments-2026-10-27/mobile-confirmed.png),
 [mobile processed refund](evidence/payments-2026-10-27/mobile-refunded.png),
 [mobile booking history](evidence/payments-2026-10-27/mobile-history.png).
+
+
+## Final sandbox rollout
+
+Deployed source `74e06c27283c68e82b59cf317f5840d2bc263236` passed
+[Quality run 40481555709](https://github.com/jackedengineer/quickbus/actions/runs/40481555709).
+The final production mobile review restored the processed refund, had zero unnamed
+controls, no horizontal overflow and no console messages. All five release probes
+passed; the financial/inventory audit remained zero across 17 checks. Temporary
+browser network/viewport overrides were restored. [Final Worker versions, source
+lineage and rejection checks](evidence/payments-2026-10-27/release.json).
+Later documentation commits retain the identical application source; this record
+identifies the deployed revision rather than implying a documentation head ran.

@@ -2,7 +2,7 @@
   "revision": "6e3b633c592c6bf558610ca31c217835c6228acb",
   "ciRun": "40480705133",
   "startedAt": "2026-10-27T09:27:43.546Z",
-  "state": "HTTP and mobile history/refund browser verified; named-control follow-up pending",
+  "state": "HTTP and mobile history/refund browser verified; named-control follow-up verified on 74e06c2",
   "previous": {
     "api": "f4937fc1-04a8-4100-9a68-d1db810d0ac7",
     "web": "f1f8ce00-3431-4659-b1d0-46be3a55bdd5"
@@ -34,5 +34,6 @@
     "mobileHistoryNavigationAndRefresh": true,
     "refundStatusRestored": true,
     "productionPaymentFlowRevision": "40077a15edb75920951efff8d36d92d17e1a21f9"
-  }
+  },
+  "namedControlFollowup": "release.json"
 }
