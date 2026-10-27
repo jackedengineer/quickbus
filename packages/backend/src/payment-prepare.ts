@@ -26,6 +26,13 @@ export async function preparePayment(
     key,
     { version },
     async (tx) => {
+      // Checkout admission always locks customer before trip. This serializes the
+      // account-wide budget across different trips and independent API Workers.
+      // NO KEY UPDATE is compatible with the idempotency row's FK KEY SHARE;
+      // upgrading those shared locks to FOR UPDATE would deadlock contenders.
+      await tx.execute(
+        sql`SELECT id FROM "user" WHERE id=${userId} FOR NO KEY UPDATE`,
+      );
       const found = await tx.execute<{ tripId: string }>(
         sql`SELECT trip_id AS "tripId" FROM bookings WHERE id=${id} AND user_id=${userId}`,
       );
@@ -126,6 +133,16 @@ export async function preparePayment(
         return failure(
           'PAYMENT_RETRY_UNAVAILABLE',
           'Wait for the existing payment to resolve.',
+        );
+      const budget = await tx.execute<{ available: boolean }>(sql`
+        SELECT count(*)<10 AS available FROM checkout_attempts c
+        JOIN payment_intents i ON i.id=c.intent_id JOIN bookings b ON b.id=i.booking_id
+        WHERE b.user_id=${userId} AND c.created_at>clock_timestamp()-interval '10 minutes'`);
+      if (!budget.rows[0].available)
+        return failure(
+          'PAYMENT_RATE_LIMIT',
+          'Too many payment attempts. Wait a few minutes before trying again.',
+          429,
         );
       const checkoutId = crypto.randomUUID();
       await tx.execute(

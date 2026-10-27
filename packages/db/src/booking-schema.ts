@@ -117,6 +117,7 @@ export const bookings = pgTable(
   },
   (t) => [
     unique('booking_id_trip').on(t.id, t.tripId),
+    index('booking_customer_created').on(t.userId, t.createdAt),
     foreignKey({
       columns: [t.tripId, t.pickupStopId],
       foreignColumns: [tripStops.tripId, tripStops.id],

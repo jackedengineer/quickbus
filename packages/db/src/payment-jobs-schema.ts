@@ -49,7 +49,8 @@ export const paymentJobs = pgTable(
     check('payment_job_attempt_bounds', sql`${t.attempts} BETWEEN 0 AND 32`),
     check(
       'payment_job_lease',
-      sql`(${t.state}='RUNNING') = (${t.leaseToken} IS NOT NULL AND ${t.leaseExpiresAt} IS NOT NULL)`,
+      sql`(${t.state}='RUNNING' AND ${t.leaseToken} IS NOT NULL AND ${t.leaseExpiresAt} IS NOT NULL)
+        OR (${t.state}<>'RUNNING' AND ${t.leaseToken} IS NULL AND ${t.leaseExpiresAt} IS NULL)`,
     ),
     check(
       'payment_job_failure_code',
