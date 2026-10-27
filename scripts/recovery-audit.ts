@@ -32,7 +32,28 @@ export const invariantQuery = `SELECT json_build_object(
     NOT EXISTS(SELECT 1 FROM trip_stops WHERE trip_id=t.id AND role='PICKUP') OR
     NOT EXISTS(SELECT 1 FROM trip_stops WHERE trip_id=t.id AND role='DROP'))),
   'partialServiceTrips',(SELECT count(*)::int FROM trips t JOIN inventory_services s ON s.id=t.source_service_id WHERE
-    (SELECT count(*) FROM trip_seats WHERE trip_id=t.id)<>s.seat_count)
+    (SELECT count(*) FROM trip_seats WHERE trip_id=t.id)<>s.seat_count),
+  'intentQuoteMismatch',(SELECT count(*)::int FROM payment_intents i JOIN bookings b ON b.id=i.booking_id
+    WHERE i.amount<>b.total_minor OR i.currency<>b.currency),
+  'confirmedWithoutMoney',(SELECT count(*)::int FROM bookings b WHERE b.status='CONFIRMED' AND
+    (SELECT count(*) FROM provider_payments p JOIN payment_intents i ON i.id=p.intent_id
+     WHERE i.booking_id=b.id AND p.disposition='FULFILLED' AND p.state='captured'
+       AND p.amount=b.total_minor AND p.currency=b.currency)<>1),
+  'fulfillmentWithoutBooking',(SELECT count(*)::int FROM provider_payments p JOIN payment_intents i ON i.id=p.intent_id
+    JOIN bookings b ON b.id=i.booking_id WHERE p.disposition='FULFILLED' AND b.status<>'CONFIRMED'),
+  'refundQuoteMismatch',(SELECT count(*)::int FROM payment_refunds r JOIN provider_payments p ON p.id=r.payment_id
+    WHERE r.amount<>p.amount OR p.currency<>'INR' OR p.disposition<>'REFUND'),
+  'captureWithoutDisposition',(SELECT count(*)::int FROM provider_payments p
+    WHERE p.state IN ('captured','refunded') AND p.disposition='PENDING'),
+  'compensationWithoutRefund',(SELECT count(*)::int FROM provider_payments p WHERE p.disposition='REFUND' AND
+    NOT EXISTS(SELECT 1 FROM payment_refunds r WHERE r.payment_id=p.id)),
+  'refundWithoutJob',(SELECT count(*)::int FROM payment_refunds r WHERE
+    NOT EXISTS(SELECT 1 FROM payment_jobs j WHERE j.kind='REFUND' AND j.resource_id=r.id)),
+  'checkoutWithoutRecovery',(SELECT count(*)::int FROM checkout_attempts c WHERE
+    NOT EXISTS(SELECT 1 FROM payment_jobs j WHERE j.kind='RECONCILE' AND j.resource_id=c.id)),
+  'inboxWithoutJob',(SELECT count(*)::int FROM payment_inbox i WHERE
+    NOT EXISTS(SELECT 1 FROM payment_jobs j WHERE j.kind='INBOX' AND j.resource_id=i.id)),
+  'processedRefundWithoutIdentity',(SELECT count(*)::int FROM payment_refunds WHERE state='PROCESSED' AND provider_id IS NULL)
 ) value`;
 export function countsQuery(tables: { schemaname: string; name: string }[]) {
   const entries = tables.map((t) => {

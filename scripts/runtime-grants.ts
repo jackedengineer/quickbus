@@ -19,7 +19,25 @@ export async function applyRuntimeGrants(client: pg.Client, role: string) {
     `GRANT SELECT,INSERT,UPDATE ON maintenance_jobs TO "${role}"`,
   );
   await client.query(`GRANT SELECT,INSERT,UPDATE ON payment_jobs TO "${role}"`);
+  // Remove the earlier table-wide update grant before narrowing it. A runtime
+  // compromise must not rewrite the quoted amount, provider identity or evidence.
   await client.query(
-    `GRANT SELECT,INSERT,UPDATE ON payment_intents,checkout_attempts,provider_payments,payment_refunds,payment_inbox,payment_cases TO "${role}"`,
+    `REVOKE UPDATE ON payment_intents,checkout_attempts,provider_payments,payment_refunds,payment_inbox,payment_cases FROM "${role}"`,
   );
+  await client.query(
+    `GRANT SELECT,INSERT ON payment_intents,checkout_attempts,provider_payments,payment_refunds,payment_inbox,payment_cases TO "${role}"`,
+  );
+  await client.query(
+    `GRANT UPDATE(state,order_id,started_at,last_checked_at) ON checkout_attempts TO "${role}"`,
+  );
+  await client.query(
+    `GRANT UPDATE(state,disposition,updated_at) ON provider_payments TO "${role}"`,
+  );
+  await client.query(
+    `GRANT UPDATE(state,provider_id,started_at,updated_at) ON payment_refunds TO "${role}"`,
+  );
+  await client.query(
+    `GRANT UPDATE(processed_at) ON payment_inbox TO "${role}"`,
+  );
+  await client.query(`GRANT UPDATE(state) ON payment_cases TO "${role}"`);
 }
