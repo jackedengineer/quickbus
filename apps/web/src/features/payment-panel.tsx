@@ -45,10 +45,20 @@ export function PaymentPanel({
     checkoutInstance = useRef<Checkout | null>(null),
     latest = useRef(0),
     onChanged = useRef(onChange),
-    bookingStatus = useRef(booking.status);
+    bookingStatus = useRef(booking.status),
+    currentBooking = useRef(booking.id),
+    mounted = useRef(true);
   onChanged.current = onChange;
   bookingStatus.current = booking.status;
+  currentBooking.current = booking.id;
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
   const reload = useCallback(async () => {
+    if (!mounted.current || currentBooking.current !== booking.id) return;
     const sequence = ++latest.current;
     try {
       const response = await fetch(`/api/v1/bookings/${booking.id}/payment`);
@@ -59,11 +69,20 @@ export function PaymentPanel({
             : 'Payment status could not be loaded.',
         );
       const next = (await response.json()) as PaymentState;
-      if (sequence !== latest.current) return;
+      if (
+        sequence !== latest.current ||
+        !mounted.current ||
+        currentBooking.current !== booking.id
+      )
+        return;
       setState(next);
       if (next.status !== bookingStatus.current) onChanged.current();
     } catch (cause) {
-      if (sequence === latest.current)
+      if (
+        sequence === latest.current &&
+        mounted.current &&
+        currentBooking.current === booking.id
+      )
         setError(
           cause instanceof Error
             ? cause.message
@@ -77,15 +96,22 @@ export function PaymentPanel({
       (['CONFIRMED', 'EXPIRED', 'CANCELLED'].includes(state.status) ||
         ['FAILED', 'CAPTURED'].includes(state.checkout?.state ?? ''))
     ) {
-      checkoutInstance.current?.close();
+      const checkout = checkoutInstance.current;
       checkoutInstance.current = null;
       setOpen(false);
+      if (checkout) {
+        checkout.close();
+        // State is already authoritative. Reset the third-party frame before
+        // another attempt, and suppress its stale dismissal callback.
+        window.location.reload();
+      }
     }
   }, [state?.status, state?.checkout?.state]);
   useEffect(
     () => () => {
-      checkoutInstance.current?.close();
+      const checkout = checkoutInstance.current;
       checkoutInstance.current = null;
+      checkout?.close();
     },
     [booking.id],
   );
@@ -130,9 +156,10 @@ export function PaymentPanel({
         );
         if (!response.ok) throw new Error();
       } catch {
-        setError(
-          'Payment verification is pending. Keep this reservation reference and refresh status; do not pay again.',
-        );
+        if (mounted.current && currentBooking.current === booking.id)
+          setError(
+            'Payment verification is pending. Keep this reservation reference and refresh status; do not pay again.',
+          );
       }
       await reload();
     },
@@ -156,6 +183,7 @@ export function PaymentPanel({
     setError('');
     try {
       const Razorpay = await checkoutSdk();
+      if (!mounted.current || currentBooking.current !== booking.id) return;
       const checkout = new Razorpay({
         key: c.keyId,
         order_id: c.orderId,
@@ -179,16 +207,29 @@ export function PaymentPanel({
         modal: {
           confirm_close: true,
           ondismiss: () => {
+            if (
+              !mounted.current ||
+              currentBooking.current !== booking.id ||
+              checkoutInstance.current !== checkout
+            )
+              return;
+            checkoutInstance.current = null;
             setOpen(false);
             setNotice(
               'Checkout closed. We are checking the payment before offering a retry.',
             );
-            void hint(c.id);
+            // The hosted SDK reused a blank frame on a real same-document retry.
+            // Frozen details and all financial state are durable; a fresh document
+            // resets provider globals without inventing another order or payment.
+            void hint(c.id).finally(() => {
+              if (mounted.current && currentBooking.current === booking.id)
+                window.location.reload();
+            });
           },
         },
       });
       checkout.on('payment.failed', () => {
-        checkout.close();
+        if (checkoutInstance.current !== checkout) return;
         setOpen(false);
         setNotice(
           'The payment attempt failed. Checking with Razorpay before you try again…',
@@ -337,7 +378,10 @@ export function PaymentPanel({
             checkout.
           </p>
         )}
-        {notice && !confirmed && !refunding && <p>{notice}</p>}
+        {notice &&
+          !confirmed &&
+          !refunding &&
+          state.checkout?.state !== 'FAILED' && <p>{notice}</p>}
       </div>
       {error && (
         <p className="error" role="alert">

@@ -111,3 +111,17 @@ web fix adds only https://api.razorpay.com to form-action; nonce scripts, fixed
 frame/connect hosts, frame-ancestors, HTTPS, Origin and private API protections
 remain. Acceptance requires repeating the actual HTTPS hosted flow after this
 narrow change, rather than treating a static header check as a working payment.
+
+The CSP fix passed actual production hosted-frame rendering in both the in-app
+browser and Chrome. A deliberate mock-bank Failure reached the signed production
+inbox and FAILED attempt; explicit replacement captured and confirmed once after
+reload/resume. Full reload retained confirmation, one allocation and one
+confirmation event. The original failed payment remained failed.
+
+Chrome also exposed a same-document SDK reuse failure: reopening the next attempt
+could leave an empty frame, while full reload/resume used the same durable order
+successfully. Checkout now resets its document after authoritative terminal state
+or a completed dismissal hint. No new order is inferred from that reset. Callback
+identity/mount guards suppress old modals affecting another reservation. Passenger
+details are already frozen; all recovery state is database-backed. This behavior
+must pass an actual failure→retry journey after deployment before UI acceptance.
