@@ -38,9 +38,7 @@ export function PaymentPanel({
   const [error, setError] = useState(''),
     [notice, setNotice] = useState(''),
     [accepted, setAccepted] = useState(false);
-  const pending = useRef<{ key: string; version: number } | null>(null),
-    autoOpen = useRef(false),
-    launched = useRef('');
+  const pending = useRef<{ key: string; version: number } | null>(null);
   const flight = useRef(false),
     checkoutInstance = useRef<Checkout | null>(null),
     latest = useRef(0),
@@ -238,7 +236,6 @@ export function PaymentPanel({
       });
       checkoutInstance.current = checkout;
       setOpen(true);
-      launched.current = c.id;
       checkout.open();
     } catch (cause) {
       setError(
@@ -247,23 +244,17 @@ export function PaymentPanel({
     } finally {
       flight.current = false;
       setBusy(false);
-      autoOpen.current = false;
     }
   }, [state?.checkout, remaining, booking.reference, hint]);
-  useEffect(() => {
-    if (
-      autoOpen.current &&
-      state?.checkout?.canOpen &&
-      launched.current !== state.checkout.id
-    )
-      void launch();
-  }, [state?.checkout, launch]);
   async function start() {
     if (flight.current || !accepted || !ready || !state?.canStart) return;
     flight.current = true;
     setBusy(true);
     setError('');
     setNotice('Preparing secure test checkout…');
+    // Load while the server prepares the order. Opening remains a direct user
+    // click: delayed effect-driven launch left a blank frame in real Chrome.
+    void checkoutSdk().catch(() => {});
     pending.current ??= { key: crypto.randomUUID(), version: booking.version };
     try {
       const response = await fetch(`/api/v1/bookings/${booking.id}/checkout`, {
@@ -288,7 +279,6 @@ export function PaymentPanel({
         );
       }
       pending.current = null;
-      autoOpen.current = true;
       setNotice('Preparing your Razorpay test order…');
       onChanged.current();
       await reload();
@@ -431,7 +421,7 @@ export function PaymentPanel({
           disabled={busy || open || remaining === null || remaining < 90}
           onClick={() => void launch()}
         >
-          {open ? 'Checkout open…' : 'Resume test checkout'}
+          {open ? 'Checkout open…' : 'Open Razorpay test checkout'}
         </button>
       )}
       {!confirmed && !refunding && remaining !== null && remaining < 90 && (
