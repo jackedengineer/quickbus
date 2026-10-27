@@ -1,6 +1,13 @@
 import type { AppEnvironment } from '@kwikbus/backend/context';
 
 export function validateEnvironment(environment: AppEnvironment) {
+  if (
+    environment.PAYMENTS_ENABLED === 'true' &&
+    (!/^rzp_test_[A-Za-z0-9]+$/.test(environment.RAZORPAY_KEY_ID ?? '') ||
+      !environment.RAZORPAY_KEY_SECRET ||
+      !environment.RAZORPAY_WEBHOOK_SECRET)
+  )
+    throw new Error('Test payment configuration required.');
   if (!environment.AUTH_SECRET || environment.AUTH_SECRET.length < 32)
     throw new Error('Invalid authentication configuration.');
   const origin = new URL(environment.APP_ORIGIN);

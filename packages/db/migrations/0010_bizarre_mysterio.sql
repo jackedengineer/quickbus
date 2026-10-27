@@ -1,0 +1,2 @@
+ALTER TABLE "maintenance_jobs" DROP CONSTRAINT "maintenance_job_name";--> statement-breakpoint
+ALTER TABLE "maintenance_jobs" ADD CONSTRAINT "maintenance_job_name" CHECK ("maintenance_jobs"."name" IN ('expiry', 'inventory','payments'));

@@ -40,6 +40,9 @@ export function createDatabase(
     Client: Driver,
     max: 1,
     connectionTimeoutMillis: 8000,
+    // Also bound queue claims and provider-recovery reads outside trip commands.
+    statement_timeout: 5000,
+    lock_timeout: 2000,
   });
   // The Neon Pool overrides pg's Client constructor during initialisation.
   // Set its documented public Client property before the first connection.

@@ -154,6 +154,23 @@ export async function applyPaymentObservation(
       sql`INSERT INTO booking_events(id,booking_id,type) VALUES(${crypto.randomUUID()},${checkout.bookingId},'CONFIRMED') ON CONFLICT DO NOTHING`,
     );
   } else {
+    if (
+      booking.status === 'PAYMENT_PENDING' &&
+      (trip.sales_state === 'CANCELLED' ||
+        !booking.owned ||
+        payment.status === 'refunded' ||
+        payment.amount_refunded > 0)
+    ) {
+      await tx.execute(
+        sql`UPDATE bookings SET status='CANCELLED' WHERE id=${checkout.bookingId}`,
+      );
+      await tx.execute(
+        sql`DELETE FROM seat_allocations WHERE booking_id=${checkout.bookingId}`,
+      );
+      await tx.execute(
+        sql`INSERT INTO booking_events(id,booking_id,type) VALUES(${crypto.randomUUID()},${checkout.bookingId},'CANCELLED') ON CONFLICT DO NOTHING`,
+      );
+    }
     await tx.execute(
       sql`UPDATE provider_payments SET disposition='REFUND' WHERE id=${payment.id}`,
     );

@@ -1,5 +1,6 @@
 import type { Database } from '@kwikbus/db';
 import { sql } from '@kwikbus/db/schema';
+import { processPaymentInbox } from './payment-inbox-worker';
 import {
   claimPaymentJob,
   failPaymentJob,
@@ -26,7 +27,7 @@ export async function runPaymentJobs(
       if (job.kind === 'ORDER') await createCheckoutOrder(db, env, job);
       else if (job.kind === 'RECONCILE') await reconcileCheckout(db, env, job);
       else if (job.kind === 'REFUND') await executeRefund(db, env, job);
-      else throw new Error('Inbox processor not yet enabled');
+      else await processPaymentInbox(db, env, job);
       processed++;
     } catch (error) {
       if (error instanceof StalePaymentLease) continue;

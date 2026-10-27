@@ -69,7 +69,7 @@ export async function reconcileCheckout(
         !(await finishPaymentJob(
           tx,
           job,
-          checkout.state === 'PENDING' ? 5 : 3600,
+          checkout.state === 'PENDING' ? 5 : undefined,
         ))
       )
         throw new StalePaymentLease();

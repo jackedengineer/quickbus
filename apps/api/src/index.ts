@@ -3,6 +3,7 @@ import { httpServerHandler } from 'cloudflare:node';
 import { createApp } from '@kwikbus/backend/app';
 import { type AppEnvironment, requestContext } from '@kwikbus/backend/context';
 import { runMaintenance } from '@kwikbus/backend/maintenance';
+import { runPaymentJobs } from '@kwikbus/backend/payment-worker';
 import {
   observeRequest,
   reportFailure,
@@ -35,9 +36,33 @@ const api = {
         environment.CI_DATABASE_PROXY,
         requestId(),
       );
-      return await requestContext.run({ db: database.db, environment }, () =>
-        handleHttp(request, environment, executionContext),
+      const response = await requestContext.run(
+        { db: database.db, environment },
+        () => handleHttp(request, environment, executionContext),
       );
+      if (
+        response.ok &&
+        request.method === 'POST' &&
+        (new URL(request.url).pathname === '/api/webhooks/razorpay' ||
+          /\/bookings\/[^/]+\/(checkout|payment\/(verify|refresh))$/.test(
+            new URL(request.url).pathname,
+          ))
+      ) {
+        executionContext.waitUntil(
+          (async () => {
+            const workerDb = createDatabase(
+              environment.DATABASE_URL,
+              environment.CI_DATABASE_PROXY,
+            );
+            try {
+              await runPaymentJobs(workerDb.db, environment, 3);
+            } finally {
+              await workerDb.close();
+            }
+          })(),
+        );
+      }
+      return response;
     } catch {
       reportFailure('worker_dependency_failed');
       return Response.json(
@@ -71,6 +96,8 @@ export default {
     );
     try {
       await runMaintenance(database.db, job, runId);
+      if (job === 'expiry')
+        await runMaintenance(database.db, 'payments', runId, environment);
     } finally {
       await database.close();
     }

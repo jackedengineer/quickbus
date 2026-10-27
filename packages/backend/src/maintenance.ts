@@ -2,11 +2,15 @@ import type { Database } from '@kwikbus/db';
 import { sql } from '@kwikbus/db/schema';
 import { sweepExpiredHolds } from './expiry';
 import { renewInventory } from './inventory';
+import { paymentJobHealth } from './payment-jobs';
+import { runPaymentJobs } from './payment-worker';
+import type { RazorpayEnvironment } from './razorpay';
 
 export async function runMaintenance(
   db: Database,
-  name: 'expiry' | 'inventory',
+  name: 'expiry' | 'inventory' | 'payments',
   runId = crypto.randomUUID(),
+  environment: RazorpayEnvironment = {},
 ) {
   const started = performance.now();
   try {
@@ -14,7 +18,9 @@ export async function runMaintenance(
     ON CONFLICT(name) DO UPDATE SET last_started_at=excluded.last_started_at`);
     const processed = await (name === 'expiry'
       ? sweepExpiredHolds(db)
-      : renewInventory(db));
+      : name === 'inventory'
+        ? renewInventory(db)
+        : runPaymentJobs(db, environment));
     await db.execute(
       sql`UPDATE maintenance_jobs SET last_succeeded_at=clock_timestamp(),last_processed=${processed} WHERE name=${name}`,
     );
@@ -60,14 +66,22 @@ export async function maintenanceHealth(db: Database) {
       FROM inventory_services s LEFT JOIN LATERAL (SELECT max(departure_at) departure FROM trips WHERE source_service_id=s.id AND sales_state='OPEN') latest ON true WHERE s.active),false) AS "horizonHealthy",
     (SELECT count(*)::int FROM bookings WHERE status IN ('HELD','PAYMENT_PENDING') AND expires_at<clock_timestamp()-interval '5 minutes') AS "overdueHolds"`);
   const values = result.rows[0];
+  const payments = await paymentJobHealth(db);
+  const cases = await db.execute<{ open: number }>(
+    sql`SELECT count(*)::int AS open FROM payment_cases WHERE state='OPEN'`,
+  );
   return {
     status:
       values.expiryFresh &&
       values.inventoryFresh &&
       values.horizonHealthy &&
-      !values.overdueHolds
+      !values.overdueHolds &&
+      !payments.failed &&
+      payments.oldestSeconds < 180 &&
+      !cases.rows[0].open
         ? 'ok'
         : 'degraded',
     ...values,
+    payments: { ...payments, openCases: cases.rows[0].open },
   };
 }

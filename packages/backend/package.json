@@ -8,7 +8,8 @@
     "./booking": "./src/booking.ts",
     "./context": "./src/context.ts",
     "./telemetry": "./src/telemetry.ts",
-    "./maintenance": "./src/maintenance.ts"
+    "./maintenance": "./src/maintenance.ts",
+    "./payment-worker": "./src/payment-worker.ts"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "1.7.12",
