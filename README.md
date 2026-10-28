@@ -41,6 +41,7 @@ The contention harness creates only synthetic fixtures, waits for concurrent req
 
 ## Implementation evidence
 
+- [Engineering case study: concurrency, payment recovery, measured results and tradeoffs](docs/engineering-case-study.md)
 - [Razorpay test checkout, late-capture refunds and production browser evidence](docs/payment-delivery.md)
 - [Observed provider contracts and safe retry limits](docs/provider-contract.md)
 - [Financial-schema recovery drill](docs/recovery.md)
