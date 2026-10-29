@@ -323,10 +323,10 @@ export function PaymentPanel({
         </button>
       </section>
     );
-  if (!state.enabled && !state.checkout)
-    return <p className="muted">Test payments are not available yet.</p>;
   const confirmed = state.status === 'CONFIRMED' && !state.tripCancelled,
-    refunding = state.refunds.length > 0;
+    refunding = state.refunds.length > 0,
+    paused =
+      !state.enabled && ['HELD', 'PAYMENT_PENDING'].includes(state.status);
   const waiting =
     state.checkout &&
     ['PENDING', 'CREATING', 'UNKNOWN'].includes(state.checkout.state);
@@ -372,6 +372,11 @@ export function PaymentPanel({
             Payment recovery needs review. Keep your reservation reference and
             do not pay again.
           </p>
+        ) : paused ? (
+          <p>
+            Test checkout is temporarily paused. Your reservation deadline is
+            unchanged. Any payment already started is still being checked.
+          </p>
         ) : waiting ? (
           <p>
             Checking your existing payment order. Do not start another payment.
@@ -410,6 +415,8 @@ export function PaymentPanel({
           </p>
         )}
         {notice &&
+          state.enabled &&
+          !state.tripCancelled &&
           !confirmed &&
           !refunding &&
           !state.checkout?.canOpen &&
