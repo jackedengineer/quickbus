@@ -370,6 +370,21 @@ export function PaymentPanel({
             checkout.
           </p>
         )}
+        {confirmed && refunding && (
+          <p>
+            {state.refunds.every((s) => s === 'PROCESSED')
+              ? 'An additional test payment has been refunded. Your booking remains confirmed.'
+              : state.refunds.some((s) => s === 'NEEDS_REVIEW')
+                ? 'An additional payment refund needs review. Keep your booking reference and do not pay again.'
+                : 'An additional test payment is being refunded. Your booking remains confirmed.'}
+          </p>
+        )}
+        {confirmed && state.needsReview && (
+          <p className="error">
+            Payment recovery needs review. Keep your booking reference and do
+            not pay again.
+          </p>
+        )}
         {notice &&
           !confirmed &&
           !refunding &&

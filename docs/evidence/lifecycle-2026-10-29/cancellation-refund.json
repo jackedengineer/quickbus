@@ -1,0 +1,39 @@
+{
+  "checkedAt": "2026-10-29T16:06:11.929Z",
+  "mode": "Razorpay test; dedicated development Neon",
+  "bookingId": "f8849f3b-3b48-4ea4-a67b-3452aae6f575",
+  "browser": {
+    "desktopAndMobilePreview": true,
+    "keepBookingDoesNotCancel": true,
+    "openerFocusRestored": true,
+    "twoIndependentTabSubmissions": true,
+    "oneCancellationEvent": true,
+    "oneRefundIntent": true,
+    "cancelledTicketRemainsVisible": true,
+    "processedRefundVisible": true
+  },
+  "audit": [
+    {
+      "source": "CUSTOMER",
+      "accepted_at": "2026-10-29 15:57:14.633946+00",
+      "started_at": "2026-10-29 15:57:47.636307+00",
+      "refund_start_delay_seconds": 33,
+      "status": "CANCELLED",
+      "allocations": 0,
+      "cancellation_count": 1,
+      "cancellation_event_count": 1,
+      "refund_id": "3b7c0f19-4ceb-44c0-9a6d-bf940d4f9e77",
+      "refund_state": "PROCESSED",
+      "provider_id": "rfnd_TtmVxVJO9MYKIq"
+    }
+  ],
+  "focusedFaultChecks": [
+    "Lost accepted refund response: read recovery with one POST",
+    "Rollback after refund-intent writes preserves original booking/seat/money and same-key retry",
+    "Separate captured attempts receive separate full refund identities; duplicate observations do not revive seats"
+  ],
+  "limits": [
+    "No live funds or real travel tickets",
+    "Native print-preview layout remains a separate manual verification gap"
+  ]
+}

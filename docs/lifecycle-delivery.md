@@ -101,3 +101,21 @@ message was corrected for a formerly confirmed booking. Resource-busy/network
 uncertainty preserves the request key and offers safe resume rather than claiming
 failure or reverting the cancellation. Native print preview remains a separate
 manual check; no cancellation/refund result is inferred from it.
+
+## T24 cancellation refunds and recovery
+
+The existing refund worker handles whole-booking cancellation without a second
+execution path. Actual test payment pay_Ttm6geggcpMFER was fully refunded as
+rfnd_TtmVxVJO9MYKIq. The cancellation committed at15:57:14UTC, the minute worker
+started its refund33seconds later, and the provider/SQL state reached PROCESSED.
+The mobile browser showed the cancelled ticket and processed refund; no browser
+success hint or manual job execution was needed to run the refund.
+
+Three further real-Neon fault scenarios passed: lost accepted-refund response
+recovers by authoritative reads with one POST total; a fault after writing refund
+intent rolls back money, seats, cancellation and command replay together; and an
+additional captured attempt remains a separate full refund before/after customer
+cancellation. Refund identities never merge or revive seats. The confirmed UI now
+also surfaces additional-payment refunds and financial-review state instead of
+hiding them behind the confirmed heading. Tests are scoped to their fixture job
+IDs; they do not claim unrelated real sandbox work from the development queue.
