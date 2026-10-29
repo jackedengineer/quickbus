@@ -146,18 +146,30 @@ try {
     `${directory}:/evidence:ro`,
     image,
   ]);
+  // The image's temporary init server accepts Unix-socket probes before the
+  // requested DB exists, then restarts. Only the final server listens on TCP.
+  // Probe the real restore DB over container loopback; no host port/network.
   let ready = false;
   for (let i = 0; i < 60; i++) {
     const probe = spawnSync(
       'docker',
       [
         'exec',
+        '-e',
+        'PGPASSWORD=restore-fixture-only',
+        '-e',
+        'PGCONNECT_TIMEOUT=1',
         container,
-        'pg_isready',
+        'psql',
+        '-h',
+        '127.0.0.1',
         '-U',
         'postgres',
         '-d',
         'kwikbus_restore',
+        '--no-password',
+        '-Atc',
+        'SELECT 1',
       ],
       { stdio: 'ignore' },
     );

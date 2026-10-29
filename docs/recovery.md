@@ -40,3 +40,20 @@ The disposable target had no network and was removed; the successful archive was
 encrypted and plaintext/source credentials removed. No production data was
 replaced. These local timings do not establish continuous backup, RPO or RTO.
 [Sanitized financial-schema evidence](evidence/payments-2026-10-27/recovery.json).
+
+## Lifecycle-schema drill — 29 October 2026
+
+The production snapshot at17:24:15.698UTC, after actual paid customer cancellation,
+restored and passed its independent audit at17:24:37.880UTC. All36 tables /8,171
+rows and schema definitions matched; all24 financial, inventory and lifecycle
+invariants were zero. Backup took15,544ms, restore/audit6,026ms and total22,917ms;
+snapshot age was22,183ms. The target had no external network or published port,
+was removed afterward, and the successful archive was encrypted.
+
+The first attempt caught a target-startup race: the image's temporary Unix-socket
+server passed pg_isready before the requested database existed. Readiness now
+queries the actual restore database over container loopback TCP, which the
+initialization server does not expose. Production remained read-only throughout;
+no database or customer record was replaced. The full retry passed using the
+updated probe. These timings are one local recovery drill, not an RPO/RTO service
+commitment. [Sanitized result](evidence/lifecycle-2026-10-29/recovery.json).
