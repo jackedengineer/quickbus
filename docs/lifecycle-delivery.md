@@ -66,3 +66,19 @@ Build, strict TypeScript and lint passed. The in-app print action blocked its
 input automation until Escape; actual Chrome print acceptance remains pending.
 Confirmation delivery, mobile/print and adversarial browser acceptance are still
 required before completing T22. Private screenshot: artifacts/local/lifecycle/.
+
+## T22 real journey and delivery
+
+Source 648e0e4 passed exact-revision Quality 40900879803 (build and isolated
+integration). A fresh isolated Chrome profile signed in through a delivered local
+OTP, searched 30 October, chose stops/seat1A, saved a synthetic passenger and
+completed the actual Razorpay mock-bank Success path. Capture confirmed once and
+atomically queued one notification. The natural minute worker sent that message
+to Mailpit; opening its link restored the owned ticket. Full reload retained the
+ticket and SENT notice. No manual notification insert or fake session was used.
+Mobile390px had no overflow; another owner's synthetic booking returned not-found
+in the signed-in browser. Chrome's actual Print button responded; the native
+preview layout remains a manual acceptance gap because native Mac control is
+unavailable and headless Chrome exposes no preview. Production Resend acceptance
+is deferred to the final guarded rollout, not inferred from Mailpit.
+[Sanitized browser/SQL record](evidence/lifecycle-2026-10-29/tickets-email.json).

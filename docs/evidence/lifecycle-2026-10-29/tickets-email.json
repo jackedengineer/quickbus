@@ -1,0 +1,34 @@
+{
+  "checkedAt": "2026-10-29T15:39:14.061Z",
+  "sourceRevision": "648e0e4",
+  "ciRun": "40900879803",
+  "environment": "dedicated development Neon, actual Razorpay test capture, local Mailpit delivery",
+  "browser": {
+    "normalEmailOtp": true,
+    "futureDateSearch": true,
+    "seatAndStopsReserved": true,
+    "passengerDetailsSaved": true,
+    "realSandboxBankSuccess": true,
+    "ownedTicketRendered": true,
+    "emailInboxObserved": true,
+    "emailLinkOpenedOwnedTicket": true,
+    "fullReloadRestoresTicketAndEmailState": true,
+    "mobileNoOverflow": true,
+    "foreignBookingShowsNotFound": true,
+    "chromePrintActionResponded": true
+  },
+  "financial": [
+    {
+      "id": "f8849f3b-3b48-4ea4-a67b-3452aae6f575",
+      "status": "CONFIRMED",
+      "notification_state": "SENT",
+      "provider_id": "Q3JLSXTi6BdZZA9fx6DRbr",
+      "notification_count": 1
+    }
+  ],
+  "limits": [
+    "Native print preview is unavailable through current Mac automation; its final paper/PDF layout has not been visually accepted.",
+    "Actual production Resend delivery will be checked during the final guarded rollout.",
+    "No live payment or real travel ticket."
+  ]
+}
