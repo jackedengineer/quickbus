@@ -28,6 +28,10 @@ export async function applyRuntimeGrants(client: pg.Client, role: string) {
   await client.query(
     `GRANT SELECT,INSERT ON booking_cancellations TO "${role}"`,
   );
+  await client.query(`GRANT SELECT,INSERT ON trip_cancellations TO "${role}"`);
+  await client.query(
+    `GRANT UPDATE(processed_bookings,completed_at) ON trip_cancellations TO "${role}"`,
+  );
   // Remove the earlier table-wide update grant before narrowing it. A runtime
   // compromise must not rewrite the quoted amount, provider identity or evidence.
   await client.query(

@@ -11,6 +11,7 @@ import { reconcileCheckout } from './payment-reconcile';
 import { executeRefund } from './payment-refunds';
 import { paymentCase } from './payment-state';
 import { ProviderUnavailable, type RazorpayEnvironment } from './razorpay';
+import { drainTripCancellation } from './trip-cancellation';
 
 export async function runPaymentJobs(
   db: Database,
@@ -19,13 +20,18 @@ export async function runPaymentJobs(
   resourceId?: string,
 ) {
   // Disabling new checkout does not disable recovery of existing money exposure.
-  if (!env.RAZORPAY_KEY_ID) return 0;
+  // Trip drain must also work for unpaid inventory without provider credentials.
   let processed = 0;
   for (let n = 0; n < limit; n++) {
-    const job = await claimPaymentJob(db, resourceId);
+    const job = await claimPaymentJob(
+      db,
+      resourceId,
+      Boolean(env.RAZORPAY_KEY_ID),
+    );
     if (!job) break;
     try {
-      if (job.kind === 'ORDER') await createCheckoutOrder(db, env, job);
+      if (job.kind === 'TRIP_CANCEL') await drainTripCancellation(db, job);
+      else if (job.kind === 'ORDER') await createCheckoutOrder(db, env, job);
       else if (job.kind === 'RECONCILE') await reconcileCheckout(db, env, job);
       else if (job.kind === 'REFUND') await executeRefund(db, env, job);
       else await processPaymentInbox(db, env, job);

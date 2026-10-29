@@ -40,7 +40,7 @@ export const paymentJobs = pgTable(
       .where(sql`${t.state} IN ('QUEUED','RUNNING')`),
     check(
       'payment_job_kind',
-      sql`${t.kind} IN ('ORDER','RECONCILE','REFUND','INBOX')`,
+      sql`${t.kind} IN ('ORDER','RECONCILE','REFUND','INBOX','TRIP_CANCEL')`,
     ),
     check(
       'payment_job_state',

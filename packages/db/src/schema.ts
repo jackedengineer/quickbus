@@ -8,3 +8,5 @@ export * from './operations-schema';
 export * from './payment-jobs-schema';
 export * from './payments-schema';
 export * from './service-schema';
+
+export * from './trip-cancellation-schema';

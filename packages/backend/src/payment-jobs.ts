@@ -1,7 +1,12 @@
 import type { Database, Transaction } from '@kwikbus/db';
 import { sql } from '@kwikbus/db/schema';
 
-export type JobKind = 'ORDER' | 'RECONCILE' | 'REFUND' | 'INBOX';
+export type JobKind =
+  | 'ORDER'
+  | 'RECONCILE'
+  | 'REFUND'
+  | 'INBOX'
+  | 'TRIP_CANCEL';
 export type PaymentJob = {
   id: string;
   kind: JobKind;
@@ -34,10 +39,11 @@ export async function enqueuePaymentJob(
 export async function claimPaymentJob(
   db: Database,
   resourceId?: string,
+  providerConfigured = true,
 ): Promise<PaymentJob | undefined> {
   const rows = await db.execute<PaymentJob>(sql`
     WITH candidate AS (
-      SELECT id FROM payment_jobs WHERE attempts<32 ${resourceId ? sql`AND resource_id=${resourceId}::uuid` : sql``} AND
+      SELECT id FROM payment_jobs WHERE attempts<32 ${providerConfigured ? sql`` : sql`AND kind='TRIP_CANCEL'`} ${resourceId ? sql`AND resource_id=${resourceId}::uuid` : sql``} AND
       ((state='QUEUED' AND available_at<=clock_timestamp()) OR
        (state='RUNNING' AND lease_expires_at<=clock_timestamp()))
       ORDER BY available_at,id LIMIT 1 FOR UPDATE SKIP LOCKED

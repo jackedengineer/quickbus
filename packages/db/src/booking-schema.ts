@@ -122,6 +122,7 @@ export const bookings = pgTable(
     unique('booking_id_trip').on(t.id, t.tripId),
     check('booking_cancellation_policy', sql`${t.cancellationPolicyVersion}=1`),
     index('booking_customer_created').on(t.userId, t.createdAt),
+    index('booking_trip_status').on(t.tripId, t.status, t.createdAt, t.id),
     foreignKey({
       columns: [t.tripId, t.pickupStopId],
       foreignColumns: [tripStops.tripId, tripStops.id],

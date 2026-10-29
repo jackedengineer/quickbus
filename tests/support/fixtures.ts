@@ -99,6 +99,14 @@ export async function cleanupFixtures(
     await client.query('DELETE FROM trip_stops WHERE trip_id=ANY($1::uuid[])', [
       tripIds,
     ]);
+    await client.query(
+      "DELETE FROM payment_jobs WHERE kind='TRIP_CANCEL' AND resource_id=ANY($1::uuid[])",
+      [tripIds],
+    );
+    await client.query(
+      'DELETE FROM trip_cancellations WHERE trip_id=ANY($1::uuid[])',
+      [tripIds],
+    );
     await client.query('DELETE FROM trips WHERE id=ANY($1::uuid[])', [tripIds]);
     await client.query(
       'DELETE FROM idempotency_keys WHERE principal_id=ANY($1::text[])',
