@@ -1,6 +1,7 @@
 export { sql } from 'drizzle-orm';
 export * from './auth-schema';
 export * from './booking-schema';
+export * from './cancellation-schema';
 export * from './catalog-schema';
 export * from './notification-schema';
 export * from './operations-schema';

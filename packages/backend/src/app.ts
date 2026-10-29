@@ -11,6 +11,7 @@ import {
   listTrips,
   releaseHold,
 } from './booking';
+import { cancellationRoutes } from './cancellation-routes';
 import { catalog, citySuggestions, searchTrips, tripDetails } from './catalog';
 import { context } from './context';
 import { maintenanceHealth } from './maintenance';
@@ -222,6 +223,7 @@ export function createApp() {
     return response.status(result.status).json(result.body);
   });
   paymentRoutes(app);
+  cancellationRoutes(app);
   app.get('/api/v1/bookings', async (_request, response) =>
     response.json({
       bookings: await getBookings(context().db, response.locals.userId),

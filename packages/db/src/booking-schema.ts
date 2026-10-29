@@ -106,6 +106,9 @@ export const bookings = pgTable(
     reference: text('reference').notNull().unique(),
     status: text('status').notNull().default('HELD'),
     version: integer('version').notNull().default(1),
+    cancellationPolicyVersion: integer('cancellation_policy_version')
+      .notNull()
+      .default(1),
     pickupStopId: uuid('pickup_stop_id'),
     dropStopId: uuid('drop_stop_id'),
     contactEmail: text('contact_email'),
@@ -117,6 +120,7 @@ export const bookings = pgTable(
   },
   (t) => [
     unique('booking_id_trip').on(t.id, t.tripId),
+    check('booking_cancellation_policy', sql`${t.cancellationPolicyVersion}=1`),
     index('booking_customer_created').on(t.userId, t.createdAt),
     foreignKey({
       columns: [t.tripId, t.pickupStopId],

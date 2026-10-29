@@ -90,6 +90,11 @@ export const reservationDetailsInput = z
 export type ReservationDetailsInput = z.infer<typeof reservationDetailsInput>;
 export type ReservationReview = {
   wasConfirmed: boolean;
+  cancellation: {
+    source: 'CUSTOMER' | 'TRIP';
+    acceptedAt: string;
+    refundMinor: number;
+  } | null;
   confirmationEmail:
     | 'QUEUED'
     | 'RUNNING'
@@ -120,4 +125,16 @@ export type ReservationReview = {
   passengers: { seatLabel: string; fareMinor: number; name: string | null }[];
   stops: TripStop[];
   complete: boolean;
+};
+
+export type CancellationPreview = {
+  id: string;
+  status: ReservationReview['status'];
+  version: number;
+  policyVersion: number;
+  cutoffAt: string;
+  serverTime: string;
+  eligible: boolean;
+  refundableMinor: number;
+  source: 'CUSTOMER' | 'TRIP' | null;
 };

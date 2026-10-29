@@ -99,6 +99,13 @@
       "when": 1793287058193,
       "tag": "0013_mighty_scourge",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1793288406350,
+      "tag": "0014_yielding_vengeance",
+      "breakpoints": true
     }
   ]
 }
