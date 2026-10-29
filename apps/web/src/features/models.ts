@@ -12,6 +12,7 @@ export type Seat = {
   available: boolean;
 };
 export type Booking = {
+  tripCancelled: boolean;
   id: string;
   tripId: string;
   reference: string;

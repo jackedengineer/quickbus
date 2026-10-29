@@ -6,6 +6,7 @@ import { type Checkout, checkoutSdk } from './razorpay-checkout';
 type PaymentState = {
   id: string;
   status: string;
+  tripCancelled: boolean;
   enabled: boolean;
   mode: 'test';
   canStart: boolean;
@@ -59,7 +60,9 @@ export function PaymentPanel({
     if (!mounted.current || currentBooking.current !== booking.id) return;
     const sequence = ++latest.current;
     try {
-      const response = await fetch(`/api/v1/bookings/${booking.id}/payment`);
+      const response = await fetch(`/api/v1/bookings/${booking.id}/payment`, {
+        signal: AbortSignal.timeout(10000),
+      });
       if (!response.ok)
         throw new Error(
           response.status === 401
@@ -74,7 +77,11 @@ export function PaymentPanel({
       )
         return;
       setState(next);
-      if (next.status !== bookingStatus.current) onChanged.current();
+      if (
+        next.status !== bookingStatus.current ||
+        next.tripCancelled !== booking.tripCancelled
+      )
+        onChanged.current();
     } catch (cause) {
       if (
         sequence === latest.current &&
@@ -87,11 +94,12 @@ export function PaymentPanel({
             : 'Payment status unavailable.',
         );
     }
-  }, [booking.id]);
+  }, [booking.id, booking.tripCancelled]);
   useEffect(() => {
     if (
       state &&
-      (['CONFIRMED', 'EXPIRED', 'CANCELLED'].includes(state.status) ||
+      (state.tripCancelled ||
+        ['CONFIRMED', 'EXPIRED', 'CANCELLED'].includes(state.status) ||
         ['FAILED', 'CAPTURED'].includes(state.checkout?.state ?? ''))
     ) {
       const checkout = checkoutInstance.current;
@@ -104,7 +112,7 @@ export function PaymentPanel({
         window.location.reload();
       }
     }
-  }, [state?.status, state?.checkout?.state]);
+  }, [state?.status, state?.checkout?.state, state?.tripCancelled]);
   useEffect(
     () => () => {
       const checkout = checkoutInstance.current;
@@ -126,18 +134,27 @@ export function PaymentPanel({
     window.addEventListener('focus', focus);
     document.addEventListener('visibilitychange', focus);
     const polling =
+      (state?.status === 'CONFIRMED' && !state.tripCancelled) ||
       state?.status === 'PAYMENT_PENDING' ||
       ['PENDING', 'CREATING', 'UNKNOWN', 'READY'].includes(
         state?.checkout?.state ?? '',
       ) ||
       state?.refunds.some((s) => !['PROCESSED', 'NEEDS_REVIEW'].includes(s));
-    const timer = polling ? window.setInterval(focus, 4000) : undefined;
+    const timer = polling
+      ? window.setInterval(focus, state?.status === 'CONFIRMED' ? 15000 : 4000)
+      : undefined;
     return () => {
       window.removeEventListener('focus', focus);
       document.removeEventListener('visibilitychange', focus);
       if (timer) window.clearInterval(timer);
     };
-  }, [reload, state?.status, state?.checkout?.state, state?.refunds.join(',')]);
+  }, [
+    reload,
+    state?.status,
+    state?.checkout?.state,
+    state?.tripCancelled,
+    state?.refunds.join(','),
+  ]);
   const hint = useCallback(
     async (
       checkoutId: string,
@@ -308,7 +325,7 @@ export function PaymentPanel({
     );
   if (!state.enabled && !state.checkout)
     return <p className="muted">Test payments are not available yet.</p>;
-  const confirmed = state.status === 'CONFIRMED',
+  const confirmed = state.status === 'CONFIRMED' && !state.tripCancelled,
     refunding = state.refunds.length > 0;
   const waiting =
     state.checkout &&
@@ -321,11 +338,13 @@ export function PaymentPanel({
     >
       <span className="sandbox-badge">TEST MODE · No real money</span>
       <h2 id="payment-heading">
-        {confirmed
-          ? 'Test booking confirmed'
-          : refunding
-            ? 'Your refund status'
-            : 'Secure payment'}
+        {state.tripCancelled && !refunding
+          ? 'Trip cancelled'
+          : confirmed
+            ? 'Test booking confirmed'
+            : refunding
+              ? 'Your refund status'
+              : 'Secure payment'}
       </h2>
       <div role="status" aria-live="polite">
         {confirmed ? (
@@ -342,6 +361,11 @@ export function PaymentPanel({
                 : booking.wasConfirmed && state.status === 'CANCELLED'
                   ? 'Your booking is cancelled. Your full test refund is being processed.'
                   : 'Your seats could not be confirmed. Your test payment is being refunded.'}
+          </p>
+        ) : state.tripCancelled ? (
+          <p>
+            The operator cancelled this trip. We are updating your booking and
+            checking any payment for a full refund. Do not pay again.
           </p>
         ) : state.needsReview ? (
           <p>
@@ -443,12 +467,16 @@ export function PaymentPanel({
           {open ? 'Checkout open…' : 'Open Razorpay test checkout'}
         </button>
       )}
-      {!confirmed && !refunding && remaining !== null && remaining < 90 && (
-        <p>
-          The payment-start window has closed. Check status before making
-          another reservation.
-        </p>
-      )}
+      {!state.tripCancelled &&
+        !confirmed &&
+        !refunding &&
+        remaining !== null &&
+        remaining < 90 && (
+          <p>
+            The payment-start window has closed. Check status before making
+            another reservation.
+          </p>
+        )}
       {state.checkout && (
         <button
           type="button"

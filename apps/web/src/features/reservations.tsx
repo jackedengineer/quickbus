@@ -18,6 +18,7 @@ export function HoldCard({
     [error, setError] = useState('');
   const key = useRef<string | null>(null);
   const held =
+    !booking.tripCancelled &&
     ['HELD', 'PAYMENT_PENDING'].includes(booking.status) &&
     (remaining === null || remaining > 0);
   return (
@@ -25,15 +26,17 @@ export function HoldCard({
       <div className="booking-status">
         <Icon name={held ? 'clock' : 'ticket'} />
         <strong>
-          {booking.status === 'CONFIRMED'
-            ? 'Test booking confirmed'
-            : held
-              ? booking.status === 'PAYMENT_PENDING'
-                ? 'Payment pending'
-                : 'Seats reserved'
-              : booking.status === 'CANCELLED'
-                ? 'Reservation released'
-                : 'Reservation expired'}
+          {booking.tripCancelled
+            ? 'Trip cancelled'
+            : booking.status === 'CONFIRMED'
+              ? 'Test booking confirmed'
+              : held
+                ? booking.status === 'PAYMENT_PENDING'
+                  ? 'Payment pending'
+                  : 'Seats reserved'
+                : booking.status === 'CANCELLED'
+                  ? 'Reservation released'
+                  : 'Reservation expired'}
         </strong>
         {held && remaining !== null && (
           <span className="countdown">

@@ -205,7 +205,7 @@ export async function listSeats(db: Database, tripId: string) {
 
 export async function getBookings(db: Database, userId: string, id?: string) {
   const result =
-    await db.execute(sql`SELECT b.id,b.trip_id AS "tripId",b.reference,
+    await db.execute(sql`SELECT b.id,b.trip_id AS "tripId",b.reference,t.sales_state='CANCELLED' AS "tripCancelled",
     CASE WHEN b.status IN ('HELD','PAYMENT_PENDING') AND b.expires_at<=clock_timestamp() THEN 'EXPIRED' ELSE b.status END AS status,
     b.expires_at AS "expiresAt",b.total_minor AS "totalMinor",b.currency,t.origin,t.destination,t.departure_at AS "departureAt",
     ARRAY(SELECT seat_label FROM booking_items WHERE booking_id=b.id ORDER BY seat_label) AS "seatLabels",clock_timestamp() AS "serverTime"

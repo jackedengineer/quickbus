@@ -90,6 +90,7 @@ export const reservationDetailsInput = z
 export type ReservationDetailsInput = z.infer<typeof reservationDetailsInput>;
 export type ReservationReview = {
   wasConfirmed: boolean;
+  tripCancelled: boolean;
   cancellation: {
     source: 'CUSTOMER' | 'TRIP';
     acceptedAt: string;

@@ -120,19 +120,33 @@ export function ReservationReviewScreen({
     };
   }, [signedIn, load]);
   useEffect(() => {
-    if (!['QUEUED', 'RUNNING'].includes(booking?.confirmationEmail ?? ''))
+    if (
+      !['QUEUED', 'RUNNING'].includes(booking?.confirmationEmail ?? '') &&
+      !(
+        booking?.tripCancelled &&
+        ['HELD', 'PAYMENT_PENDING', 'CONFIRMED'].includes(booking.status)
+      )
+    )
       return;
     const refresh = setInterval(() => {
       if (document.visibilityState === 'visible') void load();
     }, 15000);
     return () => clearInterval(refresh);
-  }, [booking?.confirmationEmail, load]);
+  }, [
+    booking?.confirmationEmail,
+    booking?.tripCancelled,
+    booking?.status,
+    load,
+  ]);
   const remaining = useRemaining(
     booking?.expiresAt ?? '',
     booking?.serverTime ?? '',
   );
   const active =
-    booking?.status === 'HELD' && remaining !== null && remaining > 0;
+    !booking?.tripCancelled &&
+    booking?.status === 'HELD' &&
+    remaining !== null &&
+    remaining > 0;
   const edit = (next: Draft) => {
     dirty.current = true;
     pending.current = null;

@@ -15,6 +15,7 @@ export async function paymentStatus(
       id: string;
       status: string;
       eligible: boolean;
+      tripCancelled: boolean;
       checkout: {
         id: string;
         state: string;
@@ -27,15 +28,15 @@ export async function paymentStatus(
       refunds: string[];
       needsReview: boolean;
     }>(sql`
-    SELECT b.id,
+    SELECT b.id,t.sales_state='CANCELLED' AS "tripCancelled",
       CASE WHEN b.status IN ('HELD','PAYMENT_PENDING') AND b.expires_at<=statement_timestamp() THEN 'EXPIRED' ELSE b.status END status,
-      b.expires_at>=statement_timestamp()+interval '90 seconds' AND b.status IN ('HELD','PAYMENT_PENDING') AS eligible,
+      t.sales_state<>'CANCELLED' AND b.expires_at>=statement_timestamp()+interval '90 seconds' AND b.status IN ('HELD','PAYMENT_PENDING') AS eligible,
       (SELECT jsonb_build_object('id',c.id,'state',c.state,'orderId',c.order_id,'keyId',i.key_id,'amount',i.amount,'currency',i.currency,
         'unresolved',EXISTS(SELECT 1 FROM provider_payments p WHERE p.checkout_id=c.id AND p.state IN ('created','authorized')))
        FROM checkout_attempts c JOIN payment_intents i ON i.id=c.intent_id WHERE i.booking_id=b.id ORDER BY c.number DESC LIMIT 1) checkout,
       ARRAY(SELECT r.state FROM payment_refunds r JOIN provider_payments p ON p.id=r.payment_id JOIN payment_intents i ON i.id=p.intent_id WHERE i.booking_id=b.id) refunds,
       EXISTS(SELECT 1 FROM payment_cases pc JOIN checkout_attempts c ON c.id=pc.checkout_id JOIN payment_intents i ON i.id=c.intent_id WHERE i.booking_id=b.id AND pc.state='OPEN') AS "needsReview"
-    FROM bookings b WHERE b.id=${id} AND b.user_id=${userId}`)
+    FROM bookings b JOIN trips t ON t.id=b.trip_id WHERE b.id=${id} AND b.user_id=${userId}`)
   ).rows[0];
   if (!row) return null;
   const enabled = env.PAYMENTS_ENABLED === 'true',
@@ -51,6 +52,7 @@ export async function paymentStatus(
   return {
     id: row.id,
     status: row.status,
+    tripCancelled: row.tripCancelled,
     enabled,
     mode: 'test' as const,
     canStart: Boolean(enabled && row.eligible && (!c || c.state === 'FAILED')),

@@ -99,3 +99,30 @@ Worker, or disable admission and forward-fix while recovery continues.
 
 Live money, continuous offsite backups, automatic manual-case resolution and
 customer paid cancellation are not enabled by this test checkout release.
+
+## Cancel a future trip (trusted operator, no admin UI)
+
+Use the restricted runtime environment, never a customer-supplied command. First
+read status and verify the exact trip/date and active booking count:
+
+```sh
+node --env-file=.env.production --import tsx scripts/cancel-trip.ts --trip <UUID>
+```
+
+After reviewing the audience, stop sales and enqueue the durable drain:
+
+```sh
+node --env-file=.env.production --import tsx scripts/cancel-trip.ts --trip <UUID> --execute --confirm-database kwikbus_v0 --actor <operator-slug> --reason OPERATOR_CANCELLED --max-affected <reviewed-count>
+```
+
+Reasons are OPERATOR_CANCELLED, SCHEDULE_CORRECTION and DEMO_RECOVERY. The command
+rejects departed trips or a larger audience under the trip lock; rerunning the
+same trip cannot duplicate work. There is no undo command. The minute worker
+cancels at most three bookings per transaction and creates full refund intents
+for confirmed fares. Read status again until remaining_bookings is zero and the
+job is DONE. outstanding_refunds is a separate bank-recovery count; drain complete
+does not mean those refunds have completed. Failed jobs/notification delivery
+remain visible in readiness/backlog monitoring. Investigate before any deliberate
+repair; never issue an extra provider refund to compensate for an unknown result.
+For the isolated local development database use .env.lifecycle and confirm
+quickbus; the command refuses production/local environment mismatches.

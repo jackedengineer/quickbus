@@ -107,6 +107,7 @@ export async function reservationReview(
   // One statement snapshot keeps version, names and lifecycle status consistent.
   const result =
     await db.execute<ReservationReview>(sql`SELECT b.id,b.trip_id AS "tripId",b.reference,b.version,
+    t.sales_state='CANCELLED' AS "tripCancelled",
     EXISTS(SELECT 1 FROM booking_events WHERE booking_id=b.id AND type='CONFIRMED') AS "wasConfirmed",
     (SELECT state FROM booking_notifications WHERE booking_id=b.id AND kind='CONFIRMED') AS "confirmationEmail",
     (SELECT jsonb_build_object('source',source,'acceptedAt',accepted_at,'refundMinor',refund_minor) FROM booking_cancellations WHERE booking_id=b.id) AS cancellation,

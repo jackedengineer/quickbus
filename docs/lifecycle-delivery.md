@@ -119,3 +119,29 @@ cancellation. Refund identities never merge or revive seats. The confirmed UI no
 also surfaces additional-payment refunds and financial-review state instead of
 hiding them behind the confirmed heading. Tests are scoped to their fixture job
 IDs; they do not claim unrelated real sandbox work from the development queue.
+
+## T25 trip cancellation
+
+The trusted operator command is read-only unless explicitly given the database,
+operator, reason and maximum affected count. Under the same trip lock as sales,
+it refuses an unexpectedly larger audience, stops sales, records the immutable
+request and enqueues one durable drain. Three bookings per transaction bound the
+work; progress, cancellation history, allocations, notification and refund intents
+commit together. Lease expiry rolls the whole batch back. The next minute worker
+resumes without repeating a completed refund. Drain completion and bank-refund
+completion are reported separately. No public privileged route or admin UI exists.
+
+Two real-Neon scenarios passed: five bookings drain in two bounded batches with
+one refund for the captured fare, and a stale invocation cannot commit while a
+late capture is fully compensated. An unpaid drain works without provider keys.
+The owned read exposes trip cancellation immediately; existing checkout admission
+and finalization also recheck sales state under the trip lock. Open confirmed
+bookings check status every15seconds while visible; terminal refunds retain their
+existing bounded polling. Browser trip-cancellation acceptance is still pending.
+
+## Native print acceptance
+
+The user inspected Chrome's actual native preview for the persisted cancelled
+demo ticket, confirmed that the layout fits correctly, and closed the dialog.
+This closes the native-preview gap; local automated page controls cannot inspect
+that operating-system surface. Public HTTPS acceptance remains a separate gate.

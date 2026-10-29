@@ -7,7 +7,7 @@ const fullDate = new Intl.DateTimeFormat('en-IN', {
   timeStyle: 'short',
 });
 export function BookingTicket({ booking }: { booking: ReservationReview }) {
-  const cancelled = booking.status === 'CANCELLED';
+  const cancelled = booking.status === 'CANCELLED' || booking.tripCancelled;
   return (
     <article className="booking-ticket" aria-labelledby="ticket-heading">
       <div className="ticket-heading">
@@ -45,7 +45,7 @@ export function BookingTicket({ booking }: { booking: ReservationReview }) {
       </p>
       <p>
         {cancelled
-          ? booking.cancellation?.source === 'TRIP'
+          ? booking.tripCancelled
             ? 'The operator cancelled this trip. See your refund status below.'
             : 'This booking is cancelled. See your refund status below.'
           : 'Test booking confirmed. This is a portfolio demonstration, not a travel ticket.'}
