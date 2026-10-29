@@ -1,0 +1,232 @@
+{
+  "observedAt": "2026-10-29",
+  "origin": "https://kwikbus.jacked.dev",
+  "journeySource": "65748acf79bc1858720d180b5dfc32c1db85f88e",
+  "finalRelease": {
+    "revision": "15ac2defcfb817320ee625224ec3baf36352bbac",
+    "ciRun": "40924670269",
+    "startedAt": "2026-10-29T17:50:22.337Z",
+    "state": "http-verified; real browser acceptance still required",
+    "previous": {
+      "api": "20b8cef7-60f6-4d45-b64c-b583b0babd1a",
+      "web": "f76e04e0-7a58-4277-817d-154e90399ba3"
+    },
+    "financialAndInventoryAudit": {
+      "missingHeldAllocations": 0,
+      "terminalAllocations": 0,
+      "incorrectQuotes": 0,
+      "crossTripStopChoices": 0,
+      "missingDetailEvents": 0,
+      "incompleteCatalogSnapshots": 0,
+      "partialServiceTrips": 0,
+      "intentQuoteMismatch": 0,
+      "confirmedWithoutMoney": 0,
+      "fulfillmentWithoutBooking": 0,
+      "refundQuoteMismatch": 0,
+      "captureWithoutDisposition": 0,
+      "compensationWithoutRefund": 0,
+      "refundWithoutJob": 0,
+      "checkoutWithoutRecovery": 0,
+      "inboxWithoutJob": 0,
+      "cancelledHistoryWithoutTerminalBooking": 0,
+      "cancelledFareMismatch": 0,
+      "tripCancellationWithoutJob": 0,
+      "completedTripWithActiveBookings": 0,
+      "confirmationWithoutNotification": 0,
+      "notificationWithoutEvent": 0,
+      "sentNotificationWithoutIdentity": 0,
+      "processedRefundWithoutIdentity": 0
+    },
+    "recoveryApi": "b99a8bf9-7c64-441b-91dc-eef97c432aad",
+    "deployed": {
+      "api": "ae0c3b79-fea8-41c8-8db0-e91720f2474c",
+      "web": "4d1ce814-e0f1-40ac-9c37-1ebab5d6b1f7"
+    },
+    "mainQualityRun": "40925102840"
+  },
+  "actualBrowserJourneys": {
+    "google": "Fresh public sign-out/account selection/return succeeded; no expanded identity grant.",
+    "emailOtp": "Actual Gmail Inbox delivery; wrong code rejected; delivered single-use code restored owned cancelled ticket.",
+    "payment": "Hosted provider cancel produced a verified failed attempt; explicit retry and Chrome mock-bank Success confirmed one booking.",
+    "confirmation": "Resend SENT, actual Gmail Inbox receipt, canonical authenticated link restored current persisted ticket.",
+    "cancellation": "Two independent browser previews; Keep booking restored focus; two submits produced one cancellation and one full refund.",
+    "refund": "Razorpay PROCESSED full INR 499 sandbox refund; mobile full reload retained cancelled ticket and refund result.",
+    "cancellationEmail": "Actual Gmail Inbox cancellation receipt observed.",
+    "print": "User inspected native Chrome preview and confirmed correct paper fit.",
+    "tripCancellation": "Reviewed exactly one synthetic PAYMENT_PENDING booking; immediate closed sales, no checkout, worker drain DONE, zero allocations; stale journey URI rejected.",
+    "paidTripCancellationScope": "Real hosted sandbox paid trip drain/refund/email verified locally against Neon; production trip-drain sample was unpaid.",
+    "rollback": "Lifecycle-aware disabled API then enabled API; original reservation deadline preserved and terminal refunded ticket remained usable.",
+    "finalPauseMessage": "On final 15ac2de web, disabled b99a8bf9 recovery API visibly explained paused checkout; original deadline unchanged; no payment controls. Enabled ae0c3b79 API restored afterward."
+  },
+  "customerFinancialAudit": {
+    "at": "2026-10-29T17:26:39.891Z",
+    "bookings": [
+      {
+        "id": "a8e4da24-0ce2-4c50-8fa5-8c33cc90d2af",
+        "reference": "QB-A8E4DA240CE24C508FA58C33CC90D2AF",
+        "trip_id": "0d8f7798-3b03-4e40-a87f-b55f6c695b6b",
+        "status": "CANCELLED",
+        "total_minor": 49900,
+        "created_at": "2026-10-29 17:10:26.846208+00",
+        "source": "CUSTOMER",
+        "accepted_at": "2026-10-29 17:23:27.156641+00",
+        "allocations": 0,
+        "attempts": [
+          {
+            "id": "82b72dfd-f093-49bb-a4ff-9706e2b3cd79",
+            "state": "CAPTURED",
+            "number": 2,
+            "orderId": "order_TtnqoPmCL4teQy"
+          },
+          {
+            "id": "9614f8a8-f35b-49cf-b24c-2ad586aae7ba",
+            "state": "FAILED",
+            "number": 1,
+            "orderId": "order_TtnmTVNAJ2LN5a"
+          }
+        ],
+        "payments": [
+          {
+            "id": "pay_TtntadJsMUagnx",
+            "state": "refunded",
+            "amount": 49900,
+            "disposition": "REFUND"
+          },
+          {
+            "id": "pay_Ttnnm9djJMBtcv",
+            "state": "failed",
+            "amount": 49900,
+            "disposition": "PENDING"
+          }
+        ],
+        "refunds": [
+          {
+            "id": "40c0ef77-c1ad-441d-accc-905d76bc2462",
+            "state": "PROCESSED",
+            "amount": 49900,
+            "providerId": "rfnd_Tto01oIgbwgJtW"
+          }
+        ],
+        "notifications": [
+          {
+            "kind": "CANCELLED",
+            "state": "SENT",
+            "providerId": "01a188b1-cebe-7625-b11c-115b5c54c41b"
+          },
+          {
+            "kind": "CONFIRMED",
+            "state": "SENT",
+            "providerId": "01a188ad-5f05-7ad0-a2e9-ee775dd0b0ac"
+          }
+        ]
+      }
+    ],
+    "invariants": {
+      "missingHeldAllocations": 0,
+      "terminalAllocations": 0,
+      "incorrectQuotes": 0,
+      "crossTripStopChoices": 0,
+      "missingDetailEvents": 0,
+      "incompleteCatalogSnapshots": 0,
+      "partialServiceTrips": 0,
+      "intentQuoteMismatch": 0,
+      "confirmedWithoutMoney": 0,
+      "fulfillmentWithoutBooking": 0,
+      "refundQuoteMismatch": 0,
+      "captureWithoutDisposition": 0,
+      "compensationWithoutRefund": 0,
+      "refundWithoutJob": 0,
+      "checkoutWithoutRecovery": 0,
+      "inboxWithoutJob": 0,
+      "cancelledHistoryWithoutTerminalBooking": 0,
+      "cancelledFareMismatch": 0,
+      "tripCancellationWithoutJob": 0,
+      "completedTripWithActiveBookings": 0,
+      "confirmationWithoutNotification": 0,
+      "notificationWithoutEvent": 0,
+      "sentNotificationWithoutIdentity": 0,
+      "processedRefundWithoutIdentity": 0
+    }
+  },
+  "productionTripDrain": {
+    "id": "0d8f7798-3b03-4e40-a87f-b55f6c695b6b",
+    "sales_state": "CANCELLED",
+    "reason": "DEMO_RECOVERY",
+    "requested_at": "2026-10-29 17:49:59.693287+00",
+    "completed_at": "2026-10-29 17:50:57.016796+00",
+    "processed_bookings": 1,
+    "job_state": "DONE",
+    "failure_code": null,
+    "remaining_bookings": 0,
+    "outstanding_refunds": 0
+  },
+  "routingSecurity": {
+    "at": "2026-10-29T17:37:33.391Z",
+    "legacy": {
+      "status": 308,
+      "location": "https://kwikbus.jacked.dev/api/health/ready?_kwikbus_domain=20261026"
+    },
+    "wrongOrigin": {
+      "status": 403
+    },
+    "privateApi": {
+      "status": 404
+    },
+    "forgedWebhook": {
+      "status": 401
+    }
+  },
+  "performance": {
+    "workload": "100 public database-backed search reads, concurrency 5, 7 dates",
+    "before": {
+      "samples": 100,
+      "errors": 0,
+      "p50": 528,
+      "p95": 715,
+      "p99": 960,
+      "max": 963
+    },
+    "after": {
+      "samples": 100,
+      "errors": 0,
+      "p50": 455,
+      "p95": 622,
+      "p99": 1126,
+      "max": 1212
+    },
+    "unit": "milliseconds",
+    "devtools": {
+      "conditions": "Chrome DevTools, 390x844; 4x CPU / Fast4G cold navigation on this shared Mac",
+      "coldHomeBefore": {
+        "lcp": 2225,
+        "ttfb": 613,
+        "cls": 0
+      },
+      "coldHomeAfter": {
+        "lcp": 1221,
+        "ttfb": 357,
+        "cls": 0
+      },
+      "resultsAfter": {
+        "lcp": 1252,
+        "ttfb": 486,
+        "cls": 0
+      },
+      "searchInteractionBefore4x": 617,
+      "searchInteractionAfter4x": 454,
+      "seatMapToList4x": 572,
+      "seatListToMap1x": 42,
+      "interactionBudgetMetAt4x": false
+    }
+  },
+  "openLimits": [
+    "Throttled interaction target remains unmet. These lab samples are not field percentiles.",
+    "No sustained 50rps/15-minute or 10000-trip capacity proof; short production read pilot only.",
+    "Focused keyboard, AX, 320/390px and reduced-motion review; no formal WCAG or physical screen-reader audio certification.",
+    "Razorpay hosted iframe intermittently blank in existing Chrome profile. Same durable order loaded in in-app browser. Reload did not create a payment; abandoned first order expired with zero allocations. Not attributed to an application or provider root cause without evidence.",
+    "One pre-existing moderate esbuild development-only advisory through Drizzle Kit; unused serve path. No high/critical audit finding.",
+    "Email delivery is bounded by provider idempotency/retention; uncertain aged sends stop for review. No universal exactly-once inbox guarantee.",
+    "Portable isolated restore is not continuous offsite backup or a service-level RPO/RTO guarantee.",
+    "Razorpay test mode only; no live-money or real travel acceptance. Admin dashboard stays deferred."
+  ]
+}

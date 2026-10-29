@@ -2,7 +2,9 @@
 
 A small bus-booking portfolio application built around correct seat ownership, retry behavior, and failure recovery.
 
-**Live v0.2 sandbox preview:** [Open KwikBus](https://kwikbus.jacked.dev/). TanStack Start and Express run on Cloudflare Workers with a private API binding and Neon/Drizzle transactions. Google/email OTP, database-backed search, seats, passenger review and Razorpay test checkout are live. Actual desktop/mobile journeys verified failure, explicit retry, confirmation, reload and release-before-capture refund recovery with the checkout tab offline. No real travel tickets or live money. [Payment delivery and evidence](docs/payment-delivery.md), [provider contract and limitations](docs/provider-contract.md).
+**Live v0.3 lifecycle preview:** [Open KwikBus](https://kwikbus.jacked.dev/). Passwordless Google/email OTP, database-backed search, seat reservation, Razorpay test checkout, printable owned tickets, confirmation email, whole-booking cancellation and full test-refund status are live. Operator trip cancellation uses a guarded CLI; admin stays deferred. TanStack Start and Express run on Cloudflare Workers with a private API binding and Neon/Drizzle transactions. No real travel tickets or live money. [Lifecycle delivery and measured limits](docs/lifecycle-delivery.md), [production browser evidence](docs/evidence/lifecycle-2026-10-29/production.json), [provider contract](docs/provider-contract.md).
+
+Actual desktop/mobile acceptance covered provider failure and explicit retry, confirmation-email link restoration, two simultaneous cancellation requests, processed refund, wrong OTP, stale cancelled-trip links, rollback and isolated database restore. The 100-customer Neon correctness proof passed. Throttled interactions still exceed the 200 ms target; full scale and screen-reader audio acceptance remain open. This is a portfolio sandbox preview, not a live-money launch.
 
 **P0 operational baseline · v0.0.3-preview:** correlated/private logs and tested monitors, minute-by-minute expiry, hourly renewal from persisted service/seat definitions, isolated PostgreSQL/Workers CI, guarded releases and a measured restore/rollback drill are complete. Real browser flows lead acceptance; the 100-customer Neon proof supplements them. [Current evidence and limits](docs/p0-hardening.md), [browser performance](docs/p0-performance.md), [release runbook](docs/releasing.md). Admin stays at the end of the roadmap.
 
@@ -40,6 +42,9 @@ pnpm build
 The contention harness creates only synthetic fixtures, waits for concurrent requests to settle, audits the database independently, and cleans up its own rows. It uses the direct owner connection for fixture setup and a trip-scoped fault trigger; HTTP requests still pass through normal authentication and the restricted runtime role. It refuses to run without explicit local fixture flags. Run it against a disposable development database, never production. While it runs, synthetic trips may briefly appear in the development timetable.
 
 ## Implementation evidence
+
+- [Tickets, notification outbox, cancellation, trip drain and v0.3 release](docs/lifecycle-delivery.md)
+- [Production browser/security/performance record](docs/evidence/lifecycle-2026-10-29/production.json)
 
 - [Razorpay test checkout, late-capture refunds and production browser evidence](docs/payment-delivery.md)
 - [Observed provider contracts and safe retry limits](docs/provider-contract.md)

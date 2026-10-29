@@ -160,7 +160,7 @@ control during the transition, now hidden for cancelled trips. The natural
 minute worker completed one cancellation, released all allocations, sent its
 cancellation email and processed the full ₹749 test refund. Actual payment
 pay_Ttn2n6AevG65GO refunded as rfnd_Ttn9AAHMpO5uJH; no manual refund dispatch was
-used. The390px browser retained the cancelled ticket and processed refund after
+used. The 390px browser retained the cancelled ticket and processed refund after
 reload. Drain and refund status were independently checked in PostgreSQL.
 
 The new two-Worker Neon contention run also passed all nine scenarios: one winner,
@@ -202,3 +202,79 @@ keyboard dialog dismissal, seat-list semantics and reduced-motion duration were
 checked; the user verified native print preview. This is focused browser/AX
 acceptance, not a formal WCAG certification or a physical screen-reader audio
 review. Public HTTPS and production email verification remain release gates.
+
+
+## Public HTTPS acceptance and preview release
+
+The exact source 65748ac passed Quality CI and was deployed with additive
+migrations 0012–0015. Fresh Google sign-in and actual public email OTP restored
+owned reservations. An intentionally wrong OTP was rejected before the delivered
+single-use code succeeded. Codes and credentials were kept out of public records.
+
+A real public Pune→Mumbai journey used keyboard seat selection and persisted
+stops/passenger details. Hosted provider cancellation produced a verified failed
+attempt; explicit retry and mock-bank Success confirmed one booking. The actual
+confirmation arrived in Gmail Inbox; its canonical authenticated link restored
+the current persisted ticket. Two independent browser cancellation previews
+showed the policy and full fare. Keep booking restored focus. Both cancellation
+submits produced one history entry, one full INR499 refund and zero allocations.
+Razorpay reported PROCESSED; the 390px ticket retained that result after reload.
+The cancellation receipt also arrived in the real Inbox.
+
+The guarded production trip command reviewed exactly one known synthetic unpaid
+reservation, stopped sales and completed one worker drain with no remaining
+allocations or outstanding refunds. The open mobile browser removed checkout
+and showed Trip cancelled. A stale journey link then showed unavailable and no
+search result. This production sample was unpaid; the paid trip-cancellation,
+email and full refund proof used actual local Neon and hosted Razorpay earlier.
+Release maintenance priming overlapped the production drain; do not attribute
+that sample solely to scheduled Cron. Natural minute recovery was proved locally.
+
+An exact-source disabled-checkout recovery API was deployed and restored. The
+original deadline remained unchanged, recovery remained enabled and the cancelled
+refunded ticket stayed usable. This exposed stale preparing-order copy when
+admission was disabled; the final 15ac2de release explains the pause explicitly.
+The final browser check visibly showed the pause explanation with no payment controls, followed by restoration of the enabled API. It includes the restore-target TCP readiness fix. No schema reversal, secret
+replacement or production data restore was used.
+
+The production restore compared 36 tables and 8,171 rows, matched schema/counts and
+all 24 invariants, and completed in 22.9 seconds. Its disposable network-isolated
+PostgreSQL target was removed. The encrypted archive remains private. This is a
+portable restore proof, not continuous offsite backup or an RPO/RTO guarantee.
+[Restore record](evidence/lifecycle-2026-10-29/recovery.json).
+
+## Measured frontend/backend limits
+
+The same short production search workload (100 reads, concurrency 5, seven dates)
+had zero errors before/after. p50 changed 528→455ms, p95 changed 715→622ms;
+after p99 was 1,126 ms and maximum 1,212 ms. This is not the planned sustained
+50 requests/second or 10,000-trip capacity demonstration.
+
+Chrome DevTools at 390×844, 4×CPU and Fast4G measured cold-home LCP 2,225→1,221ms,
+TTFB 613→357ms and CLS 0. Results-page LCP was 1,252 ms with TTFB 486ms and CLS 0.
+These are lab samples on a shared Mac, not field percentiles. Search interaction
+improved 617→454ms but still misses 200 ms; map→list was 572 ms at 4×CPU, while
+list→map was 42 ms at 1×CPU. Do not mark the low-end interaction gate complete.
+No speculative caching or broad memoization was added to conceal these results.
+
+The provider iframe intermittently remained blank in the existing Chrome
+profile. The same persisted order loaded in the in-app browser; no duplicate
+order or invented payment failure was introduced. Reload recovered the owned
+reservation, and an abandoned order expired with zero allocations/no capture.
+The root cause is unresolved; the successful earlier hosted payment does not
+close this separate acceptance finding.
+
+Focused security probes rejected wrong-Origin mutation (403), forged webhook
+signature (401) and direct private API access (404); the old read host redirected
+canonically (308). All 24 production financial/inventory/lifecycle invariants were
+zero. Existing SQL fault/race checks and fresh two-Worker Neon contention add
+correctness evidence. Exact source CI passed. Dependency audit has one existing
+moderate development-only esbuild advisory through Drizzle Kit's unused serve
+path, with no high/critical finding; no runtime service uses that dev server.
+
+T22–T25 are complete for the sandbox scope. T27/T28 and the final product release
+gate remain partial for throttled latency, physical screen-reader audio review,
+sustained capacity and intermittent hosted-checkout loading. Admin remains
+out of scope. [Versioned production record](evidence/lifecycle-2026-10-29/production.json).
+
+![Actual 390px cancelled ticket and processed sandbox refund](evidence/lifecycle-2026-10-29/refunded-mobile.png)

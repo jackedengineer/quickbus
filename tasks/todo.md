@@ -1,14 +1,14 @@
 # KwikBus task backlog
 
-Implementation has started. Items remain unchecked until their full acceptance criteria have evidence. Cloudflare Workers is required (ADR 010). The seat-concurrency proof and test-payment delivery have passed; ticket/notification delivery is the next customer slice. Each task targets one focused session. Paths in future tasks are planned; the repository and evidence documents identify landed files. Keep a task to roughly 2–5 implementation/test files; split it further if scaffolding or integration expands that scope. Gates are review points, not permission requests embedded in application flows.
+Implementation has started. Items remain unchecked until their full acceptance criteria have evidence. Cloudflare Workers is required (ADR 010). The seat-concurrency proof and test-payment delivery have passed; ticket delivery, paid cancellation, refund recovery and guarded trip drains are implemented. Each task targets one focused session. Paths in future tasks are planned; the repository and evidence documents identify landed files. Keep a task to roughly 2–5 implementation/test files; split it further if scaffolding or integration expands that scope. Gates are review points, not permission requests embedded in application flows.
 
 Commands refer to the [proposed command interface](plan.md). Before those scripts exist, a spike records its exact reproducible commands and output. Every later task also runs `pnpm check` and the affected build; focused verification is listed below.
 
 ## Current slice evidence
 
-See [compatibility](../docs/compatibility.md), [reservation proof](../docs/reservation-proof.md), and [UI/browser reference](../docs/ui-reference.md). The real Neon/Workers seat proof and a usable search/reserve/release UI were brought forward. The [V0 preview](../docs/release-v0.md) now has published Google login, locally verified hashed/single-use email OTP, SSR isolation and cookie renewal. Public OTP now sends through the verified `jacked.dev` sender and has passed browser verification; the [owned-domain cutover](../docs/domain-cutover.md) is complete, with mobile Google and desktop OTP reservation/reload/release verified on `kwikbus.jacked.dev`. Fresh admin MFA remains open for future admin routes. T02 now has observed provider-contract and sandbox replay evidence. The [P1 customer journey](../docs/p1-customer-journey.md) now completes normalized catalog publication, stop snapshots, real server search, seat list/map selection and conditional passenger review. Test checkout, signed intake, capture/refund recovery and mobile/desktop browser acceptance are delivered; paid cancellation and ticket delivery remain open. The UI reference is now FlixBus, with per-page visual comparison required.
+See [compatibility](../docs/compatibility.md), [reservation proof](../docs/reservation-proof.md), and [UI/browser reference](../docs/ui-reference.md). The real Neon/Workers seat proof and a usable search/reserve/release UI were brought forward. The [V0 preview](../docs/release-v0.md) now has published Google login, locally verified hashed/single-use email OTP, SSR isolation and cookie renewal. Public OTP now sends through the verified `jacked.dev` sender and has passed browser verification; the [owned-domain cutover](../docs/domain-cutover.md) is complete, with mobile Google and desktop OTP reservation/reload/release verified on `kwikbus.jacked.dev`. Fresh admin MFA remains open for future admin routes. T02 now has observed provider-contract and sandbox replay evidence. The [P1 customer journey](../docs/p1-customer-journey.md) now completes normalized catalog publication, stop snapshots, real server search, seat list/map selection and conditional passenger review. Test checkout, signed intake, capture/refund recovery and mobile/desktop browser acceptance are delivered; paid cancellation, ticket delivery and operator drains now have lifecycle evidence. The UI reference is now FlixBus, with per-page visual comparison required.
 
-## Active delivery order — reconciled 27 October 2026
+## Active delivery order — reconciled 29 October 2026
 
 The [five P0 operational slices](p0-hardening.md) are complete with production evidence: monitoring → scheduled expiry → database-backed inventory renewal → release safeguards → recovery drill. Real browser acceptance leads each usable change; focused SQL/concurrency checks supplement it. Use focused commits of roughly 300–400 lines, with a working application after each slice. Admin authoring/dashboard and its required MFA stay at the end of the roadmap. All synthetic inventory must be stored in PostgreSQL and served through the API; no client-only catalog or invented availability.
 
@@ -24,14 +24,14 @@ Completed independently of the original sequence: T01, T03 customer authenticati
 | T12 | Atomic party holds, immutable quote/deadline and key/hash replay proved. Lock/command latency instrumentation is live; normalized catalog and stop publication dependencies are now delivered. |
 | T13 | Nine unpaid two-instance scenarios plus independent SQL audit passed; preserve source-scoped evidence and rerun after mutation changes. |
 | T14 / T15 | Complete: accessible map/list, restored stop choices, conflict recovery, versioned passenger/contact edits, reload/release/expiry and server-enforced post-lock 90-second payment-start buffer. |
-| T16 | Complete for payments: transactional durable jobs/inbox, leases/fencing, bounded retries, minute recovery, heartbeat/backlog/failure/case health. Notification delivery remains T22. |
+| T16 | Complete: durable payment inbox/jobs and notification outbox; bounded leased/fenced recovery, backlog/failure/heartbeat health. |
 | T02 / T17–T21 | Complete in Razorpay test mode: observed provider contracts, frozen intents/attempts, common capture finalizer, signed durable intake, explicit hosted checkout and authoritative reconciliation. Actual failure/retry/capture/reload and offline-tab late-refund journeys passed. |
-| T22 / T23 | Next: printable tickets/confirmation delivery, then whole-booking paid cancellation. Owned history already exists; these full tasks stay unchecked. |
-| T24 / T25 | Compensation/excess-capture refund execution and recovery delivered. T24 stays partial until the T23 paid-cancellation branch passes; trip cancellation/drain remains future work. |
+| T22 / T23 | Complete: immutable owned print tickets, real confirmation/cancellation Inbox delivery and authenticated links; locked cancellation policy, repeated-key/dual-browser acceptance and atomic release/refund intent. |
+| T24 / T25 | Complete in test mode: processed full cancellation refund, lost-response/excess-capture recovery, guarded trip stop/drain. Paid local Neon/provider and unpaid production browser trip journeys passed. |
 | T26 | Deferred to the end: no admin dashboard or admin endpoint in the active P0/P1 scope. Fresh MFA is mandatory before any admin mutation. |
-| T27 / T28 | Current customer flows, keyboard list/focus, 320/390 px widths, stale/offline recovery and DevTools traces are evidenced. One cold 4× interaction was 213 ms (repeat 82 ms); retain strict cold-layout optimization and full paid-lifecycle accessibility/fault/load acceptance. |
-| T29 | Guarded exact-revision releases, private API, runtime secrets, monitors and compatible disabled payment rollback exist. Fresh financial-schema restore matched 33 tables/7,613 rows with 17 zero invariants. Full cancellation/trip-drain lifecycle acceptance remains open. |
-| T30 | Public v0.2 sandbox, README, ADRs, API contracts and actual browser/provider/concurrency/recovery evidence exist. Complete ticket/cancellation lifecycle portfolio package remains future work. |
+| T27 / T28 | Partial: lifecycle desktop/mobile/keyboard/AX, wrong-owner/Origin/signature checks, SQL faults and 100-customer Neon correctness passed. 4x CPU interactions 454–572 ms miss 200 ms; physical screen-reader audio and sustained scale remain open. Hosted provider iframe was intermittently blank in Chrome; root cause unresolved. |
+| T29 | Lifecycle-aware guarded deployment/disabled rollback and isolated financial-schema restore passed: 36 tables/8,171 rows, 24 zero invariants, 22.9 s drill. Broader T28 acceptance remains a dependency; no live-money gate is claimed. |
+| T30 | v0.3 sandbox evidence, walkthrough image, API/ADRs/runbooks and honest limits published. Full final portfolio release remains gated by T27/T28; admin stays deferred. |
 
 Historical baseline: [V0](../docs/release-v0.md). Current payment state: [test-payment delivery and production acceptance](../docs/payment-delivery.md), [observed provider contracts](../docs/provider-contract.md). Historical customer baseline: [P1 customer/browser/recovery evidence](../docs/p1-customer-journey.md), retaining the [P0 operational baseline](../docs/p0-hardening.md); the [owned-domain cutover](../docs/domain-cutover.md) is preserved separately. The original phase gates below describe the complete product, not a claim that every prerequisite was implemented before the intentionally smaller V0 preview.
 
@@ -165,30 +165,31 @@ Historical baseline: [V0](../docs/release-v0.md). Current payment state: [test-p
 
 ## Phase 4 — Complete the lifecycle
 
-- [ ] **T22 — Ticket, owned history, and notification delivery**
+- [x] **T22 — Ticket, owned history, and notification delivery**
   - Accept: customer list/detail and print ticket use immutable snapshots; confirmation email is outbox-driven, authorized, and deduplicated as far as provider guarantees allow.
   - Verify: two-user access tests, ticket/print browser review, duplicate-delivery test.
   - Depends: T20, T21. Targets: booking-list route, ticket component/print styles, delivery handler, tests. Size: M.
 
-- [ ] **T23 — Whole-booking cancellation**
+- [x] **T23 — Whole-booking cancellation**
   - Accept: preview and command recheck policy under lock; terminal transition releases all allocations and atomically creates a unique full-refund intent if captured.
   - Verify: cutoff equality, stale preview, repeated/different keys, unpaid cancellation, capture race.
   - Depends: T18, T20. Targets: cancellation policy/service, HTTP contract/handler, customer dialog, tests. Size: M.
 
-- [ ] **T24 — Refund execution and recovery**
-  - Partial: compensation/excess-capture full refunds, immutable key/body, unknown-result read recovery, processed UI and actual sandbox same-key replay are delivered. Keep unchecked until T23 paid-cancellation refund acceptance passes.
+- [x] **T24 — Refund execution and recovery**
+  - Delivered: full paid-cancellation and excess-capture refunds, immutable provider identity, unknown-response read recovery and actual sandbox PROCESSED evidence.
   - Accept: stable provider key, exact amount, unknown-result reconciliation, processed/refused visibility, and excess-capture refunds work without reviving bookings.
   - Verify: sandbox refund plus lost-response, duplicate job/webhook, stale lease, and overspend guards.
   - Depends: T02, T16, T21, T23. Targets: refund worker/adapter, reconciliation job, refund-status UI, tests. Size: M.
 
-**Gate H:** confirmed→cancelled→refunded and expired→late capture→refunded work end to end; no hidden financial exception is dropped.
+**Gate H passed for the sandbox lifecycle:** confirmed→cancelled→refunded and expired→late capture→refunded work end to end; no hidden financial exception is dropped.
 
-- [ ] **T25 — Trip cancellation drain**
+- [x] **T25 — Trip cancellation drain**
   - Accept: immediate sellability stop, resumable bounded booking drain, refund intents, and captures arriving after drain are safe in either race order.
   - Verify: crash/restart and mixed-state cancellation integration tests plus invariant audit.
   - Depends: T11, T21, T24. Targets: sale-state/cancel service, drain handler, progress query, tests. Size: M.
 
 - [ ] **T27 — Lifecycle usability and accessibility pass**
+  - Partial: real ticket/cancellation/refund desktop/mobile, native print, keyboard/focus/AX/reduced-motion passed; physical screen-reader audio and low-end interaction remediation remain open.
   - Accept: mobile/desktop, keyboard/screen reader, seat list, form errors, timer warnings, print, and payment recovery meet the tested accessibility criteria; findings are fixed or explicitly release-blocking.
   - Verify: `pnpm test:a11y`, manual screen-reader record, focused browser regressions.
   - Depends: T22, T24. Admin accessibility follows deferred T26 separately. Targets: affected UI components, focused browser tests, accessibility report; split fixes by page. Size: M.
@@ -198,11 +199,13 @@ Historical baseline: [V0](../docs/release-v0.md). Current payment state: [test-p
 ## Phase 5 — Prove and release
 
 - [ ] **T28 — Security, fault, and load evidence**
+  - Partial: exact-CI SQL faults, real Neon contention, 24-invariant production audits and short HTTP pilot passed; sustained scale and hosted-checkout loading investigation remain open.
   - Accept: run all mandatory races/crash windows with real SQL, validate shared quotas/CSRF/SSR isolation, and publish measured warm/cold latency and invariant results with exact versions.
   - Verify: `pnpm test:faults`, `pnpm test:contention`, full contract/integration/browser suites, k6 baseline/hot-trip runs. Split any resulting fixes into focused tasks.
   - Depends: T21, T24, T25, T27. Targets: fault/load scenarios, invariant audit, benchmark manifest/report. Size: M for execution/reporting, remediation separate.
 
 - [ ] **T29 — Deployment, migration, and restore drill**
+  - Infrastructure/drill delivered with lifecycle schema and compatible rollback. Keep the full product gate unchecked while T27/T28 acceptance remains incomplete.
   - Accept: reviewed immutable Workers versions, single-origin routing, runtime secrets, health and bounded invocation cleanup, job/error alerts, serialized migration, rollback, and isolated DB restore (provider reconciliation before payments launch) are demonstrated.
   - Verify: staging smoke, injected worker outage/alert, prior-schema upgrade, timed restore/RPO/RTO record. Split infrastructure setup from drill execution as needed.
   - Depends: T28. Targets: deployment configuration, release workflow, operating/restore runbook, evidence. Size: M per focused subtask.

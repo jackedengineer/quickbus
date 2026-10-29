@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.3.0-preview — 2026-10-29
+
+- Add immutable owned print tickets and bounded, leased confirmation/cancellation email delivery.
+- Add policy-versioned whole-booking cancellation with atomic seat release and deduplicated full refunds.
+- Add guarded operator trip cancellation and resumable three-booking drains; no admin endpoint.
+- Reduce catalogue/search database round trips without caching availability or sessions.
+- Add lifecycle-aware disabled-checkout recovery versions, 24 invariant audits and a measured 36-table isolated restore.
+- Verify real public sign-in, hosted sandbox failure/retry, email restoration, concurrent cancellation and processed refund on desktop/mobile.
+- Keep low-end interaction latency, sustained capacity, physical screen-reader review and intermittent hosted-checkout loading as explicit open acceptance findings. [Evidence and limits](docs/lifecycle-delivery.md).
+
 ## v0.2.0-preview — 2026-10-27
 
 ### Added
