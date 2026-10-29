@@ -21,6 +21,9 @@ const runtimeEnvironment = environment
   )
   .join('\n');
 await writeFile('apps/api/.dev.vars', runtimeEnvironment, { mode: 0o600 });
+const webPort = process.env.KWIKBUS_WEB_PORT ?? '3000';
+if (!/^[0-9]{4,5}$/.test(webPort) || Number(webPort) > 65535)
+  throw new Error('Use a local web port between 1000 and 65535.');
 const children = [
   spawn(
     'pnpm',
@@ -37,7 +40,20 @@ const children = [
     ],
     { stdio: 'inherit' },
   ),
-  spawn('pnpm', ['--filter', '@kwikbus/web', 'dev'], { stdio: 'inherit' }),
+  spawn(
+    'pnpm',
+    [
+      '--filter',
+      '@kwikbus/web',
+      'exec',
+      'vite',
+      '--port',
+      webPort,
+      '--host',
+      '127.0.0.1',
+    ],
+    { stdio: 'inherit' },
+  ),
 ];
 // Wrangler exposes local scheduled events but does not run production crons.
 // Keep the real sandbox journey recoverable while the development app is open.
