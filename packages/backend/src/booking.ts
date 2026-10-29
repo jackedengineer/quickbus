@@ -69,7 +69,7 @@ export async function holdSeats(
         occupied: boolean;
       }>(sql`
       SELECT s.seat_label,s.fare_minor,a.booking_id IS NOT NULL AS occupied
-      FROM trip_seats s LEFT JOIN seat_allocations a USING(trip_id,seat_label)
+      FROM trip_seats s JOIN trips t ON t.id=s.trip_id LEFT JOIN seat_allocations a USING(trip_id,seat_label)
       WHERE s.trip_id=${input.tripId} AND s.seat_label IN (${sql.join(
         seats.map((s) => sql`${s}`),
         sql`,`,
@@ -198,8 +198,8 @@ export async function listSeats(db: Database, tripId: string) {
   const result =
     await db.execute(sql`SELECT s.seat_label AS label,s.position,s.fare_minor AS "fareMinor",
     (b.id IS NULL OR b.status IN ('EXPIRED','CANCELLED') OR (b.status IN ('HELD','PAYMENT_PENDING') AND b.expires_at<=statement_timestamp())) AS available
-    FROM trip_seats s LEFT JOIN seat_allocations a USING(trip_id,seat_label) LEFT JOIN bookings b ON b.id=a.booking_id
-    WHERE s.trip_id=${tripId} ORDER BY s.position`);
+    FROM trip_seats s JOIN trips t ON t.id=s.trip_id LEFT JOIN seat_allocations a USING(trip_id,seat_label) LEFT JOIN bookings b ON b.id=a.booking_id
+    WHERE s.trip_id=${tripId} AND t.sales_state='OPEN' AND t.sales_close_at>statement_timestamp()+interval '2 minutes' ORDER BY s.position`);
   return result.rows;
 }
 

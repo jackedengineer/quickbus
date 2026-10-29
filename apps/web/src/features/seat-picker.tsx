@@ -46,6 +46,16 @@ export function SeatPicker({
           fetch(`/api/v1/trips/${trip.id}/seats`),
           fetch(`/api/v1/trips/${trip.id}`),
         ]);
+        if (sequence !== latestLoad.current) return;
+        if (detailsResponse.status === 404) {
+          setSeats([]);
+          setSelected([]);
+          setStops([]);
+          setMessage(
+            'This journey is no longer available. Please choose another journey.',
+          );
+          return;
+        }
         if (!response.ok || !detailsResponse.ok) throw new Error();
         const data = (await response.json()) as { seats: Seat[] };
         const details = (await detailsResponse.json()) as { stops: TripStop[] };

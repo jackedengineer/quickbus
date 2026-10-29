@@ -156,7 +156,7 @@ export async function tripDetails(db: Database, id: string) {
   const result =
     await db.execute<Trip>(sql`SELECT t.id,t.origin,t.destination,t.operator_name AS "operatorName",t.vehicle_label AS "vehicleLabel",
     t.departure_at AS "departureAt",t.arrival_at AS "arrivalAt",min(s.fare_minor)::int AS "fareMinor",count(*)::int AS "seatCount"
-    FROM trips t JOIN trip_seats s ON s.trip_id=t.id WHERE t.id=${id} GROUP BY t.id`);
+    FROM trips t JOIN trip_seats s ON s.trip_id=t.id WHERE t.id=${id} AND t.sales_state='OPEN' AND t.sales_close_at>statement_timestamp()+interval '2 minutes' GROUP BY t.id`);
   if (!result.rows[0]) return null;
   const stops =
     await db.execute<TripStop>(sql`SELECT id,name,address,city_id AS "cityId",role,sequence,scheduled_at AS "scheduledAt"

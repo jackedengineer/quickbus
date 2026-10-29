@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { expect, test } from 'vitest';
-import { holdSeats } from '../../packages/backend/src/booking';
+import { holdSeats, listSeats } from '../../packages/backend/src/booking';
+import { tripDetails } from '../../packages/backend/src/catalog';
 import {
   claimPaymentJob,
   StalePaymentLease,
@@ -70,6 +71,8 @@ test('trip cancellation stops sales immediately, drains bounded batches, replays
         )
       ).alreadyRequested,
     ).toBe(true);
+    expect(await tripDetails(f.runtime.db, f.trip)).toBeNull();
+    expect(await listSeats(f.runtime.db, f.trip)).toEqual([]);
     const status = await paymentStatus(
       f.runtime.db,
       {},

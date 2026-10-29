@@ -207,6 +207,15 @@ function Home() {
         const response = await fetch(`/api/v1/trips/${search.trip}`, {
           signal: controller.signal,
         });
+        if (response.status === 404) {
+          if (!controller.signal.aborted) {
+            setRestoredTrip(null);
+            setTripError(
+              'This journey is no longer available. Close this panel and choose another journey.',
+            );
+          }
+          return;
+        }
         if (!response.ok) throw new Error();
         const trip = (await response.json()) as Trip;
         if (!controller.signal.aborted) setRestoredTrip(trip);
