@@ -1,0 +1,19 @@
+{
+  "measuredAt": "2026-10-29T16:45:55.046Z",
+  "environment": "Neon development, restricted role, WebSocket pool max1, Node24.14, sequential function calls on one connection",
+  "samples": {
+    "before": {
+      "catalog": [607, 222, 217, 225, 237, 222, 276, 226, 220, 221, 239, 223],
+      "search": [243, 234, 230, 226, 255, 225, 235, 225, 222, 228, 222, 219]
+    },
+    "after": {
+      "catalog": [648, 79, 88, 78, 79, 73, 81, 74, 83, 75, 81, 86],
+      "search": [240, 157, 152, 159, 170, 148, 165, 165, 165, 185, 160, 153]
+    },
+    "repeat": {
+      "catalog": [1311, 73, 74, 74, 86, 127, 126, 124, 92, 86, 78, 77],
+      "search": [404, 149, 159, 165, 202, 536, 203, 194, 163, 179, 175, 151]
+    }
+  },
+  "limits": "Cold first sample includes connection setup; these are database function timings, not HTTP or production percentiles. Local concurrent HTTP p95 remained noisy and is not claimed fixed."
+}

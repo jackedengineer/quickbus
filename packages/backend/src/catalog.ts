@@ -19,22 +19,18 @@ export async function citySuggestions(db: Database, query: string) {
   ).rows;
 }
 export async function catalog(db: Database): Promise<Catalog> {
-  const [cities, dates, first] = await Promise.all([
-    citySuggestions(db, ''),
-    db.execute<{ today: string; through: string }>(sql`SELECT
-      (statement_timestamp() AT TIME ZONE 'Asia/Kolkata')::date::text today,
-      ((statement_timestamp() AT TIME ZONE 'Asia/Kolkata')::date+30)::text through`),
-    db.execute<{
-      from: string;
-      to: string;
-      date: string;
-    }>(sql`SELECT origin AS "from",destination AS "to",
-      (departure_at AT TIME ZONE 'Asia/Kolkata')::date::text date FROM trips t
-      WHERE sales_state='OPEN' AND sales_close_at>statement_timestamp()+interval '2 minutes'
+  // The invocation pool has one connection. Promise.all would still serialize
+  // three network round trips; return a coherent catalog in one statement.
+  const result = await db.execute<Catalog>(sql`SELECT
+    coalesce((SELECT jsonb_agg(jsonb_build_object('id',c.id,'name',c.name) ORDER BY c.name)
+      FROM (SELECT id,name FROM cities c WHERE EXISTS(SELECT 1 FROM city_aliases a WHERE a.city_id=c.id) ORDER BY name LIMIT 20) c),'[]'::jsonb) cities,
+    (statement_timestamp() AT TIME ZONE 'Asia/Kolkata')::date::text today,
+    ((statement_timestamp() AT TIME ZONE 'Asia/Kolkata')::date+30)::text through,
+    (SELECT jsonb_build_object('from',origin,'to',destination,'date',(departure_at AT TIME ZONE 'Asia/Kolkata')::date::text)
+      FROM trips t WHERE sales_state='OPEN' AND sales_close_at>statement_timestamp()+interval '2 minutes'
       AND route_id IS NOT NULL AND EXISTS(SELECT 1 FROM trip_stops WHERE trip_id=t.id)
-      ORDER BY departure_at,id LIMIT 1`),
-  ]);
-  return { cities, ...dates.rows[0], defaults: first.rows[0] ?? null };
+      ORDER BY departure_at,id LIMIT 1) defaults`);
+  return result.rows[0];
 }
 const cursorSchema = z
   .object({
@@ -54,26 +50,20 @@ export async function searchTrips(
   input: SearchInput,
 ): Promise<{ status: number; body: SearchPage }> {
   const resolved = await db.execute<{
-    id: string;
-    alias: string;
-  }>(sql`SELECT city_id id,alias FROM city_aliases
-    WHERE alias IN (lower(${input.from}),lower(${input.to}))`);
-  const origin = resolved.rows.find(
-    (c) => c.alias === input.from.toLowerCase(),
-  )?.id;
-  const destination = resolved.rows.find(
-    (c) => c.alias === input.to.toLowerCase(),
-  )?.id;
+    origin: string | null;
+    destination: string | null;
+    valid: boolean;
+  }>(sql`SELECT
+    (SELECT city_id FROM city_aliases WHERE alias=lower(${input.from})) origin,
+    (SELECT city_id FROM city_aliases WHERE alias=lower(${input.to})) destination,
+    ${input.date}::date BETWEEN (statement_timestamp() AT TIME ZONE 'Asia/Kolkata')::date
+      AND (statement_timestamp() AT TIME ZONE 'Asia/Kolkata')::date+30 valid`);
+  const { origin, destination, valid } = resolved.rows[0];
   if (!origin || !destination)
     return bad('UNKNOWN_CITY', 'Choose a city from the suggestions.');
   if (origin === destination)
     return bad('SAME_CITY', 'Choose two different cities.');
-  const range = await db.execute<{
-    valid: boolean;
-  }>(sql`SELECT ${input.date}::date BETWEEN
-    (statement_timestamp() AT TIME ZONE 'Asia/Kolkata')::date AND
-    (statement_timestamp() AT TIME ZONE 'Asia/Kolkata')::date+30 valid`);
-  if (!range.rows[0].valid)
+  if (!valid)
     return bad('DATE_OUT_OF_RANGE', 'Choose a date within the next 30 days.');
   const filter = JSON.stringify([
     origin,

@@ -168,3 +168,20 @@ The new two-Worker Neon contention run also passed all nine scenarios: one winne
 idempotent replay, post-lock time, rollback and independent allocation audit.
 This is correctness evidence, not a throughput claim; the burst and retry phase
 took84seconds. [Source-scoped record](evidence/lifecycle-2026-10-29/neon-contention.json).
+
+## Browse performance investigation
+
+The request-scoped pool deliberately has one connection. Catalogue Promise.all
+therefore serialized three round trips, and search resolved aliases/date in two
+separate preliminary reads. Return the coherent catalogue in one SQL statement
+and combine search validation in one statement. No availability/session cache or
+additional connection is introduced. Existing alias, date, cursor and capacity
+checks still pass against the actual development database/API.
+
+Twelve alternating restricted-role Neon calls before/after measured warm catalogue
+~220–240ms → ~75–90ms and search ~225–255ms → ~150–185ms. A second after run retained
+the reduction with some larger network outliers. The cold first call includes
+connection setup. The100-read/concurrency5 local HTTP runs had zero failures but
+noisy p95s (4772ms before /5423ms after); this is not evidence that HTTP tail
+latency is fixed. Production/browser measurements are a separate release gate.
+[All database samples and conditions](evidence/lifecycle-2026-10-29/database-performance.json).
