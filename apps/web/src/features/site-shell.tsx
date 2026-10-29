@@ -231,7 +231,7 @@ export function SiteFooter() {
         <div className="footer-legal">
           <a href="/?view=privacy">Privacy</a>
           <a href="/?view=terms">Terms</a>
-          <span>V0.2 · Test checkout preview</span>
+          <span>V0.3 · Customer lifecycle preview</span>
         </div>
       </div>
     </footer>

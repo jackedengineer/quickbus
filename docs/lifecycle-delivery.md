@@ -185,3 +185,20 @@ connection setup. The100-read/concurrency5 local HTTP runs had zero failures but
 noisy p95s (4772ms before /5423ms after); this is not evidence that HTTP tail
 latency is fixed. Production/browser measurements are a separate release gate.
 [All database samples and conditions](evidence/lifecycle-2026-10-29/database-performance.json).
+
+## Pre-release review
+
+Reviewed correctness, ownership/Origin boundaries, immutable financial evidence,
+lease fencing, query behavior and maintainability across the stacked commits.
+One remaining cancelled-trip window allowed an unpaid details edit while the
+batch was pending; it now rejects under the trip lock, with a focused regression
+check. There is one refund execution path and one email transport; no new
+infrastructure dependency or admin API was added.
+
+The mobile cancelled ticket and processed refund fit320px and390px without
+horizontal overflow. Actual accessibility trees expose the passenger table,
+headings, dialog controls and live refund status. Keep-booking focus restoration,
+keyboard dialog dismissal, seat-list semantics and reduced-motion duration were
+checked; the user verified native print preview. This is focused browser/AX
+acceptance, not a formal WCAG certification or a physical screen-reader audio
+review. Public HTTPS and production email verification remain release gates.

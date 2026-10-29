@@ -9,6 +9,7 @@ import {
 import { applyPaymentObservation } from '../../packages/backend/src/payment-state';
 import { paymentStatus } from '../../packages/backend/src/payment-status';
 import { runPaymentJobs } from '../../packages/backend/src/payment-worker';
+import { saveReservationDetails } from '../../packages/backend/src/reservation-details';
 import {
   drainTripCancellation,
   requestTripCancellation,
@@ -71,6 +72,26 @@ test('trip cancellation stops sales immediately, drains bounded batches, replays
         )
       ).alreadyRequested,
     ).toBe(true);
+    const unpaid = (
+      await f.owner.query(
+        'SELECT id FROM bookings WHERE trip_id=$1 AND user_id=$2',
+        [f.trip, f.users[1].id],
+      )
+    ).rows[0].id;
+    const edit = await saveReservationDetails(
+      f.runtime.db,
+      f.users[1].id,
+      unpaid,
+      randomUUID(),
+      1,
+      {
+        pickupStopId: randomUUID(),
+        dropStopId: randomUUID(),
+        passengers: [{ seatLabel: 'extra-1', name: 'Stopped trip fixture' }],
+        contactPhone: null,
+      },
+    );
+    expect(edit.body.code).toBe('RESERVATION_ENDED');
     expect(await tripDetails(f.runtime.db, f.trip)).toBeNull();
     expect(await listSeats(f.runtime.db, f.trip)).toEqual([]);
     const status = await paymentStatus(

@@ -37,7 +37,7 @@ export async function saveReservationDetails(
       const current = await tx.execute<{ status: string; version: number }>(
         sql`SELECT status,version FROM bookings WHERE id=${id} AND user_id=${userId}`,
       );
-      if (current.rows[0].status !== 'HELD')
+      if (trip.sales_state === 'CANCELLED' || current.rows[0].status !== 'HELD')
         return failure(
           'RESERVATION_ENDED',
           'This reservation has ended. Start a new search.',
