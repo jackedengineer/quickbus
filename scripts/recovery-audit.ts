@@ -53,6 +53,17 @@ export const invariantQuery = `SELECT json_build_object(
     NOT EXISTS(SELECT 1 FROM payment_jobs j WHERE j.kind='RECONCILE' AND j.resource_id=c.id)),
   'inboxWithoutJob',(SELECT count(*)::int FROM payment_inbox i WHERE
     NOT EXISTS(SELECT 1 FROM payment_jobs j WHERE j.kind='INBOX' AND j.resource_id=i.id)),
+  'cancelledHistoryWithoutTerminalBooking',(SELECT count(*)::int FROM booking_cancellations c JOIN bookings b ON b.id=c.booking_id WHERE b.status<>'CANCELLED'),
+  'cancelledFareMismatch',(SELECT count(*)::int FROM booking_cancellations c JOIN bookings b ON b.id=c.booking_id
+    WHERE c.refund_minor>0 AND (c.refund_minor<>b.total_minor OR NOT EXISTS(SELECT 1 FROM payment_intents i JOIN provider_payments p ON p.intent_id=i.id
+      JOIN payment_refunds r ON r.payment_id=p.id WHERE i.booking_id=b.id AND p.disposition='REFUND' AND r.amount=c.refund_minor))),
+  'tripCancellationWithoutJob',(SELECT count(*)::int FROM trip_cancellations c JOIN trips t ON t.id=c.trip_id WHERE t.sales_state<>'CANCELLED' OR
+    NOT EXISTS(SELECT 1 FROM payment_jobs j WHERE j.kind='TRIP_CANCEL' AND j.resource_id=c.trip_id)),
+  'completedTripWithActiveBookings',(SELECT count(*)::int FROM trip_cancellations c WHERE c.completed_at IS NOT NULL AND
+    EXISTS(SELECT 1 FROM bookings b WHERE b.trip_id=c.trip_id AND b.status IN ('HELD','PAYMENT_PENDING','CONFIRMED'))),
+  'notificationWithoutEvent',(SELECT count(*)::int FROM booking_notifications n WHERE NOT EXISTS(
+    SELECT 1 FROM booking_events e WHERE e.booking_id=n.booking_id AND e.type=n.kind)),
+  'sentNotificationWithoutIdentity',(SELECT count(*)::int FROM booking_notifications WHERE state='SENT' AND provider_id IS NULL),
   'processedRefundWithoutIdentity',(SELECT count(*)::int FROM payment_refunds WHERE state='PROCESSED' AND provider_id IS NULL)
 ) value`;
 export function countsQuery(tables: { schemaname: string; name: string }[]) {

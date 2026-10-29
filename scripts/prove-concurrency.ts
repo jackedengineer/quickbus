@@ -9,6 +9,9 @@ import {
   fixtureClient,
 } from '../tests/support/fixtures';
 
+const origin = process.env.APP_ORIGIN ?? 'http://localhost:3000';
+if (!/^http:\/\/localhost:30[0-9]{2}$/.test(origin))
+  throw Error('The proof requires a local application origin.');
 const endpoints = ['http://localhost:8787', 'http://localhost:8788'];
 const implementationFiles = [
   'apps/api/wrangler.jsonc',
@@ -98,7 +101,7 @@ try {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Origin: 'http://localhost:3000',
+          Origin: origin,
           Cookie: customers[index].cookie,
           'Idempotency-Key': key,
         },
@@ -336,7 +339,7 @@ try {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Origin: 'http://localhost:3000',
+      Origin: origin,
       Cookie: customers[0].cookie,
       'Idempotency-Key': busyKey,
     },

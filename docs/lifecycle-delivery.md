@@ -145,3 +145,26 @@ The user inspected Chrome's actual native preview for the persisted cancelled
 demo ticket, confirmed that the layout fits correctly, and closed the dialog.
 This closes the native-preview gap; local automated page controls cannot inspect
 that operating-system surface. Public HTTPS acceptance remains a separate gate.
+
+## T25 actual browser and scheduled recovery
+
+A second normal customer journey selected the persisted 30 October20:00
+Bengaluru→Hyderabad service, saved a synthetic traveller, and completed the real
+hosted Razorpay mock-bank success. The browser restored the confirmed ticket and
+its delivered confirmation email. The guarded local operator command reviewed
+exactly one active booking, stopped sales and enqueued the trip drain.
+
+The open browser updated to Trip cancelled before the booking drain completed;
+its payment action disappeared. This exposed a conflicting voluntary-cancellation
+control during the transition, now hidden for cancelled trips. The natural
+minute worker completed one cancellation, released all allocations, sent its
+cancellation email and processed the full ₹749 test refund. Actual payment
+pay_Ttn2n6AevG65GO refunded as rfnd_Ttn9AAHMpO5uJH; no manual refund dispatch was
+used. The390px browser retained the cancelled ticket and processed refund after
+reload. Drain and refund status were independently checked in PostgreSQL.
+
+The new two-Worker Neon contention run also passed all nine scenarios: one winner,
+99 resolved seat conflicts (94 initial bounded busy responses), atomic parties,
+idempotent replay, post-lock time, rollback and independent allocation audit.
+This is correctness evidence, not a throughput claim; the burst and retry phase
+took84seconds. [Source-scoped record](evidence/lifecycle-2026-10-29/neon-contention.json).

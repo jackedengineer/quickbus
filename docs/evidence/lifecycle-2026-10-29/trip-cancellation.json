@@ -1,0 +1,35 @@
+{
+  "at": "2026-10-29T16:36:54.878Z",
+  "status": {
+    "id": "d7b7af95-a218-4f35-b64c-8264d400a9b6",
+    "sales_state": "CANCELLED",
+    "reason": "DEMO_RECOVERY",
+    "requested_at": "2026-10-29 16:32:41.005711+00",
+    "completed_at": "2026-10-29 16:33:49.594206+00",
+    "processed_bookings": 1,
+    "job_state": "DONE",
+    "failure_code": null,
+    "remaining_bookings": 0,
+    "outstanding_refunds": 0
+  },
+  "rows": [
+    {
+      "id": "d9621575-aceb-4f2f-9887-4944386321b0",
+      "status": "CANCELLED",
+      "total_minor": 74900,
+      "source": "TRIP",
+      "accepted_at": "2026-10-29 16:33:47.501943+00",
+      "payment_id": "pay_Ttn2n6AevG65GO",
+      "disposition": "REFUND",
+      "refund_state": "PROCESSED",
+      "provider_id": "rfnd_Ttn9AAHMpO5uJH",
+      "refund_minor": 74900,
+      "allocations": 0,
+      "cancellation_events": 1,
+      "notifications": {
+        "CANCELLED": "SENT",
+        "CONFIRMED": "SENT"
+      }
+    }
+  ]
+}

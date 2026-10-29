@@ -68,7 +68,7 @@ export function CancellationPanel({
     }
   }
   async function submit() {
-    if (!preview?.eligible || busy) return;
+    if (!preview?.eligible || booking.tripCancelled || busy) return;
     pending.current ??= { key: crypto.randomUUID(), version: preview.version };
     setBusy(true);
     setError('');
@@ -121,7 +121,8 @@ export function CancellationPanel({
       if (mounted.current) setBusy(false);
     }
   }
-  if (booking.status !== 'CONFIRMED' && !open) return null;
+  if ((booking.tripCancelled || booking.status !== 'CONFIRMED') && !open)
+    return null;
   return (
     <section className="cancellation-panel" aria-label="Manage booking">
       <h2>Manage your booking</h2>
@@ -129,7 +130,12 @@ export function CancellationPanel({
         You can cancel the whole booking for a full test-fare refund until two
         hours before the trip’s first departure.
       </p>
-      <button type="button" className="secondary" onClick={() => void review()}>
+      <button
+        type="button"
+        className="secondary"
+        disabled={booking.tripCancelled}
+        onClick={() => void review()}
+      >
         Review cancellation
       </button>
       {uncertain && !open && (
@@ -141,6 +147,12 @@ export function CancellationPanel({
       {open && (
         <Dialog title="Cancel this booking?" onClose={close}>
           <div className="dialog-content cancellation-preview" aria-busy={busy}>
+            {booking.tripCancelled && (
+              <p role="status">
+                The operator cancelled this trip. Your booking and refund are
+                being updated.
+              </p>
+            )}
             <p>
               <strong>
                 {booking.origin} → {booking.destination}
@@ -197,7 +209,7 @@ export function CancellationPanel({
                   ? 'Back to booking'
                   : 'Keep booking'}
               </button>
-              {preview?.eligible && (
+              {preview?.eligible && !booking.tripCancelled && (
                 <button
                   type="button"
                   className="cancel-confirm"
