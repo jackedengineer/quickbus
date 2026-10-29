@@ -17,6 +17,20 @@ export async function enqueueBookingNotification(
   await tx.execute(sql`INSERT INTO booking_notifications(id,booking_id,kind)
     VALUES(${crypto.randomUUID()},${bookingId},${kind}) ON CONFLICT(booking_id,kind) DO NOTHING`);
 }
+// An old Worker can finish confirmation after the additive migration's legacy
+// backfill. Repair only missing intents; never replay SKIPPED/SENT history.
+export async function repairConfirmationNotifications(
+  db: Database,
+  bookingId?: string,
+) {
+  return (
+    await db.execute(sql`INSERT INTO booking_notifications(id,booking_id,kind)
+    SELECT gen_random_uuid(),e.booking_id,'CONFIRMED' FROM booking_events e
+    WHERE e.type='CONFIRMED' ${bookingId ? sql`AND e.booking_id=${bookingId}::uuid` : sql``}
+    AND NOT EXISTS(SELECT 1 FROM booking_notifications n WHERE n.booking_id=e.booking_id AND n.kind='CONFIRMED')
+    ORDER BY e.created_at,e.booking_id LIMIT 3 ON CONFLICT(booking_id,kind) DO NOTHING RETURNING id`)
+  ).rowCount;
+}
 export async function claimBookingNotification(
   db: Database,
   bookingId?: string,

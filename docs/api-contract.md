@@ -175,3 +175,28 @@ All responses remain no-store and the backend remains private behind the web
 service binding. Existing wrong-origin and legacy-host mutation rejection remain
 in force. See [delivery evidence](payment-delivery.md) and
 [provider recovery rules](provider-contract.md).
+
+## Implemented lifecycle surface (29 October 2026)
+
+The previous section is the historical v0.2 payment surface. The current lifecycle
+implementation adds the following; deployment identity and browser results live
+in [the delivery record](lifecycle-delivery.md).
+
+| Method / route | Request and authority | Result |
+|---|---|---|
+| GET `/api/v1/bookings/:id` | Verified owner session. | One statement snapshot with immutable ticket details, server-derived wasConfirmed, confirmationEmail delivery state, tripCancelled and accepted cancellation source/time/amount. A full reference is never authorization. |
+| GET `/api/v1/bookings/:id/cancellation` | Verified owner session. | Current version, policyVersion1, server time, two-hour cutoff, eligibility and full refundable test fare. A preview creates no reservation/refund effect. |
+| POST `/api/v1/bookings/:id/cancel` | Same Origin, verified owner, UUID Idempotency-Key, quoted integer If-Match, strict `{policyVersion:1}`. |200 `{id,status:"CANCELLED"}` after atomic commit; refund completion is read separately. Wrong owner404, stale version412, missing precondition428, changed key payload422, closed policy/trip/state409. Repeated cancellation with different keys still creates one business transition. |
+
+Payment status now includes tripCancelled and withholds checkout opening/starting
+when sales are cancelled. Public trip/detail/seat reads stop offering cancelled
+or closed journeys; a stale browser selection still faces the transactional guard.
+Confirmed visible reviews check status every15seconds; unresolved checkout/refund
+polling uses4seconds, stops when hidden and refreshes on focus. Status fetches have
+a10second browser timeout. Printing uses the owned page's print stylesheet; no
+public bearer-ticket endpoint, PDF service or privileged cancellation route exists.
+
+The trusted trip command is documented in [operations](operations.md). It requires
+an explicit reviewed audience limit and database confirmation. Its progress read
+reports remaining bookings separately from outstanding refunds. No admin UI/API
+is exposed by this release.

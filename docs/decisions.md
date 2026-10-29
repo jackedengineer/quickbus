@@ -181,3 +181,34 @@ inbox hashes. The independent release/restore audit now includes financial state
 and durable recovery linkage as well as inventory. Live keys are always rejected.
 Paid cancellation, ticket email, trip cancellation and admin remain later slices.
 [Provider contract and observations](provider-contract.md).
+
+## ADR 017 — Paid lifecycle with one recovery path and no admin dashboard
+
+Accepted29October2026. Reuse the existing trip lock, payment/refund worker and
+owned booking snapshot. Whole-booking cancellation freezes policy version1:
+full test-fare refund at least two hours before the trip's first departure,
+including equality. The server rechecks time after waiting for the trip lock.
+History, terminal state, seat release, refund intent and cancellation notification
+commit together. Provider I/O happens afterward. A different request key cannot
+cancel/refund twice; an unknown response resumes the original key.
+
+Trip cancellation is a trusted runtime-role CLI with database/audience guards,
+immutable operator/reason, immediate sales stop and three-booking leased batches.
+It has no public privileged route. Captures before/after sales stop use the same
+finalizer/refund identity and can never revive seats. Bank refund completion is
+separate from booking-drain completion. Admin remains deferred.
+
+One notification per booking/kind is committed with its lifecycle event. Rebuild
+its generic authenticated link from the frozen contact snapshot, persist a digest,
+and use the same Resend idempotency key/body. Stop uncertain retries after23hours
+(provider key retention is24hours), or earlier on configuration/body drift.
+Legacy confirmations migrate to SKIPPED; missing intents from an older in-flight
+Worker are repaired from persisted events without resending recorded history.
+The printable ticket stays owned; a booking reference grants no access.
+
+Keep exact-CI release guards, additive migrations and independent financial and
+lifecycle audits. Upload a compatible checkout-disabled recovery API before
+replacing traffic; retain email/refund/trip recovery during an admission outage.
+Actual desktop/mobile hosted test checkout, cancellation, scheduled email and
+processed refunds lead acceptance; SQL fault/lease tests supplement the browser.
+[Delivery and measured limitations](lifecycle-delivery.md).

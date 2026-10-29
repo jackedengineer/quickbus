@@ -2,7 +2,9 @@ import { expect, test } from 'vitest';
 import {
   claimBookingNotification,
   enqueueBookingNotification,
+  repairConfirmationNotifications,
 } from '../../packages/backend/src/notification-queue';
+import { applyPaymentObservation } from '../../packages/backend/src/payment-state';
 import { createDatabase } from '../../packages/db/src/client';
 import { paymentFixture } from '../support/payments';
 
@@ -54,6 +56,40 @@ test('notification intent rolls back, deduplicates and only one worker owns a le
     ).rejects.toMatchObject({ code: '23514' });
   } finally {
     await peer.close();
+    await f.close();
+  }
+});
+
+test('old-worker rollout repair fills one missing intent and preserves skipped historical deliveries', async () => {
+  const f = await paymentFixture();
+  try {
+    await f.runtime.db.transaction((tx) =>
+      applyPaymentObservation(tx, f.checkout, f.payment, f.keyId),
+    );
+    await f.owner.query(
+      "UPDATE booking_notifications SET state='SKIPPED',failure_code='LEGACY_NOT_SCHEDULED' WHERE booking_id=$1",
+      [f.booking],
+    );
+    expect(await repairConfirmationNotifications(f.runtime.db, f.booking)).toBe(
+      0,
+    );
+    await f.owner.query(
+      'DELETE FROM booking_notifications WHERE booking_id=$1',
+      [f.booking],
+    );
+    const results = await Promise.all([
+      repairConfirmationNotifications(f.runtime.db, f.booking),
+      repairConfirmationNotifications(f.runtime.db, f.booking),
+    ]);
+    expect(results.reduce<number>((n, value) => n + (value ?? 0), 0)).toBe(1);
+    const row = (
+      await f.owner.query(
+        'SELECT kind,state FROM booking_notifications WHERE booking_id=$1',
+        [f.booking],
+      )
+    ).rows;
+    expect(row).toEqual([{ kind: 'CONFIRMED', state: 'QUEUED' }]);
+  } finally {
     await f.close();
   }
 });

@@ -1,6 +1,6 @@
 # KwikBus relational database design
 
-This document describes the full target product. The deployed unpaid subset uses the Drizzle sources in `packages/db/src`; the deployed P1 includes normalized catalog and stop snapshots. Payment/refund tables below remain target work. [Task ledger](../tasks/todo.md).
+This document includes the full target product and historical P1 baseline. Current Drizzle sources in `packages/db/src` implement catalog, bookings, sandbox payments and the customer lifecycle. The delivery record distinguishes implementation from deployed acceptance. [Task ledger](../tasks/todo.md).
 
 ## Current P1 schema
 
@@ -183,3 +183,23 @@ Generate and review Drizzle SQL migrations, commit them, and run them once throu
 Keep inventory/payment identifiers and dedupe evidence for the documented replay horizon. Purge raw webhook bodies and unnecessary PII earlier under an explicit retention job; never purge unresolved financial operations. Proposed demo defaults: raw provider evidence 30 days, operational logs 14 days, response bodies 30 days, idempotency tombstones at least 180 days. Financial/business retention requires a separate policy before real commerce; these defaults are not legal advice or statutory retention claims.
 
 If segment selling is added, replace full-trip claims with explicit occupied legs and a unique `(trip_id,seat_label,leg_index)` key, inserting all legs of an itinerary atomically. Alternatively evaluate a range exclusion constraint. Define `[boarding_sequence,dropping_sequence)` occupancy, overlapping versus adjacent journeys, fare calculation, intermediate schedules, and cancellation release semantics first. Do not silently enable intermediate-city search against the current full-trip model.
+
+
+## Customer lifecycle additions
+
+Migrations0012–0015 add three tables and the immutable policy version; they retain
+existing IDs, money, allocations and booking snapshots.
+
+| Table | Key and authority |
+|---|---|
+| `booking_notifications` | UUID PK, booking FK, unique(booking_id,kind). Leased state/attempt/deadline/provider identity and request digest; no copied message or recipient. Runtime can insert/read and update delivery fields; it cannot delete history. Historical confirmations are explicitly SKIPPED. |
+| `booking_cancellations` | Booking FK/PK; source CUSTOMER/TRIP, actor, policy version, accepted time and full refund quote. Runtime INSERT/SELECT only. A paid row must correspond to the cancelled booking's full compensation obligation; the independent audit checks the join. |
+| `trip_cancellations` | Trip FK/PK; operator slug/reason/request time immutable. Runtime can advance only processed_bookings/completed_at. One TRIP_CANCEL job per trip resumes bounded batches. |
+| `bookings.cancellation_policy_version` | Version1 is stored at creation and retains the existing two-hour rule. Later policy changes must preserve evaluation of version1. |
+
+`booking_trip_status(trip_id,status,created_at,id)` supports bounded trip drain.
+Existing unique payment/refund and booking-event identities remain the business
+replay guard. New lifecycle events never update immutable fare/provider identity.
+Cancellation releases current allocations but preserves passengers, selected stop
+snapshots, original quote and history. The restore audit covers their linkage and
+notification identity in addition to the prior financial/inventory checks.

@@ -9,6 +9,7 @@ import {
 import {
   claimBookingNotification,
   type NotificationClaim,
+  repairConfirmationNotifications,
 } from './notification-queue';
 
 type Delivery = {
@@ -93,6 +94,7 @@ export async function runBookingNotifications(
   env: NotificationEnvironment,
   limit = 3,
 ) {
+  await repairConfirmationNotifications(db);
   let processed = 0;
   for (let n = 0; n < limit; n++) {
     const claim = await claimBookingNotification(db);

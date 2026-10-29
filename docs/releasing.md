@@ -70,3 +70,27 @@ After enabling, repeat real hosted sandbox success, failure, explicit retry,
 late-capture refund, full reload and desktop/mobile HTTPS/CSP acceptance. Provider
 webhook intake and independently fetched financial state must be evidenced.
 Synthetic fault tests supplement these journeys; they do not replace them.
+
+## Lifecycle-aware rollback baseline
+
+Before replacing the serving API, the release guard uploads the exact reviewed
+new implementation with PAYMENTS_ENABLED=false. It records recoveryApi from
+Wrangler's structured version-upload output. Uploading alone does not change
+traffic. This baseline understands trip-drain jobs, cancellation history and
+notification delivery while refusing new checkout; older releases may not.
+Existing provider credentials and recovery stay enabled. The deployed web version
+already understands these lifecycle states and can remain during API recovery.
+
+Use the recorded recoveryApi explicitly with `wrangler versions deploy
+<recoveryApi>@100% --yes -c apps/api/wrangler.jsonc --env production`, then verify
+status/recovery in the normal browser. Restore the captured enabled API version
+explicitly after the drill. Preserve private routing, query redaction and secrets.
+[Wrangler structured operation output](https://developers.cloudflare.com/workers/wrangler/system-environment-variables/).
+
+An older in-flight Worker can confirm during the additive migration/deployment
+window after legacy-email backfill. The notification minute worker repairs at
+most three missing confirmation intents using persisted confirmation events and
+the unique booking/kind key. It never changes SKIPPED or SENT history. Normal
+confirmation still enqueues atomically. This closes the upgrade gap without a
+second message transport or replaying historical mail. The aggregate restore
+and release audit detects a missing confirmation intent independently.

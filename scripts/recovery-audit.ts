@@ -61,6 +61,7 @@ export const invariantQuery = `SELECT json_build_object(
     NOT EXISTS(SELECT 1 FROM payment_jobs j WHERE j.kind='TRIP_CANCEL' AND j.resource_id=c.trip_id)),
   'completedTripWithActiveBookings',(SELECT count(*)::int FROM trip_cancellations c WHERE c.completed_at IS NOT NULL AND
     EXISTS(SELECT 1 FROM bookings b WHERE b.trip_id=c.trip_id AND b.status IN ('HELD','PAYMENT_PENDING','CONFIRMED'))),
+  'confirmationWithoutNotification',(SELECT count(*)::int FROM booking_events e WHERE e.type='CONFIRMED' AND NOT EXISTS(SELECT 1 FROM booking_notifications n WHERE n.booking_id=e.booking_id AND n.kind='CONFIRMED')),
   'notificationWithoutEvent',(SELECT count(*)::int FROM booking_notifications n WHERE NOT EXISTS(
     SELECT 1 FROM booking_events e WHERE e.booking_id=n.booking_id AND e.type=n.kind)),
   'sentNotificationWithoutIdentity',(SELECT count(*)::int FROM booking_notifications WHERE state='SENT' AND provider_id IS NULL),

@@ -156,6 +156,7 @@ const evidence: {
   startedAt: string;
   previous?: { api: string; web: string };
   deployed?: { api: string; web: string };
+  recoveryApi?: string;
   state: string;
   financialAndInventoryAudit?: Record<string, number>;
 } = {
@@ -230,6 +231,49 @@ try {
     throw new Error(
       'Inventory or financial audit failed; do not reopen checkout.',
     );
+  // Retain this exact lifecycle implementation with new checkout disabled.
+  // Old releases cannot safely drain the newly introduced trip jobs. Uploading
+  // does not replace the currently serving version or expose a preview URL.
+  const outputPath = `${filename}.recovery.ndjson`;
+  await writeFile(outputPath, '', { mode: 0o600 });
+  run(
+    'pnpm',
+    [
+      'exec',
+      'wrangler',
+      'versions',
+      'upload',
+      '-c',
+      'apps/api/wrangler.jsonc',
+      '--env',
+      'production',
+      '--var',
+      'PAYMENTS_ENABLED:false',
+      '--message',
+      `Recovery baseline ${revision}`,
+    ],
+    { WRANGLER_OUTPUT_FILE_PATH: outputPath },
+  );
+  const uploaded = (await readFile(outputPath, 'utf8'))
+    .trim()
+    .split('\n')
+    .map(
+      (line) =>
+        JSON.parse(line) as {
+          type: string;
+          worker_name?: string;
+          version_id?: string;
+        },
+    )
+    .find(
+      (entry) =>
+        entry.type === 'version-upload' && entry.worker_name === 'kwikbus-api',
+    );
+  if (!uploaded?.version_id || !/^[0-9a-f-]{36}$/.test(uploaded.version_id))
+    throw Error(
+      'Recovery version identity was not recorded; production was not replaced.',
+    );
+  evidence.recoveryApi = uploaded.version_id;
   evidence.state = 'deploying';
   await save();
   run('pnpm', [
