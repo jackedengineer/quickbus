@@ -19,6 +19,12 @@ export async function applyRuntimeGrants(client: pg.Client, role: string) {
     `GRANT SELECT,INSERT,UPDATE ON maintenance_jobs TO "${role}"`,
   );
   await client.query(`GRANT SELECT,INSERT,UPDATE ON payment_jobs TO "${role}"`);
+  await client.query(
+    `GRANT SELECT,INSERT ON booking_notifications TO "${role}"`,
+  );
+  await client.query(
+    `GRANT UPDATE(state,attempts,available_at,first_attempt_at,request_hash,provider_id,lease_token,lease_expires_at,failure_code,updated_at) ON booking_notifications TO "${role}"`,
+  );
   // Remove the earlier table-wide update grant before narrowing it. A runtime
   // compromise must not rewrite the quoted amount, provider identity or evidence.
   await client.query(

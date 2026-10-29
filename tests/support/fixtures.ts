@@ -71,6 +71,10 @@ export async function cleanupFixtures(
   await client.query('BEGIN');
   try {
     await client.query(
+      'DELETE FROM booking_notifications WHERE booking_id IN (SELECT id FROM bookings WHERE trip_id=ANY($1::uuid[]))',
+      [tripIds],
+    );
+    await client.query(
       'DELETE FROM booking_events WHERE booking_id IN (SELECT id FROM bookings WHERE trip_id=ANY($1::uuid[]))',
       [tripIds],
     );
