@@ -89,6 +89,7 @@ export const reservationDetailsInput = z
   .strict();
 export type ReservationDetailsInput = z.infer<typeof reservationDetailsInput>;
 export type ReservationReview = {
+  wasConfirmed: boolean;
   id: string;
   tripId: string;
   reference: string;

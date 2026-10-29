@@ -1,6 +1,7 @@
 import type { ReservationReview } from '@kwikbus/contracts';
 import { useRouter } from '@tanstack/react-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { BookingTicket } from './booking-ticket';
 import { dateInIndia, day, time } from './models';
 import { PaymentPanel } from './payment-panel';
 import { useRemaining } from './remaining';
@@ -232,7 +233,7 @@ export function ReservationReviewScreen({
     <section className="bookings-content review-content">
       <div className="section-heading">
         <h1 ref={heading} tabIndex={-1}>
-          Review reservation
+          {booking?.wasConfirmed ? 'Your booking' : 'Review reservation'}
         </h1>
         <button type="button" className="text-button" onClick={onBack}>
           My bookings
@@ -251,44 +252,54 @@ export function ReservationReviewScreen({
       )}
       {booking && draft && (
         <>
-          <HoldCard booking={booking} onChange={() => void load(true)} />
-          <p className="muted">
-            {booking.operatorName} · {booking.vehicleLabel} ·{' '}
-            {day(dateInIndia(booking.departureAt))} {time(booking.departureAt)}
-          </p>
-          {!booking.complete && (
-            <p>
-              Complete the passenger and contact details for this reservation.
-            </p>
+          {booking.wasConfirmed ? (
+            <BookingTicket booking={booking} />
+          ) : (
+            <HoldCard booking={booking} onChange={() => void load(true)} />
           )}
-          {conflict && (
-            <p role="alert">
-              A newer version is saved. Reloading will replace this draft.
-            </p>
+          {!booking.wasConfirmed && (
+            <>
+              <p className="muted">
+                {booking.operatorName} · {booking.vehicleLabel} ·{' '}
+                {day(dateInIndia(booking.departureAt))}{' '}
+                {time(booking.departureAt)}
+              </p>
+              {!booking.complete && (
+                <p>
+                  Complete the passenger and contact details for this
+                  reservation.
+                </p>
+              )}
+              {conflict && (
+                <p role="alert">
+                  A newer version is saved. Reloading will replace this draft.
+                </p>
+              )}
+              <button
+                type="button"
+                className="text-button"
+                disabled={busy || loading}
+                onClick={() => {
+                  setNotice('');
+                  void load(true);
+                }}
+              >
+                Reload saved details
+              </button>
+              <ReservationReviewForm
+                booking={booking}
+                draft={draft}
+                active={Boolean(active)}
+                busy={busy}
+                uncertain={uncertain}
+                conflict={conflict}
+                loading={loading}
+                remaining={remaining}
+                edit={edit}
+                onSave={save}
+              />
+            </>
           )}
-          <button
-            type="button"
-            className="text-button"
-            disabled={busy || loading}
-            onClick={() => {
-              setNotice('');
-              void load(true);
-            }}
-          >
-            Reload saved details
-          </button>
-          <ReservationReviewForm
-            booking={booking}
-            draft={draft}
-            active={Boolean(active)}
-            busy={busy}
-            uncertain={uncertain}
-            conflict={conflict}
-            loading={loading}
-            remaining={remaining}
-            edit={edit}
-            onSave={save}
-          />
           <PaymentPanel
             key={booking.id}
             booking={booking}
