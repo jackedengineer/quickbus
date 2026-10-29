@@ -339,7 +339,9 @@ export function PaymentPanel({
               ? 'Your test payment has been refunded.'
               : state.refunds.some((s) => s === 'NEEDS_REVIEW')
                 ? 'Your refund needs review. Keep your reservation reference.'
-                : 'Your seats could not be confirmed. Your test payment is being refunded.'}
+                : booking.wasConfirmed && state.status === 'CANCELLED'
+                  ? 'Your booking is cancelled. Your full test refund is being processed.'
+                  : 'Your seats could not be confirmed. Your test payment is being refunded.'}
           </p>
         ) : state.needsReview ? (
           <p>

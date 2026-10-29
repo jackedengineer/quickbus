@@ -45,7 +45,9 @@ export function BookingTicket({ booking }: { booking: ReservationReview }) {
       </p>
       <p>
         {cancelled
-          ? 'This booking is cancelled. See your refund status below.'
+          ? booking.cancellation?.source === 'TRIP'
+            ? 'The operator cancelled this trip. See your refund status below.'
+            : 'This booking is cancelled. See your refund status below.'
           : 'Test booking confirmed. This is a portfolio demonstration, not a travel ticket.'}
       </p>
       <div className="ticket-stops">

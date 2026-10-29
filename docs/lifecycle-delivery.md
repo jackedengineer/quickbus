@@ -82,3 +82,22 @@ preview layout remains a manual acceptance gap because native Mac control is
 unavailable and headless Chrome exposes no preview. Production Resend acceptance
 is deferred to the final guarded rollout, not inferred from Mailpit.
 [Sanitized browser/SQL record](evidence/lifecycle-2026-10-29/tickets-email.json).
+
+## T23 whole-booking cancellation
+
+The command and preview use the immutable v1 two-hour rule, frozen as a booking
+policy version against the published departure. Real Neon checks passed owner and
+version rejection, concurrent same-key/different-key replay and a cutoff crossing
+while waiting on the trip lock. The runtime can only insert/read cancellation
+history. The provider call stays outside the trip transaction.
+
+Actual Chrome desktop/mobile preview showed the full ₹749 test refund and the
+30 October18:00IST deadline. Keep booking dismissed without mutation and returned
+focus to the opener. Two tabs then submitted from their independently loaded
+previews. The booking cancelled once, all allocations disappeared, and one
+cancellation event, notification and refund intent remained. The UI retained the
+cancelled ticket and separate refund progress. A discovered late-capture-specific
+message was corrected for a formerly confirmed booking. Resource-busy/network
+uncertainty preserves the request key and offers safe resume rather than claiming
+failure or reverting the cancellation. Native print preview remains a separate
+manual check; no cancellation/refund result is inferred from it.

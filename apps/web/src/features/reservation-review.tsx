@@ -2,6 +2,7 @@ import type { ReservationReview } from '@kwikbus/contracts';
 import { useRouter } from '@tanstack/react-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { BookingTicket } from './booking-ticket';
+import { CancellationPanel } from './cancellation-panel';
 import { dateInIndia, day, time } from './models';
 import { PaymentPanel } from './payment-panel';
 import { useRemaining } from './remaining';
@@ -308,6 +309,7 @@ export function ReservationReviewScreen({
               />
             </>
           )}
+          <CancellationPanel booking={booking} onChange={() => load(true)} />
           <PaymentPanel
             key={booking.id}
             booking={booking}
