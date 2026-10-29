@@ -1,6 +1,7 @@
 import type { Database, Transaction } from '@kwikbus/db';
 import { sql } from '@kwikbus/db/schema';
 import { lockTrip } from './commands';
+import { enqueueBookingNotification } from './notification-queue';
 import { enqueuePaymentJob } from './payment-jobs';
 import type { ProviderPayment } from './razorpay';
 
@@ -120,6 +121,8 @@ export async function applyPaymentObservation(
     sql`UPDATE checkout_attempts SET state='CAPTURED' WHERE id=${checkout.id}`,
   );
   if (prior?.disposition === 'FULFILLED') {
+    // Repair an outbox gap if an older Worker confirmed during an additive rollout.
+    await enqueueBookingNotification(tx, checkout.bookingId, 'CONFIRMED');
     // An operator-side refund is outside customer cancellation in this slice.
     // Preserve inventory and surface the financial inconsistency for review.
     if (payment.status === 'refunded' || payment.amount_refunded > 0)
@@ -164,6 +167,7 @@ export async function applyPaymentObservation(
     await tx.execute(
       sql`INSERT INTO booking_events(id,booking_id,type) VALUES(${crypto.randomUUID()},${checkout.bookingId},'CONFIRMED') ON CONFLICT DO NOTHING`,
     );
+    await enqueueBookingNotification(tx, checkout.bookingId, 'CONFIRMED');
   } else {
     if (
       booking.status === 'PAYMENT_PENDING' &&

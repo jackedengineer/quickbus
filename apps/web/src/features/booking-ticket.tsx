@@ -26,6 +26,17 @@ export function BookingTicket({ booking }: { booking: ReservationReview }) {
           Print ticket
         </button>
       </div>
+      {!cancelled &&
+        booking.confirmationEmail &&
+        booking.confirmationEmail !== 'SKIPPED' && (
+          <p className="ticket-email" role="status">
+            {booking.confirmationEmail === 'SENT'
+              ? 'Confirmation email sent. Your ticket is also saved here.'
+              : booking.confirmationEmail === 'NEEDS_REVIEW'
+                ? 'We could not confirm email delivery. Your ticket is still available here.'
+                : 'Your confirmation email is on its way. Your ticket is ready here.'}
+          </p>
+        )}
       <h3>
         {booking.origin} → {booking.destination}
       </h3>

@@ -118,6 +118,14 @@ export function ReservationReviewScreen({
       document.removeEventListener('visibilitychange', refresh);
     };
   }, [signedIn, load]);
+  useEffect(() => {
+    if (!['QUEUED', 'RUNNING'].includes(booking?.confirmationEmail ?? ''))
+      return;
+    const refresh = setInterval(() => {
+      if (document.visibilityState === 'visible') void load();
+    }, 15000);
+    return () => clearInterval(refresh);
+  }, [booking?.confirmationEmail, load]);
   const remaining = useRemaining(
     booking?.expiresAt ?? '',
     booking?.serverTime ?? '',

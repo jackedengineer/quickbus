@@ -80,6 +80,7 @@
   body > a,
   [role="dialog"],
   .review-content > :not(.booking-ticket),
+  .ticket-email,
   .ticket-print {
     display: none !important;
   }

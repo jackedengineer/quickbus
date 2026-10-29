@@ -108,8 +108,10 @@ export default {
     );
     try {
       await runMaintenance(database.db, job, runId);
-      if (job === 'expiry')
+      if (job === 'expiry') {
         await runMaintenance(database.db, 'payments', runId, environment);
+        await runMaintenance(database.db, 'notifications', runId, environment);
+      }
     } finally {
       await database.close();
     }

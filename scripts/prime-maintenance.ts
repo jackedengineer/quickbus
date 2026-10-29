@@ -13,6 +13,8 @@ const environment: AppEnvironment = {
   AUTH_SECRET: process.env.AUTH_SECRET ?? '',
   APP_ORIGIN: process.env.APP_ORIGIN ?? '',
   DEPLOYMENT_ENV: 'production',
+  RESEND_API_KEY: process.env.RESEND_API_KEY,
+  EMAIL_FROM: process.env.EMAIL_FROM,
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   PAYMENTS_ENABLED: process.env.PAYMENTS_ENABLED,
@@ -26,6 +28,7 @@ try {
   await runMaintenance(database.db, 'expiry');
   await runMaintenance(database.db, 'inventory');
   await runMaintenance(database.db, 'payments', undefined, environment);
+  await runMaintenance(database.db, 'notifications', undefined, environment);
 } finally {
   await database.close();
 }

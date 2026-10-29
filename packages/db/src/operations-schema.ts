@@ -14,7 +14,7 @@ export const maintenanceJobs = pgTable(
   (t) => [
     check(
       'maintenance_job_name',
-      sql`${t.name} IN ('expiry', 'inventory','payments')`,
+      sql`${t.name} IN ('expiry', 'inventory','payments','notifications')`,
     ),
   ],
 );

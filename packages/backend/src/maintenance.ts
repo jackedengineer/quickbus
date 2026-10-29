@@ -2,15 +2,18 @@ import type { Database } from '@kwikbus/db';
 import { sql } from '@kwikbus/db/schema';
 import { sweepExpiredHolds } from './expiry';
 import { renewInventory } from './inventory';
+import type { NotificationEnvironment } from './notification-email';
+import { notificationHealth } from './notification-queue';
+import { runBookingNotifications } from './notifications';
 import { paymentJobHealth } from './payment-jobs';
 import { runPaymentJobs } from './payment-worker';
 import type { RazorpayEnvironment } from './razorpay';
 
 export async function runMaintenance(
   db: Database,
-  name: 'expiry' | 'inventory' | 'payments',
+  name: 'expiry' | 'inventory' | 'payments' | 'notifications',
   runId = crypto.randomUUID(),
-  environment: RazorpayEnvironment = {},
+  environment: RazorpayEnvironment & NotificationEnvironment = {},
 ) {
   const started = performance.now();
   try {
@@ -20,7 +23,9 @@ export async function runMaintenance(
       ? sweepExpiredHolds(db)
       : name === 'inventory'
         ? renewInventory(db)
-        : runPaymentJobs(db, environment));
+        : name === 'payments'
+          ? runPaymentJobs(db, environment)
+          : runBookingNotifications(db, environment));
     await db.execute(
       sql`UPDATE maintenance_jobs SET last_succeeded_at=clock_timestamp(),last_processed=${processed} WHERE name=${name}`,
     );
@@ -63,7 +68,9 @@ export async function maintenanceHealth(
     horizonHealthy: boolean;
     overdueHolds: number;
     paymentsFresh: boolean;
+    notificationsFresh: boolean;
   }>(sql`SELECT
+    coalesce((SELECT last_succeeded_at>clock_timestamp()-interval '10 minutes' FROM maintenance_jobs WHERE name='notifications'),false) AS "notificationsFresh",
     coalesce((SELECT last_succeeded_at>clock_timestamp()-interval '10 minutes' FROM maintenance_jobs WHERE name='expiry'),false) AS "expiryFresh",
     coalesce((SELECT last_succeeded_at>clock_timestamp()-interval '3 hours' FROM maintenance_jobs WHERE name='inventory'),false) AS "inventoryFresh",
     coalesce((SELECT bool_and(coalesce(latest.departure>clock_timestamp()+interval '27 days',false))
@@ -72,6 +79,7 @@ export async function maintenanceHealth(
     (NOT ${paymentsConfigured} OR coalesce((SELECT last_succeeded_at>clock_timestamp()-interval '10 minutes' FROM maintenance_jobs WHERE name='payments'),false)) AS "paymentsFresh"`);
   const values = result.rows[0];
   const payments = await paymentJobHealth(db);
+  const notifications = await notificationHealth(db);
   const cases = await db.execute<{ open: number }>(
     sql`SELECT count(*)::int AS open FROM payment_cases WHERE state='OPEN'`,
   );
@@ -81,13 +89,17 @@ export async function maintenanceHealth(
       values.inventoryFresh &&
       values.horizonHealthy &&
       values.paymentsFresh &&
+      values.notificationsFresh &&
       !values.overdueHolds &&
+      !notifications.failed &&
+      notifications.oldestSeconds < 180 &&
       !payments.failed &&
       payments.oldestSeconds < 180 &&
       !cases.rows[0].open
         ? 'ok'
         : 'degraded',
     ...values,
+    notifications,
     payments: { ...payments, openCases: cases.rows[0].open },
   };
 }
