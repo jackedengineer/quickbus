@@ -1,0 +1,592 @@
+{
+  "date": "2026-10-31",
+  "acceptedScope": "Free limited-traffic preview. Capacity thresholds failed; user declined a billing upgrade.",
+  "fixture": {
+    "database": "isolated Neon development database",
+    "trips": 10000,
+    "seats": 400000,
+    "historicalBookings": 100000,
+    "customers": 3000,
+    "workers": [
+      "2c1e4a2c-7f66-4a77-a175-d1c025718b1b",
+      "3b025c3b-bea1-4768-a3d1-31447d13c7c8"
+    ],
+    "placement": "aws:ap-southeast-1",
+    "payments": false,
+    "loadGenerator": "k6 2.3.0 in Docker on the Mac",
+    "ingress": "MRS",
+    "baselineRates": {
+      "reads": 45,
+      "writes": 5
+    },
+    "hotRates": {
+      "reads": 5,
+      "writes": 10
+    }
+  },
+  "runs": [
+    {
+      "label": "baseline-15m",
+      "metrics": {
+        "http_reqs": {
+          "count": 44942,
+          "rate": 49.906304400776904
+        },
+        "unexpected_errors": {
+          "rate": 0.040207378398825155,
+          "passes": 1807,
+          "fails": 43135
+        },
+        "search_ms": {
+          "avg": 572.0310964530786,
+          "med": 527.69825,
+          "p(95)": 761.8295939999999,
+          "p(99)": 1607.7852087499994,
+          "max": 2859.910071
+        },
+        "mutation_ms": {
+          "avg": 615.0679692208391,
+          "med": 575.18075,
+          "p(95)": 840.145876,
+          "p(99)": 1682.065709,
+          "max": 2540.636835
+        },
+        "search_server_ms": {
+          "avg": 80.92813388064414,
+          "med": 62,
+          "p(95)": 185,
+          "p(99)": 339,
+          "max": 980
+        },
+        "mutation_server_ms": {
+          "avg": 113.49273482096523,
+          "med": 100,
+          "p(95)": 214.34999999999982,
+          "p(99)": 330.93999999999994,
+          "max": 962
+        },
+        "session_ms": {
+          "avg": 33.20899616017554,
+          "med": 27,
+          "p(95)": 65,
+          "p(99)": 147.08999999999995,
+          "max": 691
+        },
+        "trip_lock_ms": {
+          "avg": 4.8507268951194185,
+          "med": 4,
+          "p(95)": 8,
+          "p(99)": 15,
+          "max": 763
+        },
+        "business_conflicts": {
+          "count": 948,
+          "rate": 1.0527163137362934
+        },
+        "missing_server_timing": {
+          "rate": 0.039717858573272216,
+          "passes": 1785,
+          "fails": 43157
+        },
+        "dropped_iterations": {
+          "count": 60,
+          "rate": 0.06662761479343629
+        }
+      }
+    },
+    {
+      "label": "diagnostic-30s-with-burst",
+      "metrics": {
+        "http_reqs": {
+          "count": 1489,
+          "rate": 48.594097467163955
+        },
+        "unexpected_errors": {
+          "passes": 109,
+          "fails": 1380,
+          "rate": 0.07320349227669577
+        },
+        "search_ms": {
+          "p(95)": 974.6176624999999,
+          "p(99)": 1135.40974372,
+          "max": 1687.054918,
+          "avg": 588.1463572336443,
+          "med": 527.584167
+        },
+        "mutation_ms": {
+          "p(99)": 1371.89005892,
+          "max": 1595.356417,
+          "avg": 618.4776174800004,
+          "med": 565.4857505,
+          "p(95)": 1021.5797567
+        },
+        "search_server_ms": {
+          "max": 673,
+          "avg": 104.17092337917485,
+          "med": 63,
+          "p(95)": 400.59999999999997,
+          "p(99)": 550.7599999999999
+        },
+        "mutation_server_ms": {
+          "avg": 121.39285714285714,
+          "med": 97.5,
+          "p(95)": 262.34999999999997,
+          "p(99)": 489.16999999999985,
+          "max": 583
+        },
+        "session_ms": {
+          "med": 27,
+          "p(95)": 86.29999999999978,
+          "p(99)": 276.9999999999999,
+          "max": 391,
+          "avg": 40.15525114155251
+        },
+        "trip_lock_ms": {
+          "p(99)": 15,
+          "max": 342,
+          "avg": 7.4375,
+          "med": 4,
+          "p(95)": 8.449999999999996
+        },
+        "business_conflicts": {
+          "count": 48,
+          "rate": 1.5664987766446405
+        },
+        "missing_server_timing": {
+          "passes": 106,
+          "fails": 1383,
+          "rate": 0.07118871725990597
+        },
+        "edge_errors": {
+          "count": 106,
+          "rate": 3.459351465090248
+        },
+        "dropped_iterations": {
+          "count": 12,
+          "rate": 0.39162469416116014
+        }
+      }
+    },
+    {
+      "label": "diagnostic-10s",
+      "metrics": {
+        "http_reqs": {
+          "count": 494,
+          "rate": 46.91106767141814
+        },
+        "unexpected_errors": {
+          "rate": 0.06072874493927125,
+          "passes": 30,
+          "fails": 464
+        },
+        "search_ms": {
+          "med": 525.1057225,
+          "p(95)": 616.0100419999997,
+          "p(99)": 861.8956015,
+          "max": 1076.084543,
+          "avg": 541.8655694204542
+        },
+        "mutation_ms": {
+          "avg": 563.1791995294118,
+          "med": 550.953375,
+          "p(95)": 689.809097,
+          "p(99)": 829.1216669999999,
+          "max": 939.283792
+        },
+        "search_server_ms": {
+          "avg": 67.35838150289017,
+          "med": 60,
+          "p(95)": 118.19999999999997,
+          "p(99)": 158.67999999999998,
+          "max": 286
+        },
+        "mutation_server_ms": {
+          "med": 88,
+          "p(95)": 149.39999999999998,
+          "p(99)": 179.82,
+          "max": 189,
+          "avg": 95.2
+        },
+        "session_ms": {
+          "avg": 30.4,
+          "med": 27,
+          "p(95)": 55,
+          "p(99)": 74.3,
+          "max": 78
+        },
+        "trip_lock_ms": {
+          "p(99)": 10.959999999999997,
+          "max": 13,
+          "avg": 4.142857142857143,
+          "med": 4,
+          "p(95)": 6.299999999999999
+        },
+        "business_conflicts": {
+          "rate": 2.3740418862053714,
+          "count": 25
+        },
+        "missing_server_timing": {
+          "rate": 0.06072874493927125,
+          "passes": 30,
+          "fails": 464
+        },
+        "edge_errors": {
+          "count": 30,
+          "rate": 2.8488502634464457
+        },
+        "dropped_iterations": {
+          "count": 7,
+          "rate": 0.6647317281375039
+        }
+      }
+    },
+    {
+      "label": "diagnostic-20s",
+      "metrics": {
+        "http_reqs": {
+          "count": 980,
+          "rate": 40.772924993314966
+        },
+        "unexpected_errors": {
+          "rate": 0.08673469387755102,
+          "passes": 85,
+          "fails": 895
+        },
+        "search_ms": {
+          "avg": 742.1049692962962,
+          "med": 596.101194,
+          "p(95)": 1673.826126,
+          "p(99)": 2681.8194179999987,
+          "max": 3037.736085
+        },
+        "mutation_ms": {
+          "med": 588.186292,
+          "p(95)": 1978.377917,
+          "p(99)": 2463.008585,
+          "max": 2705.199876,
+          "avg": 749.8995814554456
+        },
+        "search_server_ms": {
+          "p(95)": 258.79999999999995,
+          "p(99)": 336.44,
+          "max": 374,
+          "avg": 130.2066869300912,
+          "med": 111
+        },
+        "mutation_server_ms": {
+          "max": 368,
+          "avg": 115.44,
+          "med": 103,
+          "p(95)": 202.79999999999993,
+          "p(99)": 329.52
+        },
+        "session_ms": {
+          "p(99)": 127.80999999999997,
+          "max": 178,
+          "avg": 36.964285714285715,
+          "med": 30,
+          "p(95)": 65.34999999999995
+        },
+        "trip_lock_ms": {
+          "med": 4,
+          "p(95)": 9,
+          "p(99)": 32.01999999999998,
+          "max": 52,
+          "avg": 5.28
+        },
+        "business_conflicts": {
+          "count": 49,
+          "rate": 2.0386462496657485
+        },
+        "missing_server_timing": {
+          "rate": 0.08469387755102041,
+          "passes": 83,
+          "fails": 897
+        },
+        "edge_errors": {
+          "count": 83,
+          "rate": 3.4532171167807575
+        },
+        "dropped_iterations": {
+          "count": 21,
+          "rate": 0.873705535571035
+        }
+      }
+    },
+    {
+      "label": "hot-trip-60s",
+      "metrics": {
+        "http_reqs": {
+          "count": 902,
+          "rate": 14.892288551117897
+        },
+        "unexpected_errors": {
+          "rate": 0.2394678492239468,
+          "passes": 216,
+          "fails": 686
+        },
+        "search_ms": {
+          "avg": 537.7729191833333,
+          "med": 523.186771,
+          "p(95)": 612.8055294499999,
+          "p(99)": 801.5165025399999,
+          "max": 822.984084
+        },
+        "mutation_ms": {
+          "max": 1402.161001,
+          "avg": 570.2215499084855,
+          "med": 548.924167,
+          "p(95)": 752.639667,
+          "p(99)": 1121.534334
+        },
+        "search_server_ms": {
+          "p(99)": 134.32,
+          "max": 296,
+          "avg": 65.34285714285714,
+          "med": 59,
+          "p(95)": 90.6
+        },
+        "mutation_server_ms": {
+          "med": 87,
+          "p(95)": 160.39999999999998,
+          "p(99)": 228.51999999999998,
+          "max": 270,
+          "avg": 95.86198547215497
+        },
+        "session_ms": {
+          "max": 210,
+          "avg": 33.089244851258584,
+          "med": 27,
+          "p(95)": 67.39999999999996,
+          "p(99)": 87
+        },
+        "trip_lock_ms": {
+          "p(95)": 26,
+          "p(99)": 46.639999999999986,
+          "max": 81,
+          "avg": 6.581113801452784,
+          "med": 4
+        },
+        "business_conflicts": {
+          "count": 370,
+          "rate": 6.10881015954947
+        },
+        "missing_server_timing": {
+          "rate": 0.23835920177383593,
+          "passes": 215,
+          "fails": 687
+        },
+        "edge_errors": {
+          "count": 215,
+          "rate": 3.5497140116300976
+        },
+        "dropped_iterations": {
+          "count": 0,
+          "rate": 0
+        }
+      }
+    }
+  ],
+  "cpuSample": {
+    "records": 199,
+    "keys": [
+      "wallTime",
+      "cpuTime",
+      "truncated",
+      "executionModel",
+      "outcome",
+      "scriptVersion",
+      "scriptName",
+      "diagnosticsChannelEvents",
+      "exceptions",
+      "logs",
+      "eventTimestamp",
+      "event"
+    ],
+    "outcomes": {
+      "exceededCpu": 28,
+      "ok": 171
+    },
+    "statuses": {
+      "200": 125,
+      "201": 2,
+      "409": 44,
+      "503": 23,
+      "undefined": 5
+    },
+    "exceptions": {
+      "Error:Worker exceeded CPU time limit.": 62
+    },
+    "cpu": {
+      "count": 199,
+      "p95": 67,
+      "p99": 151,
+      "max": 186
+    },
+    "wall": {
+      "count": 199,
+      "p95": 304,
+      "p99": 1972,
+      "max": 2200
+    }
+  },
+  "lastSeat": {
+    "at": "2026-10-31T06:41:11.961Z",
+    "requests": 100,
+    "workers": 2,
+    "elapsedMs": 7302,
+    "initial": {
+      "201": 1,
+      "SEATS_UNAVAILABLE": 76,
+      "PLATFORM": 19,
+      "RESOURCE_BUSY": 4
+    },
+    "dependencyRetries": 25,
+    "busyRetries": 4,
+    "winners": 1,
+    "resolvedSeatConflicts": 99,
+    "audit": {
+      "allocations": 1,
+      "owners": 1
+    },
+    "invariants": {
+      "missingHeldAllocations": 0,
+      "terminalAllocations": 0,
+      "incorrectQuotes": 0,
+      "crossTripStopChoices": 0,
+      "missingDetailEvents": 0,
+      "incompleteCatalogSnapshots": 0,
+      "partialServiceTrips": 0,
+      "intentQuoteMismatch": 0,
+      "confirmedWithoutMoney": 0,
+      "fulfillmentWithoutBooking": 0,
+      "refundQuoteMismatch": 0,
+      "captureWithoutDisposition": 0,
+      "compensationWithoutRefund": 0,
+      "refundWithoutJob": 0,
+      "checkoutWithoutRecovery": 0,
+      "inboxWithoutJob": 0,
+      "cancelledHistoryWithoutTerminalBooking": 0,
+      "cancelledFareMismatch": 0,
+      "tripCancellationWithoutJob": 0,
+      "completedTripWithActiveBookings": 0,
+      "confirmationWithoutNotification": 0,
+      "notificationWithoutEvent": 0,
+      "sentNotificationWithoutIdentity": 0,
+      "processedRefundWithoutIdentity": 0
+    },
+    "released": true
+  },
+  "postBaseline": {
+    "at": "2026-10-31T06:37:04.725Z",
+    "counts": {
+      "trips": 10000,
+      "seats": 400000,
+      "historical_bookings": 100000,
+      "active_bookings": 33,
+      "allocations": 33,
+      "connections": 8,
+      "waiting_locks": 0
+    },
+    "invariants": {
+      "missingHeldAllocations": 0,
+      "terminalAllocations": 0,
+      "incorrectQuotes": 0,
+      "crossTripStopChoices": 0,
+      "missingDetailEvents": 0,
+      "incompleteCatalogSnapshots": 0,
+      "partialServiceTrips": 0,
+      "intentQuoteMismatch": 0,
+      "confirmedWithoutMoney": 0,
+      "fulfillmentWithoutBooking": 0,
+      "refundQuoteMismatch": 0,
+      "captureWithoutDisposition": 0,
+      "compensationWithoutRefund": 0,
+      "refundWithoutJob": 0,
+      "checkoutWithoutRecovery": 0,
+      "inboxWithoutJob": 0,
+      "cancelledHistoryWithoutTerminalBooking": 0,
+      "cancelledFareMismatch": 0,
+      "tripCancellationWithoutJob": 0,
+      "completedTripWithActiveBookings": 0,
+      "confirmationWithoutNotification": 0,
+      "notificationWithoutEvent": 0,
+      "sentNotificationWithoutIdentity": 0,
+      "processedRefundWithoutIdentity": 0
+    }
+  },
+  "postHot": {
+    "at": "2026-10-31T06:47:35.030Z",
+    "counts": {
+      "trips": 10000,
+      "seats": 400000,
+      "historical_bookings": 100000,
+      "active_bookings": 40,
+      "allocations": 40,
+      "connections": 58,
+      "waiting_locks": 0
+    },
+    "invariants": {
+      "missingHeldAllocations": 0,
+      "terminalAllocations": 0,
+      "incorrectQuotes": 0,
+      "crossTripStopChoices": 0,
+      "missingDetailEvents": 0,
+      "incompleteCatalogSnapshots": 0,
+      "partialServiceTrips": 0,
+      "intentQuoteMismatch": 0,
+      "confirmedWithoutMoney": 0,
+      "fulfillmentWithoutBooking": 0,
+      "refundQuoteMismatch": 0,
+      "captureWithoutDisposition": 0,
+      "compensationWithoutRefund": 0,
+      "refundWithoutJob": 0,
+      "checkoutWithoutRecovery": 0,
+      "inboxWithoutJob": 0,
+      "cancelledHistoryWithoutTerminalBooking": 0,
+      "cancelledFareMismatch": 0,
+      "tripCancellationWithoutJob": 0,
+      "completedTripWithActiveBookings": 0,
+      "confirmationWithoutNotification": 0,
+      "notificationWithoutEvent": 0,
+      "sentNotificationWithoutIdentity": 0,
+      "processedRefundWithoutIdentity": 0
+    }
+  },
+  "databaseStats": {
+    "at": "2026-10-31T06:36:26.387Z",
+    "database": {
+      "numbackends": 8,
+      "xact_commit": "85215",
+      "xact_rollback": "122",
+      "deadlocks": "0",
+      "temp_files": "0",
+      "temp_bytes": "0",
+      "blks_read": "73",
+      "blks_hit": "88898428"
+    },
+    "activity": [
+      {
+        "state": "active",
+        "wait_event_type": null,
+        "connections": 1
+      },
+      {
+        "state": "idle",
+        "wait_event_type": "Client",
+        "connections": 7
+      }
+    ],
+    "maxConnections": "901"
+  },
+  "limits": {
+    "cpuAndMemory": "Sampled CPU from Cloudflare tail; Worker memory and Neon compute size not measured.",
+    "network": "Report server timings and full HTTP durations separately. Do not subtract network time or remove failed requests to pass thresholds.",
+    "provider": "No provider API calls in capacity workload; real hosted test payments verified separately."
+  },
+  "cleanup": {
+    "workers": "Both owned temporary load Workers removed",
+    "database": "Final audit and isolated database removal recorded separately",
+    "production": "Production data, Workers, credentials and unrelated services preserved"
+  }
+}
