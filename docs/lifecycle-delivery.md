@@ -278,3 +278,18 @@ sustained capacity and intermittent hosted-checkout loading. Admin remains
 out of scope. [Versioned production record](evidence/lifecycle-2026-10-29/production.json).
 
 ![Actual 390px cancelled ticket and processed sandbox refund](evidence/lifecycle-2026-10-29/refunded-mobile.png)
+
+## 31 October acceptance follow-up
+
+The historical limits above remain part of the original v0.3 evidence. The next
+patch adds bounded disposable checkout documents, app-owned Return, provider-check
+reopen safeguards, responsive search feedback and stable seat rows. Fresh public
+Google/OTP and actual hosted failure/retry/ticket/reload passed. Public throttled
+search samples are 42/37/27ms, CLS0; the retained earlier cold misses are not hidden.
+
+The full 15-minute, 10,000-trip/400,000-seat/100,000-history exercise was executed
+and **failed** capacity acceptance. Runtime traces confirm free-tier CPU termination.
+The user explicitly accepted a free limited-traffic preview and declined physical
+VoiceOver audio review. No billing change or full conformance/capacity claim is
+made. [Current record](acceptance-hardening.md), [load results](evidence/acceptance-2026-10-31/load.json),
+[browser results](evidence/acceptance-2026-10-31/browser.json).

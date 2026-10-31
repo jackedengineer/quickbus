@@ -212,3 +212,25 @@ replacing traffic; retain email/refund/trip recovery during an admission outage.
 Actual desktop/mobile hosted test checkout, cancellation, scheduled email and
 processed refunds lead acceptance; SQL fault/lease tests supplement the browser.
 [Delivery and measured limitations](lifecycle-delivery.md).
+
+## ADR 018 — Disposable checkout documents and an explicit free-preview limit
+
+**Status:** accepted for the customer sandbox, 31 October 2026.
+
+A real provider failure and intermittent hosted-frame loading require an escape
+path independent of provider JavaScript. Open each attempt in a disposable
+same-origin checkout document under an app-owned dialog. Keep Return outside the
+vendor frame, destroy the document on close, reread the saved owned order on
+reopen, bound loading, and validate message source/origin/attempt. No browser
+message confirms inventory or money. Due/failed reconciliation blocks reopen;
+owned status reads wake bounded, fenced recovery work. Narrow CSP framing to this
+one own document. Do not reload the whole reservation as an SDK reset mechanism.
+
+Place the private transactional Worker near the actual Singapore Neon database;
+keep its pool invocation-scoped and its role restricted. The sustained real-edge
+load exercise met server-side latency targets but failed full HTTP/error/drop
+criteria. Cloudflare tail directly confirmed CPU-limit terminations. The user
+chose to keep the free preview rather than change billing. Preserve the measured
+failure and unchanged thresholds; do not certify 50rps capacity, invent caches,
+replace Better Auth with a custom shortcut, or weaken concurrency/security to fit
+a 10ms CPU budget. [Evidence and reproduction](acceptance-hardening.md).

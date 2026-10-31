@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.3.1-preview — 2026-10-31
+
+### Fixed
+
+- Paint search feedback before navigation and reuse seat-row content when switching map/list. Public throttled search samples: 42/37/27 ms; cold outliers remain in evidence.
+- Isolate each hosted Razorpay checkout document, bound loading, and keep an app-owned Return button available during provider/network stalls. Reconcile before reopening; retain server-authoritative money and seat decisions.
+- Restore popover/seat-drawer focus and correct seat/language accessible names. Hide stale preparation copy once a reservation ends.
+- Place the private API near Singapore Neon without caching sessions or availability.
+
+### Verification and limits
+
+- Real public Google/email OTP, saved-detail restoration and hosted test failure/retry/ticket were verified after rollout.
+- Execute isolated 10,000-trip/400,000-seat/100,000-history, two-Worker load and last-seat exercises. All 24 invariants stayed zero; the capacity gate failed with confirmed free-tier CPU termination.
+- Keep the free limited-traffic preview by explicit user choice. Physical VoiceOver audio review was declined. Admin and live payments remain deferred. [Measured evidence](docs/acceptance-hardening.md).
+
 ## v0.3.0-preview — 2026-10-29
 
 - Add immutable owned print tickets and bounded, leased confirmation/cancellation email delivery.

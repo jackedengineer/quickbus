@@ -8,7 +8,7 @@ Commands refer to the [proposed command interface](plan.md). Before those script
 
 See [compatibility](../docs/compatibility.md), [reservation proof](../docs/reservation-proof.md), and [UI/browser reference](../docs/ui-reference.md). The real Neon/Workers seat proof and a usable search/reserve/release UI were brought forward. The [V0 preview](../docs/release-v0.md) now has published Google login, locally verified hashed/single-use email OTP, SSR isolation and cookie renewal. Public OTP now sends through the verified `jacked.dev` sender and has passed browser verification; the [owned-domain cutover](../docs/domain-cutover.md) is complete, with mobile Google and desktop OTP reservation/reload/release verified on `kwikbus.jacked.dev`. Fresh admin MFA remains open for future admin routes. T02 now has observed provider-contract and sandbox replay evidence. The [P1 customer journey](../docs/p1-customer-journey.md) now completes normalized catalog publication, stop snapshots, real server search, seat list/map selection and conditional passenger review. Test checkout, signed intake, capture/refund recovery and mobile/desktop browser acceptance are delivered; paid cancellation, ticket delivery and operator drains now have lifecycle evidence. The UI reference is now FlixBus, with per-page visual comparison required.
 
-## Active delivery order — reconciled 29 October 2026
+## Active delivery order — reconciled 31 October 2026
 
 The [five P0 operational slices](p0-hardening.md) are complete with production evidence: monitoring → scheduled expiry → database-backed inventory renewal → release safeguards → recovery drill. Real browser acceptance leads each usable change; focused SQL/concurrency checks supplement it. Use focused commits of roughly 300–400 lines, with a working application after each slice. Admin authoring/dashboard and its required MFA stay at the end of the roadmap. All synthetic inventory must be stored in PostgreSQL and served through the API; no client-only catalog or invented availability.
 
@@ -29,7 +29,7 @@ Completed independently of the original sequence: T01, T03 customer authenticati
 | T22 / T23 | Complete: immutable owned print tickets, real confirmation/cancellation Inbox delivery and authenticated links; locked cancellation policy, repeated-key/dual-browser acceptance and atomic release/refund intent. |
 | T24 / T25 | Complete in test mode: processed full cancellation refund, lost-response/excess-capture recovery, guarded trip stop/drain. Paid local Neon/provider and unpaid production browser trip journeys passed. |
 | T26 | Deferred to the end: no admin dashboard or admin endpoint in the active P0/P1 scope. Fresh MFA is mandatory before any admin mutation. |
-| T27 / T28 | Partial: lifecycle desktop/mobile/keyboard/AX, wrong-owner/Origin/signature checks, SQL faults and 100-customer Neon correctness passed. 4x CPU interactions 454–572 ms miss 200 ms; physical screen-reader audio and sustained scale remain open. Hosted provider iframe was intermittently blank in Chrome; root cause unresolved. |
+| T27 / T28 | Focused browser/keyboard/axe review and checkout remediation delivered. Public 4× CPU search 42/37/27 ms; 40-seat keyboard traversal and 320/390 px checks passed. User declined physical VoiceOver. Full 15-minute two-Worker load executed and failed latency/error/drop targets; Cloudflare tail confirmed CPU-limit termination. User chose the free limited-traffic preview. All 24 invariants and the retried 100-customer last-seat proof passed. [Current acceptance](../docs/acceptance-hardening.md). |
 | T29 | Lifecycle-aware guarded deployment/disabled rollback and isolated financial-schema restore passed: 36 tables/8,171 rows, 24 zero invariants, 22.9 s drill. Broader T28 acceptance remains a dependency; no live-money gate is claimed. |
 | T30 | v0.3 sandbox evidence, walkthrough image, API/ADRs/runbooks and honest limits published. Full final portfolio release remains gated by T27/T28; admin stays deferred. |
 
@@ -189,7 +189,7 @@ Historical baseline: [V0](../docs/release-v0.md). Current payment state: [test-p
   - Depends: T11, T21, T24. Targets: sale-state/cancel service, drain handler, progress query, tests. Size: M.
 
 - [ ] **T27 — Lifecycle usability and accessibility pass**
-  - Partial: real ticket/cancellation/refund desktop/mobile, native print, keyboard/focus/AX/reduced-motion passed; physical screen-reader audio and low-end interaction remediation remain open.
+  - Focused preview review delivered: mobile interaction fixes, real checkout recovery, axe/keyboard/focus/AX/reduced-motion, 320/390 px and native print evidence. Physical VoiceOver was explicitly declined. Whole-product/vendor/timing conformance is not certified; keep the full gate unchecked.
   - Accept: mobile/desktop, keyboard/screen reader, seat list, form errors, timer warnings, print, and payment recovery meet the tested accessibility criteria; findings are fixed or explicitly release-blocking.
   - Verify: `pnpm test:a11y`, manual screen-reader record, focused browser regressions.
   - Depends: T22, T24. Admin accessibility follows deferred T26 separately. Targets: affected UI components, focused browser tests, accessibility report; split fixes by page. Size: M.
@@ -199,7 +199,7 @@ Historical baseline: [V0](../docs/release-v0.md). Current payment state: [test-p
 ## Phase 5 — Prove and release
 
 - [ ] **T28 — Security, fault, and load evidence**
-  - Partial: exact-CI SQL faults, real Neon contention, 24-invariant production audits and short HTTP pilot passed; sustained scale and hosted-checkout loading investigation remain open.
+  - Execution delivered: exact-CI faults, production audit, isolated sustained/hot-trip load and last-seat retry evidence. Capacity acceptance failed with free-tier CPU termination; user accepted the limited-traffic preview. Thresholds remain unchanged, so the full capacity gate stays unchecked.
   - Accept: run all mandatory races/crash windows with real SQL, validate shared quotas/CSRF/SSR isolation, and publish measured warm/cold latency and invariant results with exact versions.
   - Verify: `pnpm test:faults`, `pnpm test:contention`, full contract/integration/browser suites, k6 baseline/hot-trip runs. Split any resulting fixes into focused tasks.
   - Depends: T21, T24, T25, T27. Targets: fault/load scenarios, invariant audit, benchmark manifest/report. Size: M for execution/reporting, remediation separate.
