@@ -27,8 +27,10 @@ export async function paymentStatus(
       } | null;
       refunds: string[];
       needsReview: boolean;
+      remainingSeconds: number;
     }>(sql`
     SELECT b.id,t.sales_state='CANCELLED' AS "tripCancelled",
+      greatest(0,floor(extract(epoch from b.expires_at-statement_timestamp())))::int AS "remainingSeconds",
       CASE WHEN b.status IN ('HELD','PAYMENT_PENDING') AND b.expires_at<=statement_timestamp() THEN 'EXPIRED' ELSE b.status END status,
       t.sales_state<>'CANCELLED' AND b.expires_at>=statement_timestamp()+interval '90 seconds' AND b.status IN ('HELD','PAYMENT_PENDING') AS eligible,
       (SELECT jsonb_build_object('id',c.id,'state',c.state,'orderId',c.order_id,'keyId',i.key_id,'amount',i.amount,'currency',i.currency,
@@ -55,6 +57,7 @@ export async function paymentStatus(
     tripCancelled: row.tripCancelled,
     enabled,
     mode: 'test' as const,
+    remainingSeconds: row.remainingSeconds,
     canStart: Boolean(enabled && row.eligible && (!c || c.state === 'FAILED')),
     needsReview: row.needsReview,
     refunds: row.refunds,
