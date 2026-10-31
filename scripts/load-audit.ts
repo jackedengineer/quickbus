@@ -1,15 +1,9 @@
 import { mkdir, writeFile } from 'node:fs/promises';
-import { fixtureClient } from '../tests/support/fixtures';
+import { loadTarget } from './load-target';
 import { invariantQuery } from './recovery-audit';
 
-const target = new URL(process.env.MIGRATION_DATABASE_URL ?? '');
-if (
-  target.hostname !== '127.0.0.1' ||
-  target.port !== '55432' ||
-  target.pathname !== '/quickbus_ci'
-)
-  throw Error('Load audits require the isolated loopback fixture database.');
-const client = await fixtureClient();
+const { client, directory } = loadTarget();
+await client.connect();
 try {
   const counts = (
     await client.query(`SELECT
@@ -23,11 +17,8 @@ try {
   ).rows[0];
   const invariants = (await client.query(invariantQuery)).rows[0].value;
   const report = { at: new Date().toISOString(), counts, invariants };
-  await mkdir('artifacts/local/load', { recursive: true, mode: 0o700 });
-  await writeFile(
-    'artifacts/local/load/audit.json',
-    JSON.stringify(report, null, 2),
-  );
+  await mkdir(directory, { recursive: true, mode: 0o700 });
+  await writeFile(`${directory}/audit.json`, JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report));
   if (Object.values(invariants).some((count) => count !== 0))
     process.exitCode = 1;

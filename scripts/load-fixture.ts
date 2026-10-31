@@ -1,25 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
-import pg from 'pg';
 import { createCustomers } from '../tests/support/fixtures';
+import { loadTarget } from './load-target';
 import { invariantQuery } from './recovery-audit';
 
-// Load fixtures are deliberately restricted more tightly than normal dev seeds.
-const target = new URL(process.env.MIGRATION_DATABASE_URL ?? '');
-if (
-  target.hostname !== '127.0.0.1' ||
-  target.port !== '55432' ||
-  target.pathname !== '/quickbus_ci' ||
-  process.env.DEPLOYMENT_ENV !== 'local' ||
-  process.env.ALLOW_DEV_FIXTURES !== 'true' ||
-  process.env.CI_DATABASE_PROXY !== '127.0.0.1:6543'
-)
-  throw Error('Load fixtures require the isolated loopback CI database.');
-const client = new pg.Client({
-  connectionString: target.href,
-  connectionTimeoutMillis: 8000,
-  query_timeout: 120000,
-});
+const { client, directory } = loadTarget();
 await client.connect();
 try {
   const existing = await client.query(
@@ -77,7 +62,6 @@ try {
   const invariants = (await client.query(invariantQuery)).rows[0].value;
   if (Object.values(invariants).some((n) => n !== 0))
     throw Error('Seed invariant audit failed.');
-  const directory = 'artifacts/local/load';
   await mkdir(directory, { recursive: true, mode: 0o700 });
   await writeFile(
     `${directory}/fixture.json`,

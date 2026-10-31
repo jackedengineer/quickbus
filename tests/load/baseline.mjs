@@ -12,16 +12,31 @@ const customers = new SharedArray(
   'customers',
   () => JSON.parse(open(fixturePath)).customers,
 );
-const endpoints = [
-  'http://host.docker.internal:8787',
-  'http://host.docker.internal:8788',
-];
+const edge = __ENV.EDGE_FIXTURE === 'true';
+const endpoints = edge
+  ? [
+      'https://kwikbus-load-a.ichiragbhugra.workers.dev',
+      'https://kwikbus-load-b.ichiragbhugra.workers.dev',
+    ]
+  : (__ENV.NEON_FIXTURE === 'true' ? [8791, 8792] : [8787, 8788]).map(
+      (port) => `http://host.docker.internal:${port}`,
+    );
+const loadToken = new SharedArray('run credential', () => [
+  JSON.parse(open(fixturePath)).loadToken ?? '',
+])[0];
+if (edge && !/^[a-f0-9]{64}$/.test(loadToken))
+  throw Error('The isolated edge run requires its private fixture credential.');
 const duration = __ENV.DURATION || '15m';
 const origin = 'http://localhost:3002';
 const errors = new Rate('unexpected_errors');
 const conflicts = new Counter('business_conflicts');
 const searchTime = new Trend('search_ms', true);
 const mutationTime = new Trend('mutation_ms', true);
+const searchServer = new Trend('search_server_ms', true);
+const mutationServer = new Trend('mutation_server_ms', true);
+const sessionTime = new Trend('session_ms', true);
+const lockTime = new Trend('trip_lock_ms', true);
+const missingTiming = new Rate('missing_server_timing');
 const outcomes = new Counter('outcomes');
 export const options = {
   scenarios: {
@@ -49,6 +64,9 @@ export const options = {
     search_ms: ['p(95)<500'],
     mutation_ms: ['p(95)<750'],
     dropped_iterations: ['count==0'],
+    search_server_ms: ['p(95)<500'],
+    mutation_server_ms: ['p(95)<750'],
+    missing_server_timing: ['rate==0'],
   },
   systemTags: ['status', 'method', 'name', 'scenario', 'expected_response'],
   summaryTrendStats: ['avg', 'med', 'p(95)', 'p(99)', 'max'],
@@ -70,6 +88,7 @@ function request(method, path, body, customer, name, headers = {}) {
         Origin: origin,
         Cookie: customer.cookie,
         'Content-Type': 'application/json',
+        ...(edge ? { 'x-kwikbus-load': loadToken } : {}),
         ...headers,
       },
       tags: { name },
@@ -83,8 +102,33 @@ function request(method, path, body, customer, name, headers = {}) {
     );
   if (business) conflicts.add(1);
   const failed = response.status < 200 || (response.status >= 400 && !business);
+  if (failed && exec.scenario.iterationInTest < 200)
+    console.warn(
+      JSON.stringify({
+        operation: name,
+        status: response.status,
+        code: response.status ? response.json('code') : 'TRANSPORT',
+      }),
+    );
   errors.add(failed);
   outcomes.add(1, { operation: name, status: String(response.status) });
+  const timing = response.headers['Server-Timing'] ?? '';
+  const duration = (metric) => {
+    const match = timing.match(
+      new RegExp(`(?:^|,\\s*)${metric};dur=([\\d.]+)`),
+    );
+    return match ? Number(match[1]) : null;
+  };
+  const api = duration('api');
+  missingTiming.add(api === null);
+  if (api !== null) {
+    if (name === 'search') searchServer.add(api);
+    if (method !== 'GET') mutationServer.add(api);
+  }
+  const session = duration('session'),
+    lock = duration('tripLock');
+  if (session !== null) sessionTime.add(session);
+  if (lock !== null) lockTime.add(lock);
   return response;
 }
 export function read() {
@@ -123,6 +167,9 @@ export function read() {
 }
 let held = null;
 let saved = false;
+let holdKey = uuid();
+let detailsKey = uuid();
+let releaseKey = uuid();
 export function write() {
   const trip = trips[exec.vu.idInTest % trips.length];
   const customer = customers[exec.vu.idInTest % customers.length];
@@ -141,11 +188,15 @@ export function write() {
       },
       customer,
       'hold',
-      { 'Idempotency-Key': uuid() },
+      { 'Idempotency-Key': holdKey },
     );
     if (r.status === 201) {
       held = r.json('id');
       saved = false;
+      detailsKey = uuid();
+      releaseKey = uuid();
+    } else if (r.status === 409 && r.json('code') !== 'RESOURCE_BUSY') {
+      holdKey = uuid();
     }
   } else if (!saved) {
     r = request(
@@ -159,12 +210,17 @@ export function write() {
       },
       customer,
       'details',
-      { 'Idempotency-Key': uuid(), 'If-Match': '"1"' },
+      { 'Idempotency-Key': detailsKey, 'If-Match': '"1"' },
     );
     if (r.status === 200) saved = true;
   } else {
-    r = request('POST', `/bookings/${held}/release`, {}, customer, 'release');
-    if (r.status === 200) held = null;
+    r = request('POST', `/bookings/${held}/release`, {}, customer, 'release', {
+      'Idempotency-Key': releaseKey,
+    });
+    if (r.status === 200) {
+      held = null;
+      holdKey = uuid();
+    }
   }
   mutationTime.add(r.timings.duration);
 }
@@ -180,6 +236,12 @@ export function handleSummary(data) {
             'unexpected_errors',
             'search_ms',
             'mutation_ms',
+            'search_server_ms',
+            'mutation_server_ms',
+            'session_ms',
+            'trip_lock_ms',
+            'business_conflicts',
+            'missing_server_timing',
             'dropped_iterations',
           ].map((name) => [name, data.metrics[name]?.values]),
         ),
