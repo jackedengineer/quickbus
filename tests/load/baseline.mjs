@@ -37,6 +37,9 @@ const mutationServer = new Trend('mutation_server_ms', true);
 const sessionTime = new Trend('session_ms', true);
 const lockTime = new Trend('trip_lock_ms', true);
 const missingTiming = new Rate('missing_server_timing');
+const transportErrors = new Counter('transport_errors');
+const edgeErrors = new Counter('edge_errors');
+let failureSamples = 0;
 const outcomes = new Counter('outcomes');
 export const options = {
   scenarios: {
@@ -102,14 +105,19 @@ function request(method, path, body, customer, name, headers = {}) {
     );
   if (business) conflicts.add(1);
   const failed = response.status < 200 || (response.status >= 400 && !business);
-  if (failed && exec.scenario.iterationInTest < 200)
+  if (failed && failureSamples++ < 2)
     console.warn(
       JSON.stringify({
         operation: name,
         status: response.status,
-        code: response.status ? response.json('code') : 'TRANSPORT',
+        transportCode: response.error_code,
+        edgeCode: response.body?.match(/(?:Error|error code:)\s*(\d{4})/i)?.[1],
+        server: response.headers.Server,
+        contentType: response.headers['Content-Type'],
+        appTiming: Boolean(response.headers['Server-Timing']),
       }),
     );
+  if (!response.status) transportErrors.add(1);
   errors.add(failed);
   outcomes.add(1, { operation: name, status: String(response.status) });
   const timing = response.headers['Server-Timing'] ?? '';
@@ -120,6 +128,7 @@ function request(method, path, body, customer, name, headers = {}) {
     return match ? Number(match[1]) : null;
   };
   const api = duration('api');
+  if (api === null && response.status) edgeErrors.add(1);
   missingTiming.add(api === null);
   if (api !== null) {
     if (name === 'search') searchServer.add(api);
@@ -244,6 +253,8 @@ export function handleSummary(data) {
             'trip_lock_ms',
             'business_conflicts',
             'missing_server_timing',
+            'transport_errors',
+            'edge_errors',
             'dropped_iterations',
           ].map((name) => [name, data.metrics[name]?.values]),
         ),
