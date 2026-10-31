@@ -1,0 +1,290 @@
+{
+  "date": "2026-10-31",
+  "conditions": {
+    "viewport": "390x844, mobile/touch",
+    "cpu": 4,
+    "network": "Fast 4G",
+    "tool": "chrome-devtools-mcp 1.12.0; isolated Chrome; telemetry/CrUX disabled"
+  },
+  "performance": {
+    "baselineSearch": 458,
+    "localFirstSearchAfterFix": 232,
+    "localRepeatedSearch": [34, 51, 25, 24],
+    "publicSearch": [42, 37, 27],
+    "seatBeforeStableRows": 345,
+    "seatAfterStableRows": 89,
+    "discardedOffscreenPaintExperiment": 210,
+    "cls": 0,
+    "warning": "Small lab samples; no physical-device or field percentile claim."
+  },
+  "accessibility": {
+    "engine": "axe-core 4.14.0",
+    "scans": [
+      {
+        "state": "home-mobile-final",
+        "passedRules": 40,
+        "violations": [
+          {
+            "id": "color-contrast",
+            "targets": [[".brand"]]
+          }
+        ],
+        "manualReview": []
+      },
+      {
+        "state": "calendar-mobile-final",
+        "passedRules": 40,
+        "violations": [
+          {
+            "id": "color-contrast",
+            "targets": [[".brand"]]
+          }
+        ],
+        "manualReview": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [".passenger-field > span"],
+              [".field-button.field-control[type=\"button\"]"],
+              [".search-submit"],
+              ["div:nth-child(1) > h2"],
+              ["div:nth-child(1) > p"],
+              ["div:nth-child(2) > h2"],
+              ["div:nth-child(2) > p"]
+            ]
+          }
+        ]
+      },
+      {
+        "state": "passengers-mobile-final",
+        "passedRules": 40,
+        "violations": [
+          {
+            "id": "color-contrast",
+            "targets": [[".brand"]]
+          }
+        ],
+        "manualReview": []
+      },
+      {
+        "state": "results-mobile-final",
+        "passedRules": 41,
+        "violations": [
+          {
+            "id": "aria-prohibited-attr",
+            "targets": [
+              [
+                "article:nth-child(4) > .trip-overview > .trip-price[aria-label=\"₹499.00 per adult\"]"
+              ],
+              [
+                "article:nth-child(5) > .trip-overview > .trip-price[aria-label=\"₹499.00 per adult\"]"
+              ],
+              [
+                "article:nth-child(6) > .trip-overview > .trip-price[aria-label=\"₹499.00 per adult\"]"
+              ],
+              [
+                "article:nth-child(7) > .trip-overview > .trip-price[aria-label=\"₹499.00 per adult\"]"
+              ],
+              [
+                "article:nth-child(8) > .trip-overview > .trip-price[aria-label=\"₹499.00 per adult\"]"
+              ],
+              [
+                "article:nth-child(9) > .trip-overview > .trip-price[aria-label=\"₹499.00 per adult\"]"
+              ],
+              [
+                "article:nth-child(10) > .trip-overview > .trip-price[aria-label=\"₹499.00 per adult\"]"
+              ],
+              [
+                "article:nth-child(11) > .trip-overview > .trip-price[aria-label=\"₹499.00 per adult\"]"
+              ],
+              [
+                "article:nth-child(12) > .trip-overview > .trip-price[aria-label=\"₹499.00 per adult\"]"
+              ],
+              [
+                "article:nth-child(13) > .trip-overview > .trip-price[aria-label=\"₹499.00 per adult\"]"
+              ]
+            ]
+          },
+          {
+            "id": "color-contrast",
+            "targets": [[".brand"]]
+          }
+        ],
+        "manualReview": []
+      },
+      {
+        "state": "stable-seat-list",
+        "passedRules": 25,
+        "violations": [],
+        "manualReview": []
+      },
+      {
+        "state": "selected-seat-list",
+        "passedRules": 25,
+        "violations": [],
+        "manualReview": []
+      },
+      {
+        "state": "auth-email-final",
+        "passedRules": 23,
+        "violations": [],
+        "manualReview": []
+      },
+      {
+        "state": "auth-error-final",
+        "passedRules": 26,
+        "violations": [],
+        "manualReview": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [".auth-form > p:nth-child(2)"],
+              [".auth-email"],
+              [".error"]
+            ]
+          }
+        ]
+      },
+      {
+        "state": "refund-320-final",
+        "passedRules": 43,
+        "violations": [
+          {
+            "id": "color-contrast",
+            "targets": [[".brand"]]
+          }
+        ],
+        "manualReview": []
+      },
+      {
+        "state": "cancellation-dialog",
+        "passedRules": 18,
+        "violations": [],
+        "manualReview": [
+          {
+            "id": "color-contrast",
+            "targets": [[".dialog-content > p:nth-child(4)"]]
+          }
+        ]
+      },
+      {
+        "state": "checkout-shell",
+        "passedRules": 46,
+        "violations": [
+          {
+            "id": "color-contrast",
+            "targets": [[".brand"]]
+          }
+        ],
+        "manualReview": [
+          {
+            "id": "aria-prohibited-attr",
+            "targets": [[".language"]]
+          },
+          {
+            "id": "frame-tested",
+            "targets": [["iframe"]]
+          }
+        ],
+        "phase": "Historical pre-badge-fix scan, retained; final own shell exposes role=img correctly"
+      }
+    ],
+    "manual": [
+      "Calendar/party Escape and focus restoration",
+      "Tab through all 40 seats, including the last offscreen seat",
+      "Seat selection accessible names match visible state",
+      "Seat drawer Escape restores Continue across its loading transition",
+      "Cancellation keep/Escape restores focus",
+      "320px ticket and drawer; 390px hosted checkout; no horizontal overflow",
+      "Reduced motion: no running animation at 320px"
+    ],
+    "brandException": "Only .brand logotype contrast is manually exempt under WCAG 1.4.3. No global rule suppression.",
+    "physicalVoiceOver": "User explicitly chose to continue without physical VoiceOver audio review.",
+    "scope": "Focused WCAG A/AA scans and manual keyboard/AX review; no whole-product conformance certification. Vendor frame needs separate review; ten-minute inventory timing is not certified under a timing exception."
+  },
+  "localMoney": {
+    "journey": "Bengaluru to Hyderabad",
+    "result": "Failed hosted attempt, same-booking explicit retry, captured test payment, ticket, cancellation, full processed refund, zero allocations",
+    "fareMinor": 74900,
+    "attempts": {
+      "failed": 1,
+      "captured": 1
+    },
+    "wrongOrigin": 403,
+    "forgedSignature": 401,
+    "offline": "Hosted document could not load; outer Return remained usable. Online reopen reused its one saved order; release succeeded."
+  },
+  "publicBrowser": {
+    "source": "d5ce83ed678e45cb668698855ac7631ab748aacc",
+    "google": "Fresh real Google sign-in restored the owned booking",
+    "emailOtp": "New Resend OTP delivered to the real inbox and restored the owned booking",
+    "mobile": {
+      "width": 390,
+      "height": 844
+    },
+    "details": "Passenger/stops restored after full reload",
+    "payment": "Real mock-bank Failure, server-confirmed failed attempt, explicit retry, mock-bank Success, confirmed immutable ticket, full reload",
+    "cancellation": "Reviewed policy deadline and full INR499 refund, cancelled normally; refund completion checked separately",
+    "audit": {
+      "at": "2026-10-31T07:16:06.721Z",
+      "booking": {
+        "status": "CANCELLED",
+        "total_minor": 49900
+      },
+      "attempts": [
+        {
+          "number": 1,
+          "state": "FAILED"
+        },
+        {
+          "number": 2,
+          "state": "CAPTURED"
+        }
+      ],
+      "allocations": 0,
+      "refunds": [
+        {
+          "state": "PENDING",
+          "amount": 49900
+        }
+      ],
+      "notifications": [
+        {
+          "kind": "CANCELLED",
+          "state": "SENT"
+        },
+        {
+          "kind": "CONFIRMED",
+          "state": "SENT"
+        }
+      ],
+      "invariants": {
+        "missingHeldAllocations": 0,
+        "terminalAllocations": 0,
+        "incorrectQuotes": 0,
+        "crossTripStopChoices": 0,
+        "missingDetailEvents": 0,
+        "incompleteCatalogSnapshots": 0,
+        "partialServiceTrips": 0,
+        "intentQuoteMismatch": 0,
+        "confirmedWithoutMoney": 0,
+        "fulfillmentWithoutBooking": 0,
+        "refundQuoteMismatch": 0,
+        "captureWithoutDisposition": 0,
+        "compensationWithoutRefund": 0,
+        "refundWithoutJob": 0,
+        "checkoutWithoutRecovery": 0,
+        "inboxWithoutJob": 0,
+        "cancelledHistoryWithoutTerminalBooking": 0,
+        "cancelledFareMismatch": 0,
+        "tripCancellationWithoutJob": 0,
+        "completedTripWithActiveBookings": 0,
+        "confirmationWithoutNotification": 0,
+        "notificationWithoutEvent": 0,
+        "sentNotificationWithoutIdentity": 0,
+        "processedRefundWithoutIdentity": 0
+      }
+    },
+    "csp": "Real nested hosted document rendered and accepted payment under normal HTTPS"
+  }
+}
