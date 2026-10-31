@@ -389,6 +389,7 @@ export function PaymentPanel({
           </p>
         )}
         {notice &&
+          ['HELD', 'PAYMENT_PENDING'].includes(state.status) &&
           state.enabled &&
           !state.tripCancelled &&
           !confirmed &&
