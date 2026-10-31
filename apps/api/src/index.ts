@@ -42,11 +42,13 @@ const api = {
       );
       if (
         response.ok &&
-        request.method === 'POST' &&
-        (new URL(request.url).pathname === '/api/webhooks/razorpay' ||
-          /\/bookings\/[^/]+\/(checkout|payment\/(verify|refresh))$/.test(
-            new URL(request.url).pathname,
-          ))
+        ((request.method === 'GET' &&
+          /\/bookings\/[^/]+\/payment$/.test(new URL(request.url).pathname)) ||
+          (request.method === 'POST' &&
+            (new URL(request.url).pathname === '/api/webhooks/razorpay' ||
+              /\/bookings\/[^/]+\/(checkout|payment\/(verify|refresh))$/.test(
+                new URL(request.url).pathname,
+              ))))
       ) {
         const body = (await response
           .clone()
@@ -54,8 +56,12 @@ const api = {
           .catch(() => ({}))) as {
           checkoutId?: unknown;
           jobResourceId?: unknown;
+          checkout?: { id?: unknown; checking?: boolean };
         };
-        const resourceId = body.checkoutId ?? body.jobResourceId;
+        const resourceId =
+          body.checkoutId ??
+          body.jobResourceId ??
+          (body.checkout?.checking ? body.checkout.id : undefined);
         if (
           typeof resourceId === 'string' &&
           /^[0-9a-f-]{36}$/i.test(resourceId)
