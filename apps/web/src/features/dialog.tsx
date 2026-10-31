@@ -6,12 +6,14 @@ export function Dialog({
   children,
   drawer = false,
   className = '',
+  returnFocusId,
 }: {
   title: string;
   onClose: () => void;
   children: ReactNode;
   drawer?: boolean;
   className?: string;
+  returnFocusId?: string;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -23,8 +25,13 @@ export function Dialog({
     return () => {
       dialog?.close();
       document.body.style.overflow = previous;
-      if (opener instanceof HTMLElement && opener.isConnected)
-        opener.focus({ preventScroll: true });
+      const target =
+        opener instanceof HTMLElement && opener.isConnected
+          ? opener
+          : returnFocusId
+            ? document.getElementById(returnFocusId)
+            : null;
+      target?.focus({ preventScroll: true });
     };
   }, []);
   return (

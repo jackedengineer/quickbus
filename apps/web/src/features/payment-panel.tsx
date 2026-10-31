@@ -60,6 +60,7 @@ export function PaymentPanel({
       )
         return;
       setState(next);
+      setError('');
       if (
         next.status !== bookingStatus.current ||
         next.tripCancelled !== booking.tripCancelled
@@ -72,9 +73,9 @@ export function PaymentPanel({
         currentBooking.current === booking.id
       )
         setError(
-          cause instanceof Error
+          cause instanceof Error && cause.name === 'Error'
             ? cause.message
-            : 'Payment status unavailable.',
+            : 'Connection interrupted. Refresh payment status when you’re back online.',
         );
     }
   }, [booking.id, booking.tripCancelled]);
@@ -249,7 +250,7 @@ export function PaymentPanel({
       await reload();
     } catch (cause) {
       setError(
-        cause instanceof Error
+        cause instanceof Error && cause.name === 'Error'
           ? cause.message
           : 'Connection interrupted. Retry the same checkout request safely.',
       );

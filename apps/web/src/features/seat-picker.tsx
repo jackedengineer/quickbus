@@ -165,7 +165,12 @@ export function SeatPicker({
     }
   }
   return (
-    <Dialog title="Choose your seats" onClose={onClose} drawer>
+    <Dialog
+      title="Choose your seats"
+      onClose={onClose}
+      drawer
+      returnFocusId={`journey-${trip.id}`}
+    >
       <div className="drawer-content">
         <p className="journey-summary">
           <strong>

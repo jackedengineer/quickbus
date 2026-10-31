@@ -403,6 +403,7 @@ function Home() {
       {search.trip && !selectedTrip && !accountOpen && (
         <Dialog
           title="Journey"
+          returnFocusId={`journey-${search.trip}`}
           onClose={() =>
             void navigate({
               search: { ...search, trip: undefined },

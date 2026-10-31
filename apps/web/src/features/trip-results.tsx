@@ -60,8 +60,7 @@ export function TripResults({
       </div>
       <div className="results-tools">
         <h1>
-          {matches.length} {matches.length === 1 ? 'journey' : 'journeys'} on
-          this page
+          {`${matches.length} ${matches.length === 1 ? 'journey' : 'journeys'} on this page`}
         </h1>
       </div>
       {page.detail && (
@@ -123,6 +122,7 @@ export function TripResults({
                   {trip.availableSeats} seats available
                 </span>
                 <Link
+                  id={`journey-${trip.id}`}
                   className="continue-button"
                   to="/"
                   search={(previous) => ({
