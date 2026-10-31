@@ -428,6 +428,13 @@
   box-shadow: none;
   text-align: left;
 }
+.seat-grid .seat-description,
+.seat-grid .seat-status {
+  display: none;
+}
+.seat-list .seat-label {
+  font-weight: 700;
+}
 
 .checkout-shell {
   width: min(900px, calc(100% - 24px));

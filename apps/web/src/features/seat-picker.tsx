@@ -294,28 +294,22 @@ export function SeatPicker({
                     );
                   }}
                 >
-                  {seatView === 'map' ? (
-                    s.label
-                  ) : (
-                    <>
-                      <strong>{s.label}</strong>
-                      <span>
-                        Row {Math.floor((s.position - 1) / 4) + 1} ·{' '}
-                        {s.position % 4 === 1 || s.position % 4 === 0
-                          ? 'Window'
-                          : 'Aisle'}
-                        <br />
-                        {money(s.fareMinor)}
-                      </span>
-                      <small>
-                        {!s.available
-                          ? 'Unavailable'
-                          : selected.includes(s.label)
-                            ? 'Selected'
-                            : 'Available'}
-                      </small>
-                    </>
-                  )}
+                  <span className="seat-label">{s.label}</span>
+                  <span className="seat-description">
+                    Row {Math.floor((s.position - 1) / 4) + 1} ·{' '}
+                    {s.position % 4 === 1 || s.position % 4 === 0
+                      ? 'Window'
+                      : 'Aisle'}
+                    <br />
+                    {money(s.fareMinor)}
+                  </span>
+                  <small className="seat-status">
+                    {!s.available
+                      ? 'Unavailable'
+                      : selected.includes(s.label)
+                        ? 'Selected'
+                        : 'Available'}
+                  </small>
                 </button>
               ))}
             </div>
