@@ -275,7 +275,7 @@ function Home() {
     });
   };
   const doSearch = (v: SearchValues) =>
-    void navigate({
+    navigate({
       search: { view: 'results', ...v, sort: search.sort, limit: search.limit },
     });
   return (

@@ -273,7 +273,11 @@ export function SeatPicker({
                   key={s.label}
                   type="button"
                   className={s.available ? 'seat' : 'seat unavailable-seat'}
-                  aria-label={`Seat ${s.label}, row ${Math.floor((s.position - 1) / 4) + 1}, ${s.position % 4 === 1 || s.position % 4 === 0 ? 'window' : 'aisle'}, ${money(s.fareMinor)}, ${s.available ? 'available' : 'unavailable'}`}
+                  aria-label={
+                    seatView === 'map'
+                      ? `Seat ${s.label}, row ${Math.floor((s.position - 1) / 4) + 1}, ${s.position % 4 === 1 || s.position % 4 === 0 ? 'window' : 'aisle'}, ${money(s.fareMinor)}, ${s.available ? 'available' : 'unavailable'}`
+                      : undefined
+                  }
                   aria-pressed={selected.includes(s.label)}
                   disabled={
                     !s.available ||

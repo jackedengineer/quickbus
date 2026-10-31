@@ -71,7 +71,7 @@ export function SiteHeader({
             </button>
           </nav>
           <div className="header-widgets">
-            <span className="language" aria-label="India, English">
+            <span className="language" role="img" aria-label="India, English">
               <span className="flag">🇮🇳</span>EN
             </span>
             <button

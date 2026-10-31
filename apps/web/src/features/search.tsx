@@ -1,5 +1,5 @@
 import type { Catalog } from '@kwikbus/contracts';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CityInput } from './city-input';
 import { Icon } from './icon';
 import { day } from './models';
@@ -18,7 +18,7 @@ export function SearchForm({
   initial: SearchValues;
   autoSearch?: boolean;
   catalog: Catalog;
-  onSearch: (values: SearchValues) => void;
+  onSearch: (values: SearchValues) => void | Promise<void>;
 }) {
   const [values, setValues] = useState(initial);
   const initialAdults = initial.adults;
@@ -33,6 +33,32 @@ export function SearchForm({
   const [passengers, setPassengers] = useState(false);
   const [month, setMonth] = useState(initial.date.slice(0, 7));
   const [error, setError] = useState('');
+  const [searching, setSearching] = useState(false);
+  const searchSequence = useRef(0);
+  useEffect(
+    () => () => {
+      searchSequence.current++;
+    },
+    [],
+  );
+  async function requestSearch(next: SearchValues) {
+    const sequence = ++searchSequence.current;
+    setSearching(true);
+    // Paint the acknowledgement before synchronous router validation/history
+    // work. A microtask alone runs before paint and retains the input delay.
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => setTimeout(resolve, 0));
+    });
+    if (sequence !== searchSequence.current) return;
+    try {
+      await onSearch(next);
+    } catch {
+      if (sequence === searchSequence.current)
+        setError('Journeys could not be loaded. Please try again.');
+    } finally {
+      if (sequence === searchSequence.current) setSearching(false);
+    }
+  }
   function update(next: SearchValues) {
     setValues(next);
     if (next.from === next.to) {
@@ -40,7 +66,7 @@ export function SearchForm({
       return;
     }
     setError('');
-    if (autoSearch) onSearch(next);
+    if (autoSearch) void requestSearch(next);
   }
   const changeDay = (offset: number) => {
     const d = new Date(`${values.date}T12:00:00Z`);
@@ -64,7 +90,7 @@ export function SearchForm({
           return;
         }
         setError('');
-        onSearch(values);
+        void requestSearch(values);
       }}
     >
       <fieldset className="trip-type">
@@ -214,7 +240,7 @@ export function SearchForm({
               setCalendar(false);
             }}
           >
-            {values.adults} {values.adults === 1 ? 'Adult' : 'Adults'}
+            {`${values.adults} ${values.adults === 1 ? 'Adult' : 'Adults'}`}
             <Icon name="chevron" size={18} style={{ rotate: '90deg' }} />
           </button>
           {passengers && (
@@ -254,10 +280,13 @@ export function SearchForm({
             </div>
           )}
         </div>
-        <button type="submit" className="search-submit">
-          Search
+        <button type="submit" className="search-submit" disabled={searching}>
+          {searching ? 'Searching…' : 'Search'}
         </button>
       </div>
+      <span className="sr-only" role="status">
+        {searching ? 'Searching journeys…' : ''}
+      </span>
       {error && (
         <p className="error" role="alert">
           {error}
