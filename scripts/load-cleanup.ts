@@ -9,7 +9,13 @@ try {
     await readFile(`${directory}/fixture.json`, 'utf8'),
   ) as {
     customers: { id: string; cookie: string }[];
+    loadToken?: string;
   };
+  if (
+    process.argv.includes('--edge') &&
+    !/^[a-f0-9]{64}$/.test(fixture.loadToken ?? '')
+  )
+    throw Error('The edge fixture credential is missing.');
   const cookies = new Map(
     fixture.customers.map((user) => [user.id, user.cookie]),
   );
@@ -43,6 +49,9 @@ try {
                 Origin: 'http://localhost:3002',
                 'Content-Type': 'application/json',
                 'Idempotency-Key': randomUUID(),
+                ...(process.argv.includes('--edge')
+                  ? { 'x-kwikbus-load': fixture.loadToken! }
+                  : {}),
               },
               body: '{}',
               signal: AbortSignal.timeout(20000),

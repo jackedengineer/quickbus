@@ -135,7 +135,8 @@ export function read() {
   const i = exec.scenario.iterationInTest;
   // 70% of browse traffic targets the first 20 departures; the rest spreads
   // over 1,000 departures. This keeps a hot subset in the published catalogue.
-  const trip = trips[i % (i % 10 < 7 ? 20 : trips.length)];
+  const trip =
+    trips[__ENV.HOT_TRIP === 'true' ? 0 : i % (i % 10 < 7 ? 20 : trips.length)];
   const customer = customers[exec.vu.idInTest % customers.length];
   switch (i % 10) {
     case 0:
@@ -171,7 +172,8 @@ let holdKey = uuid();
 let detailsKey = uuid();
 let releaseKey = uuid();
 export function write() {
-  const trip = trips[exec.vu.idInTest % trips.length];
+  const trip =
+    trips[__ENV.HOT_TRIP === 'true' ? 0 : exec.vu.idInTest % trips.length];
   const customer = customers[exec.vu.idInTest % customers.length];
   let r;
   if (!held) {

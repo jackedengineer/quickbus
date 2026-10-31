@@ -6,6 +6,7 @@ export function loadTarget() {
   const owner = new URL(process.env.MIGRATION_DATABASE_URL ?? '');
   const runtime = new URL(process.env.DATABASE_URL ?? '');
   const neon = process.argv.includes('--neon');
+  const edge = process.argv.includes('--edge');
   const allowed = neon
     ? owner.hostname.endsWith('.neon.tech') &&
       !owner.hostname.includes('-pooler.') &&
@@ -21,6 +22,7 @@ export function loadTarget() {
       process.env.CI_DATABASE_PROXY === '127.0.0.1:6543';
   if (
     !allowed ||
+    (edge && !neon) ||
     process.env.DEPLOYMENT_ENV !== 'local' ||
     process.env.ALLOW_DEV_FIXTURES !== 'true' ||
     process.env.APP_ORIGIN !== 'http://localhost:3002'
@@ -33,6 +35,8 @@ export function loadTarget() {
       query_timeout: 180000,
     }),
     directory: `artifacts/local/${neon ? 'load-neon' : 'load'}`,
-    endpoint: `http://localhost:${neon ? 8791 : 8787}`,
+    endpoint: edge
+      ? 'https://kwikbus-load-a.ichiragbhugra.workers.dev'
+      : `http://localhost:${neon ? 8791 : 8787}`,
   };
 }
