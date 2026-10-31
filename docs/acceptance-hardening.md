@@ -46,8 +46,8 @@ pages retain DENY/frame-ancestors none, nonce CSP and the private API binding.
 Local actual hosted failure → explicit retry → capture → ticket → cancellation →
 processed full INR749 refund passed, with zero allocations and all 24 invariants.
 An offline 390 px hosted document could not load; outer Return still worked.
-Online reopen used the saved order, and normal release succeeded. Public acceptance
-and immutable Worker versions are recorded in the deployment manifest.
+Online reopen used the saved order, and normal release succeeded. Public Google/OTP, hosted failure/retry, confirmed ticket/reload, cancellation and
+processed full INR499 refund passed. [Immutable Worker/deployment manifest](evidence/acceptance-2026-10-31/deployment.json).
 
 ## Accessibility review
 

@@ -224,9 +224,9 @@
     },
     "details": "Passenger/stops restored after full reload",
     "payment": "Real mock-bank Failure, server-confirmed failed attempt, explicit retry, mock-bank Success, confirmed immutable ticket, full reload",
-    "cancellation": "Reviewed policy deadline and full INR499 refund, cancelled normally; refund completion checked separately",
+    "cancellation": "Quoted full INR499 refund, normal cancellation, processed refund observed in mobile UI and PostgreSQL",
     "audit": {
-      "at": "2026-10-31T07:16:06.721Z",
+      "at": "2026-10-31T07:27:42.265Z",
       "booking": {
         "status": "CANCELLED",
         "total_minor": 49900
@@ -244,7 +244,7 @@
       "allocations": 0,
       "refunds": [
         {
-          "state": "PENDING",
+          "state": "PROCESSED",
           "amount": 49900
         }
       ],
@@ -285,6 +285,7 @@
         "processedRefundWithoutIdentity": 0
       }
     },
-    "csp": "Real nested hosted document rendered and accepted payment under normal HTTPS"
+    "csp": "Real nested hosted document rendered and accepted payment under normal HTTPS",
+    "finalDeployment": "See deployment.json for the final copy-only follow-up and immutable Worker identities"
   }
 }

@@ -11,7 +11,7 @@
 
 ### Verification and limits
 
-- Real public Google/email OTP, saved-detail restoration and hosted test failure/retry/ticket were verified after rollout.
+- Real public Google/email OTP, saved-detail restoration and hosted test failure/retry/ticket, cancellation and processed full refund were verified after rollout.
 - Execute isolated 10,000-trip/400,000-seat/100,000-history, two-Worker load and last-seat exercises. All 24 invariants stayed zero; the capacity gate failed with confirmed free-tier CPU termination.
 - Keep the free limited-traffic preview by explicit user choice. Physical VoiceOver audio review was declined. Admin and live payments remain deferred. [Measured evidence](docs/acceptance-hardening.md).
 

@@ -1,0 +1,126 @@
+{
+  "at": "2026-10-31T07:27:43.340Z",
+  "release": "v0.3.1-preview",
+  "source": "3292637ec9b185cd595a503fb8e1d9ca28657d83",
+  "ci": {
+    "id": "41179995290",
+    "url": "https://github.com/jackedengineer/quickbus/actions/runs/41179995290",
+    "result": "success"
+  },
+  "workers": {
+    "api": "597ffc6d-6723-46ef-b17e-e42856df1c10",
+    "web": "43f0b2d0-4005-4469-8501-8f0e106494f7"
+  },
+  "recoveryApi": "a465b0d3-460a-4218-8441-6bf87d0a45b7",
+  "previous": {
+    "api": "ae04d0c5-23f6-486c-8e1c-417a31e13a6e",
+    "web": "dd00fae8-d653-4020-b5cd-31c80670bd63"
+  },
+  "domain": "https://kwikbus.jacked.dev",
+  "acceptance": "Limited-traffic free preview accepted by the user. Capacity gate failed; no billing change.",
+  "functionalBrowserSource": "d5ce83ed678e45cb668698855ac7631ab748aacc",
+  "finalRuntimeDiff": "Only suppress stale preparation copy on terminal reservations. Payment, auth, locks and checkout document code unchanged from the completed public browser journey.",
+  "browser": {
+    "google": "Fresh Google sign-in restored the owned reservation",
+    "otp": "Fresh real delivered email OTP restored the owned reservation",
+    "mobile": "390x844 actual Chrome viewport",
+    "journey": "Database-backed Pune to Mumbai; stops and passenger saved and restored after full reload",
+    "payment": "Mock-bank Failure; server-confirmed failure; explicit retry; mock-bank Success; confirmed ticket; full reload",
+    "cancellation": "Quoted INR499 full refund; normal cancellation; UI and SQL observed processed refund",
+    "physicalVoiceOver": "User explicitly declined audio review; keyboard/AX/axe evidence is scoped, not conformance certification."
+  },
+  "moneyAudit": {
+    "at": "2026-10-31T07:27:42.265Z",
+    "booking": {
+      "status": "CANCELLED",
+      "total_minor": 49900
+    },
+    "attempts": [
+      {
+        "number": 1,
+        "state": "FAILED"
+      },
+      {
+        "number": 2,
+        "state": "CAPTURED"
+      }
+    ],
+    "allocations": 0,
+    "refunds": [
+      {
+        "state": "PROCESSED",
+        "amount": 49900
+      }
+    ],
+    "notifications": [
+      {
+        "kind": "CANCELLED",
+        "state": "SENT"
+      },
+      {
+        "kind": "CONFIRMED",
+        "state": "SENT"
+      }
+    ],
+    "invariants": {
+      "missingHeldAllocations": 0,
+      "terminalAllocations": 0,
+      "incorrectQuotes": 0,
+      "crossTripStopChoices": 0,
+      "missingDetailEvents": 0,
+      "incompleteCatalogSnapshots": 0,
+      "partialServiceTrips": 0,
+      "intentQuoteMismatch": 0,
+      "confirmedWithoutMoney": 0,
+      "fulfillmentWithoutBooking": 0,
+      "refundQuoteMismatch": 0,
+      "captureWithoutDisposition": 0,
+      "compensationWithoutRefund": 0,
+      "refundWithoutJob": 0,
+      "checkoutWithoutRecovery": 0,
+      "inboxWithoutJob": 0,
+      "cancelledHistoryWithoutTerminalBooking": 0,
+      "cancelledFareMismatch": 0,
+      "tripCancellationWithoutJob": 0,
+      "completedTripWithActiveBookings": 0,
+      "confirmationWithoutNotification": 0,
+      "notificationWithoutEvent": 0,
+      "sentNotificationWithoutIdentity": 0,
+      "processedRefundWithoutIdentity": 0
+    }
+  },
+  "security": {
+    "wrongOrigin": 403,
+    "forgedWebhook": 401,
+    "forgedCallbackLocal": 401,
+    "legacyRead": 308,
+    "legacyMutation": 421,
+    "privateApiPublicHostname": 404,
+    "rootFramePolicy": "DENY / frame-ancestors none",
+    "checkoutFramePolicy": "SAMEORIGIN / frame-ancestors self"
+  },
+  "secrets": {
+    "at": "2026-10-31T07:21:41.206Z",
+    "secretKindsChecked": 7,
+    "findings": []
+  },
+  "cleanup": {
+    "temporaryLoadWorkers": "Both deleted",
+    "isolatedNeonLoadDatabase": "Deleted only after matching fixture markers and all 24 zero invariants",
+    "localFixture": "Original HBA restored; only kwikbus-ci containers/network removed",
+    "credentials": "Obsolete load-only credentials removed; production/development originals preserved",
+    "unrelatedServices": "Preserved",
+    "browser": "Connection timed out during screenshot cleanup; viewport reset was attempted but not independently confirmed. Agent-created testing tabs were left unmarked for automatic cleanup."
+  },
+  "limits": {
+    "capacity": "15-minute run failed unchanged error, latency and dropped-iteration thresholds; sampled exceededCpu confirmed.",
+    "timing": "No formal WCAG timing-exception claim for the ten-minute inventory hold.",
+    "providerFrame": "Vendor accessibility and uninterrupted provider availability are not certified."
+  },
+  "postFinalRollout": {
+    "publicMobileGuestSearch": "Passed on the final refreshed build at 390px/4x CPU/Fast4G",
+    "browserConsoleErrors": 0,
+    "financialAudit": "All 24 invariants zero after final rollout",
+    "copyOnlyFollowUp": "Ended-reservation notice filter reviewed; completed authenticated financial paths unchanged"
+  }
+}

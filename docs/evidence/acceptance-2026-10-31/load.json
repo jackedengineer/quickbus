@@ -586,7 +586,7 @@
   },
   "cleanup": {
     "workers": "Both owned temporary load Workers removed",
-    "database": "Final audit and isolated database removal recorded separately",
+    "database": "Removed only the marked isolated Neon load database after its final zero-invariant audit",
     "production": "Production data, Workers, credentials and unrelated services preserved"
   }
 }

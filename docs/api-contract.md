@@ -1,24 +1,39 @@
 # KwikBus API contract
 
-## Deployed unpaid surface
+## Deployed customer sandbox surface
 
-The sections after this implementation note define the target contract, including future DTO/OpenAPI packages, problem details, payments and admin. They are not a claim that those endpoints exist. The current Express/Zod boundary lives in `packages/backend/src/app.ts`; [task status](../tasks/todo.md).
+The implementation note below describes shipped behavior. Later sections retain
+the broader target contract; generated OpenAPI and admin are not implied to exist.
+Express/Zod inputs live in `packages/backend/src/app.ts`, payment/cancellation route
+modules and `packages/contracts`. [Task status](../tasks/todo.md),
+[current acceptance](acceptance-hardening.md).
 
 | Current route | Behavior |
 |---|---|
-| `GET /api/health/live`, `/ready`, `/maintenance` | Liveness, real database readiness and freshness/horizon/backlog health; maintenance returns 503 when degraded. |
-| `GET /api/v1/session` | Safe auth availability flags and the current verified customer; session cookie renewal propagates through SSR. |
-| `GET /api/v1/trips`, `/trips/:id/seats` | Bounded database-backed preview timetable and authoritative seat availability. Filtered/cursor-based server search remains P1. |
-| `POST /api/v1/holds` | Verified customer; UUID idempotency key, one to four distinct labels, expected INR total. Atomic all-or-none hold and replay result. |
-| `GET /api/v1/bookings`, `/bookings/:id` | Owned unpaid reservations only; no other customer's booking data. |
-| `POST /api/v1/bookings/:id/release` | Owner, UUID command key and current trip-lock protocol; no physical deletion of history. |
-| Better Auth allowlist under `/api/auth/*` | Google social sign-in/callback, send/verify sign-in email OTP, sign-out and error return only. Passwords, magic links, OTP inspection/reset and admin methods are unreachable. |
+| `GET /api/health/live`, `/ready`, `/maintenance` | Liveness, PostgreSQL readiness and inventory/job/notification health; degraded maintenance is 503. |
+| `GET /api/v1/session` | Safe auth availability/current verified customer, with cookie renewal propagated through SSR. |
+| `GET /api/v1/catalog`, `/cities`, `/trips`, `/trips/:id`, `/trips/:id/seats` | Persisted catalogue and stops, bounded filtered/cursor search, trip snapshots and authoritative availability. |
+| `POST /api/v1/holds` | Verified customer, UUID idempotency key, one to four seats, expected INR quote and selected stops; atomic hold/replay. |
+| `GET /api/v1/bookings`, `/bookings/:id` | Owned lifecycle history/review, immutable confirmed ticket snapshot, cancellation/refund/notification status. Never another owner's data. |
+| `PATCH /api/v1/bookings/:id/details` | Owner, command key and `If-Match`; validated passenger/contact/stops update and replay before payment locks details. |
+| `POST /api/v1/bookings/:id/release` | Owner/key and trip lock; terminal history retained. |
+| `POST /api/v1/bookings/:id/checkout` | Owner/key/`If-Match`, explicit test-policy consent; frozen money intent and durable order/reconciliation jobs. |
+| `GET /api/v1/bookings/:id/payment` | Owned test-mode financial view; server `remainingSeconds`, `canStart`, refund states and checkout `checking`/`canOpen`. Provider fields only when opening is eligible. A due check wakes bounded leased recovery. |
+| `POST /api/v1/bookings/:id/payment/verify`, `/payment/refresh` | Owned reconciliation hints; verify additionally checks the stored order/payment HMAC. Neither confirms seats from browser data. |
+| `GET /api/v1/bookings/:id/cancellation`, `POST /bookings/:id/cancel` | Locked policy preview and idempotent/versioned full-booking cancellation with one refund intent. |
+| `POST /api/webhooks/razorpay` | Exact-byte signature verification before durable signed-event intake; exempt from browser Origin, not provider authentication. |
+| Better Auth allowlist under `/api/auth/*` | Google, sign-in email OTP, sign-out and error return only. No passwords, magic links, OTP inspection/reset or admin methods. |
 
-Browser calls stay on the public web origin and pass through a private API service binding. Mutations require the exact canonical Origin and bounded bodies. Current errors are bounded JSON `code`/`detail` responses; UUID request correlation and safe Server-Timing are response headers. No payment, webhook, ticket or admin route is exposed.
+All browser API calls use the canonical web origin/private service binding. Cookie
+mutations require exact Origin and bounded bodies. Authenticated `/checkout` is a
+disposable UI document, not a money command. Narrow same-origin framing, nonce CSP,
+private/no-store responses and ownership remain enforced. Current errors are
+bounded JSON `code`/`detail`; safe request correlation/Server-Timing are headers.
+No admin API or live-money mode is exposed.
 
 ## Common contract
 
-Express owns `/api/v1/*`. Better Auth owns `/api/auth/*`; provider webhooks use `/webhooks/razorpay`. Every endpoint has runtime input/output schemas in `packages/contracts`, an OpenAPI representation, and contract tests. Share DTOs and generated client functions, never Drizzle entities or private session types.
+Express owns `/api/v1/*`. Better Auth owns `/api/auth/*`; provider webhooks use `/api/webhooks/razorpay`. Every endpoint has runtime input/output schemas in `packages/contracts`, an OpenAPI representation, and contract tests. Share DTOs and generated client functions, never Drizzle entities or private session types.
 
 Use opaque string IDs, ISO 8601 UTC timestamps, explicit timezone/local dates, and integer minor-unit amounts. Public fields use camelCase; business state values use uppercase. Validate query limits, array uniqueness, field lengths, malformed dates, unknown IDs, and body sizes. Never accept `userId`, `role`, a refund amount, a provider status, or a calculated final fare as client authority.
 
