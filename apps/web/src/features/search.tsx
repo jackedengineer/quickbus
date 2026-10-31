@@ -31,6 +31,8 @@ export function SearchForm({
   }, [initialAdults]);
   const [calendar, setCalendar] = useState(false);
   const [passengers, setPassengers] = useState(false);
+  const dateButton = useRef<HTMLButtonElement>(null);
+  const partyButton = useRef<HTMLButtonElement>(null);
   const [month, setMonth] = useState(initial.date.slice(0, 7));
   const [error, setError] = useState('');
   const [searching, setSearching] = useState(false);
@@ -83,6 +85,14 @@ export function SearchForm({
   return (
     <form
       className={autoSearch ? 'search-form automatic' : 'search-form'}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape' && (calendar || passengers)) {
+          event.stopPropagation();
+          (calendar ? dateButton : partyButton).current?.focus();
+          setCalendar(false);
+          setPassengers(false);
+        }
+      }}
       onSubmit={(e) => {
         e.preventDefault();
         if (values.from === values.to) {
@@ -139,6 +149,7 @@ export function SearchForm({
           <div className="field-control">
             <button
               type="button"
+              ref={dateButton}
               className="field-button"
               aria-expanded={calendar}
               onClick={() => {
@@ -169,12 +180,17 @@ export function SearchForm({
             </button>
           </div>
           {calendar && (
-            <div className="popover calendar">
+            <div
+              className="popover calendar"
+              role="group"
+              aria-label="Choose departure date"
+            >
               <div className="calendar-heading">
                 <button
                   type="button"
                   className="icon-button previous"
                   aria-label="Previous month"
+                  disabled={month <= today.slice(0, 7)}
                   onClick={() => {
                     first.setUTCMonth(first.getUTCMonth() - 1);
                     setMonth(first.toISOString().slice(0, 7));
@@ -192,6 +208,7 @@ export function SearchForm({
                   type="button"
                   className="icon-button"
                   aria-label="Next month"
+                  disabled={month >= catalog.through.slice(0, 7)}
                   onClick={() => {
                     first.setUTCMonth(first.getUTCMonth() + 1);
                     setMonth(first.toISOString().slice(0, 7));
@@ -219,6 +236,7 @@ export function SearchForm({
                       onClick={() => {
                         update({ ...values, date });
                         setCalendar(false);
+                        dateButton.current?.focus();
                       }}
                     >
                       {i + 1}
@@ -233,6 +251,7 @@ export function SearchForm({
           <span>Passengers</span>
           <button
             type="button"
+            ref={partyButton}
             className="field-control field-button"
             aria-expanded={passengers}
             onClick={() => {
@@ -244,7 +263,11 @@ export function SearchForm({
             <Icon name="chevron" size={18} style={{ rotate: '90deg' }} />
           </button>
           {passengers && (
-            <div className="popover passengers">
+            <div
+              className="popover passengers"
+              role="group"
+              aria-label="Choose passengers"
+            >
               <strong>Adults</strong>
               <span className="muted">18 years and above</span>
               <div className="stepper">
@@ -273,7 +296,10 @@ export function SearchForm({
               <button
                 type="button"
                 className="text-button"
-                onClick={() => setPassengers(false)}
+                onClick={() => {
+                  setPassengers(false);
+                  partyButton.current?.focus();
+                }}
               >
                 Done
               </button>
