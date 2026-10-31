@@ -29,6 +29,7 @@ export type PaymentState = {
     id: string;
     state: string;
     canOpen: boolean;
+    checking: boolean;
     keyId?: string;
     orderId?: string;
     amount?: number;

@@ -134,6 +134,9 @@ export function PaymentPanel({
       checkoutId: string,
       verification?: { paymentId: string; signature: string },
     ) => {
+      if (flight.current) return;
+      flight.current = true;
+      setBusy(true);
       try {
         const response = await fetch(
           `/api/v1/bookings/${booking.id}/payment/${verification ? 'verify' : 'refresh'}`,
@@ -151,7 +154,12 @@ export function PaymentPanel({
             'Payment verification is pending. Keep this reservation reference and refresh status; do not pay again.',
           );
       }
-      await reload();
+      try {
+        await reload();
+      } finally {
+        flight.current = false;
+        if (mounted.current) setBusy(false);
+      }
     },
     [booking.id, reload],
   );
@@ -269,7 +277,8 @@ export function PaymentPanel({
       !state.enabled && ['HELD', 'PAYMENT_PENDING'].includes(state.status);
   const waiting =
     state.checkout &&
-    ['PENDING', 'CREATING', 'UNKNOWN'].includes(state.checkout.state);
+    (state.checkout.checking ||
+      ['PENDING', 'CREATING', 'UNKNOWN'].includes(state.checkout.state));
   return (
     <section
       className="payment-panel"

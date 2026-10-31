@@ -36,6 +36,39 @@ test('owned payment status and signed callback cannot bypass authoritative captu
     );
     expect(active?.checkout?.canOpen).toBe(true);
     expect(active?.checkout?.keyId).toBe(config.RAZORPAY_KEY_ID);
+    await f.owner.query(
+      "INSERT INTO payment_jobs(id,kind,resource_id,available_at) VALUES(gen_random_uuid(),'RECONCILE',$1,clock_timestamp())",
+      [f.checkout],
+    );
+    const checking = await paymentStatus(
+      f.runtime.db,
+      config,
+      f.users[0].id,
+      f.booking,
+    );
+    expect(checking?.checkout).toMatchObject({
+      checking: true,
+      canOpen: false,
+    });
+    expect(checking?.checkout?.orderId).toBeUndefined();
+    // A successful check schedules its next safety read in the future. A
+    // provider failure must continue blocking reopen even during backoff.
+    await f.owner.query(
+      "UPDATE payment_jobs SET available_at=clock_timestamp()+interval '30 seconds',failure_code='PROVIDER_UNAVAILABLE' WHERE resource_id=$1",
+      [f.checkout],
+    );
+    expect(
+      (await paymentStatus(f.runtime.db, config, f.users[0].id, f.booking))
+        ?.checkout?.canOpen,
+    ).toBe(false);
+    await f.owner.query(
+      'UPDATE payment_jobs SET failure_code=NULL WHERE resource_id=$1',
+      [f.checkout],
+    );
+    expect(
+      (await paymentStatus(f.runtime.db, config, f.users[0].id, f.booking))
+        ?.checkout?.canOpen,
+    ).toBe(true);
     const sign = (orderId: string) =>
       createHmac('sha256', config.RAZORPAY_KEY_SECRET)
         .update(`${orderId}|${f.payment.id}`)
