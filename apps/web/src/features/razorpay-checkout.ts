@@ -35,7 +35,13 @@ export type PaymentState = {
     currency?: string;
   } | null;
 };
-export function checkoutMessage(data: unknown, expectedId: string) {
+export type CheckoutMessage =
+  | { kind: 'success'; paymentId: string; signature: string }
+  | { kind: 'dismissed' | 'failed' | 'unavailable' };
+export function checkoutMessage(
+  data: unknown,
+  expectedId: string,
+): CheckoutMessage | null {
   if (!data || typeof data !== 'object') return null;
   const m = data as Record<string, unknown>;
   if (m.type !== 'kwikbus:checkout' || m.checkoutId !== expectedId) return null;

@@ -49,8 +49,12 @@ const web = createServerEntry({
       'camera=(), microphone=(), geolocation=()',
     );
     if (new URL(request.url).protocol === 'https:') {
+      const checkoutDocument = url.pathname === '/checkout';
       secured.headers.set('Strict-Transport-Security', 'max-age=31536000');
-      secured.headers.set('X-Frame-Options', 'DENY');
+      secured.headers.set(
+        'X-Frame-Options',
+        checkoutDocument ? 'SAMEORIGIN' : 'DENY',
+      );
       secured.headers.set(
         'Content-Security-Policy',
         [
@@ -60,13 +64,15 @@ const web = createServerEntry({
           "img-src 'self' data:",
           "font-src 'self'",
           "connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com",
-          'frame-src https://api.razorpay.com https://checkout.razorpay.com',
+          "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com",
           "object-src 'none'",
           "base-uri 'none'",
           // Checkout posts into its initially blank iframe, which inherits this
           // policy. frame-src alone does not permit that form navigation.
           "form-action 'self' https://api.razorpay.com",
-          "frame-ancestors 'none'",
+          checkoutDocument
+            ? "frame-ancestors 'self'"
+            : "frame-ancestors 'none'",
           'upgrade-insecure-requests',
         ].join('; '),
       );

@@ -5,11 +5,13 @@ export function Dialog({
   onClose,
   children,
   drawer = false,
+  className = '',
 }: {
   title: string;
   onClose: () => void;
   children: ReactNode;
   drawer?: boolean;
+  className?: string;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -28,7 +30,7 @@ export function Dialog({
   return (
     <dialog
       ref={ref}
-      className={drawer ? 'dialog drawer' : 'dialog'}
+      className={`${drawer ? 'dialog drawer' : 'dialog'} ${className}`}
       onCancel={(e) => {
         e.preventDefault();
         onClose();

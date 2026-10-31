@@ -1,27 +1,9 @@
 import type { ReservationReview } from '@kwikbus/contracts';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Dialog } from './dialog';
 import { money } from './models';
-import { type Checkout, checkoutSdk } from './razorpay-checkout';
+import { checkoutMessage, type PaymentState } from './razorpay-checkout';
 
-type PaymentState = {
-  id: string;
-  status: string;
-  tripCancelled: boolean;
-  enabled: boolean;
-  mode: 'test';
-  canStart: boolean;
-  needsReview: boolean;
-  refunds: string[];
-  checkout: {
-    id: string;
-    state: string;
-    canOpen: boolean;
-    keyId?: string;
-    orderId?: string;
-    amount?: number;
-    currency?: string;
-  } | null;
-};
 export function PaymentPanel({
   booking,
   ready,
@@ -41,7 +23,8 @@ export function PaymentPanel({
     [accepted, setAccepted] = useState(false);
   const pending = useRef<{ key: string; version: number } | null>(null);
   const flight = useRef(false),
-    checkoutInstance = useRef<Checkout | null>(null),
+    hostedFrame = useRef<HTMLIFrameElement | null>(null),
+    activeCheckout = useRef<string | null>(null),
     latest = useRef(0),
     onChanged = useRef(onChange),
     bookingStatus = useRef(booking.status),
@@ -102,22 +85,13 @@ export function PaymentPanel({
         ['CONFIRMED', 'EXPIRED', 'CANCELLED'].includes(state.status) ||
         ['FAILED', 'CAPTURED'].includes(state.checkout?.state ?? ''))
     ) {
-      const checkout = checkoutInstance.current;
-      checkoutInstance.current = null;
+      activeCheckout.current = null;
       setOpen(false);
-      if (checkout) {
-        checkout.close();
-        // State is already authoritative. Reset the third-party frame before
-        // another attempt, and suppress its stale dismissal callback.
-        window.location.reload();
-      }
     }
   }, [state?.status, state?.checkout?.state, state?.tripCancelled]);
   useEffect(
     () => () => {
-      const checkout = checkoutInstance.current;
-      checkoutInstance.current = null;
-      checkout?.close();
+      activeCheckout.current = null;
     },
     [booking.id],
   );
@@ -167,6 +141,7 @@ export function PaymentPanel({
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ checkoutId, ...verification }),
+            signal: AbortSignal.timeout(15000),
           },
         );
         if (!response.ok) throw new Error();
@@ -180,98 +155,62 @@ export function PaymentPanel({
     },
     [booking.id, reload],
   );
-  const launch = useCallback(async () => {
+  const leaveCheckout = () => {
+    const id = activeCheckout.current;
+    activeCheckout.current = null;
+    setOpen(false);
+    setNotice(
+      'Checkout closed. Checking your existing payment before offering a retry.',
+    );
+    if (id) void hint(id);
+  };
+  useEffect(() => {
+    if (!open) return;
+    const receive = (event: MessageEvent) => {
+      const source = hostedFrame.current?.contentWindow;
+      if (
+        !source ||
+        event.origin !== window.location.origin ||
+        event.source !== source ||
+        !activeCheckout.current
+      )
+        return;
+      const id = activeCheckout.current;
+      const message = checkoutMessage(event.data, id);
+      if (!message) return;
+      activeCheckout.current = null;
+      setOpen(false);
+      setNotice('Checkout finished. Verifying your saved reservation…');
+      void hint(
+        id,
+        message.kind === 'success'
+          ? { paymentId: message.paymentId, signature: message.signature }
+          : undefined,
+      );
+    };
+    window.addEventListener('message', receive);
+    return () => window.removeEventListener('message', receive);
+  }, [open, hint]);
+  function launch() {
     const c = state?.checkout;
     if (
       flight.current ||
+      activeCheckout.current ||
       !c?.canOpen ||
-      !c.keyId ||
-      !c.orderId ||
-      !c.amount ||
-      !c.currency ||
       remaining === null ||
       remaining < 90
     )
       return;
-    flight.current = true;
-    setBusy(true);
+    activeCheckout.current = c.id;
     setError('');
-    try {
-      const Razorpay = await checkoutSdk();
-      if (!mounted.current || currentBooking.current !== booking.id) return;
-      const checkout = new Razorpay({
-        key: c.keyId,
-        order_id: c.orderId,
-        amount: c.amount,
-        currency: c.currency,
-        name: 'KwikBus',
-        description: `Test reservation ${booking.reference}`,
-        timeout: Math.min(600, remaining),
-        theme: { color: '#73a800' },
-        retry: { enabled: false },
-        handler: (result) => {
-          setOpen(false);
-          setNotice(
-            'Payment received by checkout. Verifying your reservation…',
-          );
-          void hint(c.id, {
-            paymentId: result.razorpay_payment_id,
-            signature: result.razorpay_signature,
-          });
-        },
-        modal: {
-          confirm_close: true,
-          ondismiss: () => {
-            if (
-              !mounted.current ||
-              currentBooking.current !== booking.id ||
-              checkoutInstance.current !== checkout
-            )
-              return;
-            checkoutInstance.current = null;
-            setOpen(false);
-            setNotice(
-              'Checkout closed. We are checking the payment before offering a retry.',
-            );
-            // The hosted SDK reused a blank frame on a real same-document retry.
-            // Frozen details and all financial state are durable; a fresh document
-            // resets provider globals without inventing another order or payment.
-            void hint(c.id).finally(() => {
-              if (mounted.current && currentBooking.current === booking.id)
-                window.location.reload();
-            });
-          },
-        },
-      });
-      checkout.on('payment.failed', () => {
-        if (checkoutInstance.current !== checkout) return;
-        setOpen(false);
-        setNotice(
-          'The payment attempt failed. Checking with Razorpay before you try again…',
-        );
-        void hint(c.id);
-      });
-      checkoutInstance.current = checkout;
-      setOpen(true);
-      checkout.open();
-    } catch (cause) {
-      setError(
-        cause instanceof Error ? cause.message : 'Checkout could not open.',
-      );
-    } finally {
-      flight.current = false;
-      setBusy(false);
-    }
-  }, [state?.checkout, remaining, booking.reference, hint]);
+    setOpen(true);
+  }
   async function start() {
     if (flight.current || !accepted || !ready || !state?.canStart) return;
     flight.current = true;
     setBusy(true);
     setError('');
     setNotice('Preparing secure test checkout…');
-    // Load while the server prepares the order. Opening remains a direct user
-    // click: delayed effect-driven launch left a blank frame in real Chrome.
-    void checkoutSdk().catch(() => {});
     pending.current ??= { key: crypto.randomUUID(), version: booking.version };
     try {
       const response = await fetch(`/api/v1/bookings/${booking.id}/checkout`, {
@@ -282,6 +221,7 @@ export function PaymentPanel({
           'If-Match': `"${pending.current.version}"`,
         },
         body: JSON.stringify({ policyAccepted: true }),
+        signal: AbortSignal.timeout(15000),
       });
       const result = (await response.json()) as {
         detail?: string;
@@ -336,6 +276,30 @@ export function PaymentPanel({
       aria-labelledby="payment-heading"
       aria-busy={busy}
     >
+      {open && (
+        <Dialog
+          title="Secure test checkout"
+          onClose={leaveCheckout}
+          className="checkout-shell"
+        >
+          <div className="checkout-return">
+            <p>
+              No real money. If the hosted panel does not load, return safely;
+              your existing order stays saved.
+            </p>
+            <button type="button" className="secondary" onClick={leaveCheckout}>
+              Return to reservation
+            </button>
+          </div>
+          <iframe
+            ref={hostedFrame}
+            className="hosted-checkout"
+            title="Razorpay test checkout"
+            src={`/checkout?bookingId=${booking.id}`}
+            allow="payment"
+          />
+        </Dialog>
+      )}
       <span className="sandbox-badge">TEST MODE · No real money</span>
       <h2 id="payment-heading">
         {state.tripCancelled && !refunding

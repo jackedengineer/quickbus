@@ -428,3 +428,35 @@
   box-shadow: none;
   text-align: left;
 }
+
+.checkout-shell {
+  width: min(900px, calc(100% - 24px));
+  height: calc(100dvh - 24px);
+  max-height: calc(100dvh - 24px);
+  display: flex;
+  flex-direction: column;
+}
+.checkout-shell:not([open]) {
+  display: none;
+}
+.checkout-shell .dialog-heading,
+.checkout-return {
+  flex-shrink: 0;
+}
+.checkout-return {
+  padding: 8px 16px 12px;
+  font-size: 13px;
+}
+.checkout-return p {
+  margin: 0 0 8px;
+}
+.hosted-checkout {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  border: 0;
+  background: white;
+}
+.checkout-document {
+  padding: 16px;
+}
