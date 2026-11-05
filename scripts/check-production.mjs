@@ -2,12 +2,17 @@ import { setTimeout } from 'node:timers/promises';
 
 const origin = 'https://kwikbus.jacked.dev';
 const drill = process.argv.includes('--failure-drill');
-async function probe(path, validate) {
+async function probe(path, validate, { authorized = false } = {}) {
   const started = performance.now();
+  const headers = { 'User-Agent': 'KwikBus-health-monitor' };
+  if (authorized) {
+    if (!process.env.HEALTH_TOKEN) throw new Error('HEALTH_TOKEN_MISSING');
+    headers.Authorization = `Bearer ${process.env.HEALTH_TOKEN}`;
+  }
   const response = await fetch(new URL(path, origin), {
     redirect: 'error',
     signal: AbortSignal.timeout(15000),
-    headers: { 'User-Agent': 'KwikBus-health-monitor' },
+    headers,
   });
   if (!response.ok) throw new Error(`HTTP_${response.status}`);
   await validate(response);
@@ -22,14 +27,22 @@ async function probe(path, validate) {
 }
 async function check() {
   if (drill) throw new Error('INTENTIONAL_MONITOR_DRILL');
-  await probe('/api/health/ready', async (response) => {
-    if ((await response.json()).status !== 'ok')
-      throw new Error('DATABASE_NOT_READY');
-  });
-  await probe('/api/health/maintenance', async (response) => {
-    if ((await response.json()).status !== 'ok')
-      throw new Error('MAINTENANCE_DEGRADED');
-  });
+  await probe(
+    '/api/health/ready',
+    async (response) => {
+      if ((await response.json()).status !== 'ok')
+        throw new Error('DATABASE_NOT_READY');
+    },
+    { authorized: true },
+  );
+  await probe(
+    '/api/health/maintenance',
+    async (response) => {
+      if ((await response.json()).status !== 'ok')
+        throw new Error('MAINTENANCE_DEGRADED');
+    },
+    { authorized: true },
+  );
   await probe('/api/v1/session', async (response) => {
     const session = await response.json();
     if (

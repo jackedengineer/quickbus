@@ -13,6 +13,10 @@ export type HoldInput = {
   dropStopId?: string;
 };
 const scope = 'POST /api/v1/holds';
+// Seats are scarce and every account can sign in with any mailbox, so an
+// account may not tie up inventory across the whole timetable.
+export const MAX_LIVE_HOLDS = 3;
+export const MAX_HOLDS_PER_WINDOW = 8; // created in the last 10 minutes
 
 export async function holdSeats(
   db: Database,
@@ -28,6 +32,12 @@ export async function holdSeats(
     key,
     { ...input, seatLabels: seats },
     async (tx) => {
+      // Customer before trip, as in checkout admission, so the per-account
+      // budgets below are serialised across trips and API Workers. NO KEY UPDATE
+      // is compatible with the idempotency row's FK KEY SHARE on this user.
+      await tx.execute(
+        sql`SELECT id FROM "user" WHERE id=${userId} FOR NO KEY UPDATE`,
+      );
       const trip = await lockTrip(tx, input.tripId);
       if (!trip)
         return failure('TRIP_NOT_FOUND', 'This trip is unavailable.', 404);
@@ -62,6 +72,24 @@ export async function holdSeats(
         return failure(
           'ACTIVE_HOLD_EXISTS',
           'You already have a reservation for this trip. Open My bookings.',
+        );
+      const load = (
+        await tx.execute<{ live: number; recent: number }>(sql`
+        SELECT count(*) FILTER (WHERE status IN ('HELD','PAYMENT_PENDING') AND expires_at>clock_timestamp())::int AS live,
+          count(*) FILTER (WHERE created_at>clock_timestamp()-interval '10 minutes')::int AS recent
+        FROM bookings WHERE user_id=${userId}`)
+      ).rows[0];
+      if (load.live >= MAX_LIVE_HOLDS)
+        return failure(
+          'HOLD_LIMIT_REACHED',
+          `You can hold up to ${MAX_LIVE_HOLDS} unpaid reservations at once. Pay for or release one in My bookings first.`,
+          429,
+        );
+      if (load.recent >= MAX_HOLDS_PER_WINDOW)
+        return failure(
+          'HOLD_RATE_LIMIT',
+          'Too many reservations in a short time. Wait a few minutes and try again.',
+          429,
         );
       const selected = await tx.execute<{
         seat_label: string;

@@ -12,6 +12,10 @@ async function authRequest(path: string, body: Record<string, unknown>) {
     url?: string;
   };
   if (!response.ok) {
+    if (data.code === 'OTP_SEND_LIMIT')
+      throw new Error(
+        'Too many codes were requested for this address. Use the latest code from your inbox, try again in about 15 minutes, or continue with Google.',
+      );
     if (response.status === 429)
       throw new Error('Too many attempts. Please wait a minute and try again.');
     if (

@@ -14,6 +14,7 @@ import {
 import { cancellationRoutes } from './cancellation-routes';
 import { catalog, citySuggestions, searchTrips, tripDetails } from './catalog';
 import { context } from './context';
+import { healthAccessAllowed } from './health-access';
 import { maintenanceHealth } from './maintenance';
 import { receivePaymentWebhook } from './payment-inbox';
 import { paymentRoutes } from './payment-routes';
@@ -53,13 +54,22 @@ export function createApp() {
   app.get('/api/health/live', (_request, response) => {
     response.json({ status: 'ok', runtime: 'cloudflare-workers' });
   });
-  app.get('/api/health/ready', async (_request, response) => {
+  // Liveness is public. Readiness and maintenance reveal internal state and
+  // wake the database, so they require the monitor's bearer token.
+  const healthGate: express.RequestHandler = (request, response, next) => {
+    if (
+      healthAccessAllowed(context().environment, request.get('authorization'))
+    )
+      return next();
+    response.status(404).json({ code: 'NOT_FOUND' });
+  };
+  app.get('/api/health/ready', healthGate, async (_request, response) => {
     const rows = await context().db.execute(
       sql`select current_setting('server_version_num')::int / 10000 as major`,
     );
     response.json({ status: 'ok', postgresMajor: rows.rows[0]?.major });
   });
-  app.get('/api/health/maintenance', async (_request, response) => {
+  app.get('/api/health/maintenance', healthGate, async (_request, response) => {
     const { db, environment } = context();
     const health = await maintenanceHealth(
       db,

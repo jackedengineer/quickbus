@@ -10,7 +10,8 @@ modules and `packages/contracts`. [Task status](../tasks/todo.md),
 
 | Current route | Behavior |
 |---|---|
-| `GET /api/health/live`, `/ready`, `/maintenance` | Liveness, PostgreSQL readiness and inventory/job/notification health; degraded maintenance is 503. |
+| `GET /api/health/live` | Public liveness. |
+| `GET /api/health/ready`, `/maintenance` | PostgreSQL readiness and inventory/job/notification health; degraded maintenance is 503. Production requires `Authorization: Bearer <HEALTH_TOKEN>` and otherwise answers 404; with no token configured, production denies everyone. |
 | `GET /api/v1/session` | Safe auth availability/current verified customer, with cookie renewal propagated through SSR. |
 | `GET /api/v1/catalog`, `/cities`, `/trips`, `/trips/:id`, `/trips/:id/seats` | Persisted catalogue and stops, bounded filtered/cursor search, trip snapshots and authoritative availability. |
 | `POST /api/v1/holds` | Verified customer, UUID idempotency key, one to four seats, expected INR quote and selected stops; atomic hold/replay. |

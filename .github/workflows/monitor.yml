@@ -26,6 +26,7 @@ jobs:
       - name: Check public site, database, auth configuration and inventory
         env:
           FAILURE_DRILL: ${{ inputs.failure_drill }}
+          HEALTH_TOKEN: ${{ secrets.HEALTH_TOKEN }}
         run: |
           if [ "$FAILURE_DRILL" = "true" ]; then
             node scripts/check-production.mjs --failure-drill

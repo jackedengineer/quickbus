@@ -7,6 +7,8 @@ export type AppEnvironment = AuthEnvironment &
   RazorpayEnvironment & {
     DATABASE_URL: string;
     CI_DATABASE_PROXY?: string;
+    // Bearer token for /api/health/ready and /maintenance. Required in production.
+    HEALTH_TOKEN?: string;
   };
 export const requestContext = new AsyncLocalStorage<{
   db: Database;

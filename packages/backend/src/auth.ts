@@ -3,8 +3,10 @@ import { drizzleAdapter } from '@better-auth/drizzle-adapter';
 import type { Database } from '@kwikbus/db';
 import * as authSchema from '@kwikbus/db/auth-schema';
 import { betterAuth } from 'better-auth';
+import { APIError, createAuthMiddleware } from 'better-auth/api';
 import { emailOTP } from 'better-auth/plugins';
 import { sendSignInCode } from './email';
+import { consumeOtpSend } from './otp-budget';
 
 export type AuthEnvironment = {
   AUTH_SECRET: string;
@@ -56,6 +58,19 @@ export function createAuth(db: Database, environment: AuthEnvironment) {
           }
         : {},
     rateLimit: { enabled: true, storage: 'database', window: 60, max: 20 },
+    hooks: {
+      before: createAuthMiddleware(async (ctx) => {
+        if (ctx.path !== '/email-otp/send-verification-otp') return;
+        const email = (ctx.body as { email?: unknown } | undefined)?.email;
+        // Let the endpoint's own schema reject malformed bodies.
+        if (typeof email !== 'string' || !email || email.length > 254) return;
+        if (!(await consumeOtpSend(db, environment.AUTH_SECRET, email)))
+          throw new APIError('TOO_MANY_REQUESTS', {
+            code: 'OTP_SEND_LIMIT',
+            message: 'Too many sign-in codes were requested for this address.',
+          });
+      }),
+    },
     plugins: [
       emailOTP({
         otpLength: 6,
