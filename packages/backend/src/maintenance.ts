@@ -9,10 +9,16 @@ import { paymentJobHealth } from './payment-jobs';
 import { runPaymentJobs } from './payment-worker';
 import type { RazorpayEnvironment } from './razorpay';
 
+export type MaintenanceJob =
+  | 'expiry'
+  | 'inventory'
+  | 'payments'
+  | 'notifications';
+
 export async function runMaintenance(
   db: Database,
-  name: 'expiry' | 'inventory' | 'payments' | 'notifications',
-  runId = crypto.randomUUID(),
+  name: MaintenanceJob,
+  runId: string = crypto.randomUUID(),
   environment: RazorpayEnvironment & NotificationEnvironment = {},
 ) {
   const started = performance.now();
@@ -56,6 +62,28 @@ export async function runMaintenance(
     );
     throw new Error('Scheduled maintenance failed.');
   }
+}
+
+// One scheduled invocation runs several independent jobs. A failure in one must
+// not skip the rest: expiry trouble can't be allowed to stop payment recovery or
+// confirmation email. They run in turn because the invocation has one connection.
+// Failing afterwards still marks the Cron event failed; runMaintenance has already
+// logged and recorded which job it was.
+export async function runMaintenanceJobs(
+  db: Database,
+  names: MaintenanceJob[],
+  runId: string,
+  environment: RazorpayEnvironment & NotificationEnvironment,
+) {
+  let failed = false;
+  for (const name of names) {
+    try {
+      await runMaintenance(db, name, runId, environment);
+    } catch {
+      failed = true;
+    }
+  }
+  if (failed) throw new Error('Scheduled maintenance failed.');
 }
 
 export async function maintenanceHealth(

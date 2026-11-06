@@ -2,7 +2,7 @@
 import { httpServerHandler } from 'cloudflare:node';
 import { createApp } from '@kwikbus/backend/app';
 import { type AppEnvironment, requestContext } from '@kwikbus/backend/context';
-import { runMaintenance } from '@kwikbus/backend/maintenance';
+import { runMaintenanceJobs } from '@kwikbus/backend/maintenance';
 import { runPaymentJobs } from '@kwikbus/backend/payment-worker';
 import {
   observeRequest,
@@ -113,11 +113,12 @@ export default {
       runId,
     );
     try {
-      await runMaintenance(database.db, job, runId);
-      if (job === 'expiry') {
-        await runMaintenance(database.db, 'payments', runId, environment);
-        await runMaintenance(database.db, 'notifications', runId, environment);
-      }
+      await runMaintenanceJobs(
+        database.db,
+        job === 'expiry' ? ['expiry', 'payments', 'notifications'] : [job],
+        runId,
+        environment,
+      );
     } finally {
       await database.close();
     }
