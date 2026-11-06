@@ -171,8 +171,12 @@ the stable body. Actual same-key replay returned one processed sandbox refund.
 Because indefinite provider key retention is not established, an uncertain submit
 recovers by reads and opens a review case rather than issuing another mutation.
 Cases, backlog age, exhausted jobs and the recovery heartbeat affect health.
-Settled orders receive hourly safety reads for thirty days; unresolved exposure
-at that boundary retains a case. Signed intake remains active after that window.
+Reconciliation reads every 30 seconds only while the booking is live or a payment
+is in flight. Settled orders and abandoned or failed checkouts on ended bookings
+receive hourly safety reads for thirty days. Only unresolved exposure at that
+boundary (a paid order that isn't settled, or a payment still in flight) retains a
+case; an abandoned checkout owes nothing. Signed intake remains active after that
+window.
 
 Deploy payment-aware code with admission disabled before enabling test checkout,
 so a compatible Worker rollback exists. Disabling admission preserves secrets,

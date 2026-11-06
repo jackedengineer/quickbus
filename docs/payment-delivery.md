@@ -66,7 +66,8 @@ passed the integration suite and its independent two-Worker contention run.
 
 During actual usage, older recovery jobs delayed a new checkout's request wakeup.
 Request-triggered work now claims only the trusted checkout/inbox resource; cron
-handles the global queue. Successful settled orders back off to hourly reads.
+handles the global queue. Settled orders, and abandoned or failed checkouts on
+ended bookings, back off to hourly reads.
 Browser polling continues after release while checkout/refund exposure remains,
 and authoritative terminal states close a stale hosted overlay.
 

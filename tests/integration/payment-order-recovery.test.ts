@@ -137,6 +137,132 @@ test('an expired order worker never creates again and empty receipt lookup stays
   }
 });
 
+type Fixture = Awaited<ReturnType<typeof paymentFixture>>;
+const providerOrder = (f: Fixture, status: string) => ({
+  id: f.payment.order_id,
+  receipt: f.checkout,
+  amount: 74900,
+  currency: 'INR',
+  status,
+  amount_paid: 0,
+  amount_due: 74900,
+  attempts: 1,
+});
+async function endBooking(f: Fixture) {
+  await f.owner.query("UPDATE bookings SET status='CANCELLED' WHERE id=$1", [
+    f.booking,
+  ]);
+  await f.owner.query('DELETE FROM seat_allocations WHERE booking_id=$1', [
+    f.booking,
+  ]);
+}
+// Runs one reconcile pass and returns the job with its delay until the next read.
+async function reconcileOnce(
+  f: Fixture,
+  order: unknown,
+  items: unknown[],
+  jobId?: string,
+) {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (url: string) =>
+      Response.json(
+        url.endsWith('/payments') ? { count: items.length, items } : order,
+      ),
+    ),
+  );
+  if (!jobId)
+    await f.runtime.db.transaction((tx) =>
+      enqueuePaymentJob(tx, 'RECONCILE', f.checkout),
+    );
+  const job = await claimPaymentJob(f.runtime.db, f.checkout);
+  if (!job) throw new Error('Missing reconciliation');
+  await reconcileCheckout(f.runtime.db, config, job);
+  const seconds = (
+    await f.owner.query(
+      'SELECT extract(epoch FROM available_at-clock_timestamp())::int seconds FROM payment_jobs WHERE id=$1',
+      [job.id],
+    )
+  ).rows[0].seconds;
+  return { job, seconds };
+}
+async function pastSafetyWindow(f: Fixture, jobId: string) {
+  await f.owner.query(
+    "UPDATE checkout_attempts SET created_at=clock_timestamp()-interval '31 days' WHERE id=$1",
+    [f.checkout],
+  );
+  await f.owner.query(
+    'UPDATE payment_jobs SET available_at=clock_timestamp() WHERE id=$1',
+    [jobId],
+  );
+}
+const openCases = async (f: Fixture) =>
+  (
+    await f.owner.query(
+      'SELECT count(*)::int n FROM payment_cases WHERE checkout_id=$1',
+      [f.checkout],
+    )
+  ).rows[0].n;
+
+test.each([
+  ['was never paid', 'created', []],
+  ['has only failed payments', 'attempted', ['failed']],
+])(
+  'an ended booking whose order %s backs off hourly and finishes its window with no case',
+  async (_, status, payments) => {
+    const f = await paymentFixture();
+    try {
+      await endBooking(f);
+      const order = providerOrder(f, status as string);
+      const items = (payments as string[]).map((s) => ({
+        ...f.payment,
+        status: s,
+        captured: false,
+      }));
+      const { job, seconds } = await reconcileOnce(f, order, items);
+      expect(seconds).toBeGreaterThan(3500);
+      await pastSafetyWindow(f, job.id);
+      await reconcileOnce(f, order, items, job.id);
+      expect(
+        (
+          await f.owner.query('SELECT state FROM payment_jobs WHERE id=$1', [
+            job.id,
+          ])
+        ).rows[0].state,
+      ).toBe('DONE');
+      expect(await openCases(f)).toBe(0);
+    } finally {
+      await f.close();
+    }
+  },
+);
+
+test('a live booking keeps the 30-second poll while the customer can still pay', async () => {
+  const f = await paymentFixture();
+  try {
+    const { seconds } = await reconcileOnce(f, providerOrder(f, 'created'), []);
+    expect(seconds).toBeLessThanOrEqual(30);
+  } finally {
+    await f.close();
+  }
+});
+
+test('an authorized payment on an ended booking keeps polling and opens a case at the window', async () => {
+  const f = await paymentFixture();
+  try {
+    await endBooking(f);
+    const order = providerOrder(f, 'attempted');
+    const items = [{ ...f.payment, status: 'authorized', captured: false }];
+    const { job, seconds } = await reconcileOnce(f, order, items);
+    expect(seconds).toBeLessThanOrEqual(30);
+    await pastSafetyWindow(f, job.id);
+    await reconcileOnce(f, order, items, job.id);
+    expect(await openCases(f)).toBe(1);
+  } finally {
+    await f.close();
+  }
+});
+
 test('settled orders back off and finish the safety window without false ambiguity alerts', async () => {
   const f = await paymentFixture();
   try {

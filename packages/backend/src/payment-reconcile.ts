@@ -117,15 +117,28 @@ export async function reconcileCheckout(
       payments.every((p) =>
         ['failed', 'captured', 'refunded'].includes(p.status),
       );
-    // Continue observing earlier failed attempts for surprising later captures.
-    // Settled orders need only an hourly safety read; signed events still wake
-    // their own durable inbox immediately. Avoid a permanent 30-second poll.
-    // At the automatic window boundary retain an actionable case, never erase it.
+    // An unpaid order with no payment in flight owes nothing: it is an abandoned
+    // or failed checkout, not unresolved exposure.
+    const inProgress = payments.some((p) =>
+      ['created', 'authorized'].includes(p.status),
+    );
+    const nothingOwed = settled || (order.status !== 'paid' && !inProgress);
+    // lockTrip has already expired due holds, so this status is current.
+    const booking = await tx.execute<{ live: boolean }>(
+      sql`SELECT status IN ('HELD','PAYMENT_PENDING') AS live FROM bookings WHERE id=${checkout.bookingId}`,
+    );
+    // Poll quickly only while something can still happen. Otherwise keep an hourly
+    // safety read for surprising later captures; signed events still wake their own
+    // durable inbox immediately. A permanent 30-second poll for every abandoned
+    // checkout would saturate the bounded queue for 30 days.
+    const quiet = settled || (nothingOwed && !booking.rows[0]?.live);
+    // At the automatic window boundary retain an actionable case for real exposure,
+    // never erase it. An abandoned checkout has nothing for anyone to act on.
     const age = await tx.execute(
       sql`SELECT id FROM checkout_attempts WHERE id=${checkout.id} AND created_at<clock_timestamp()-interval '30 days'`,
     );
     if (age.rowCount) {
-      if (!settled)
+      if (!nothingOwed)
         await paymentCase(
           tx,
           `window:${checkout.id}`,
@@ -133,7 +146,7 @@ export async function reconcileCheckout(
           checkout.id,
         );
       if (!(await finishPaymentJob(tx, job))) throw new StalePaymentLease();
-    } else if (!(await finishPaymentJob(tx, job, settled ? 3600 : 30)))
+    } else if (!(await finishPaymentJob(tx, job, quiet ? 3600 : 30)))
       throw new StalePaymentLease();
   });
 }
