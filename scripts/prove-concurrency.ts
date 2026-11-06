@@ -215,11 +215,13 @@ try {
     elapsedMs: Math.round(performance.now() - started),
   });
   console.log('PASS: last-seat race (1 winner, 99 conflicts)');
+  // Each scenario below gets its own customers: an account may only hold
+  // MAX_LIVE_HOLDS reservations at once, and these scenarios leave theirs live.
   const duplicate = await trip(),
     key = randomUUID();
   const replay = await collect(
     Array.from({ length: 12 }, (_, i) =>
-      reserve(duplicate, 0, ['1A', '1B'], key, i % 2),
+      reserve(duplicate, 10, ['1A', '1B'], key, i % 2),
     ),
   );
   assert.ok(replay.every((r) => r.status === 201));
@@ -240,8 +242,8 @@ try {
   console.log('PASS: concurrent idempotency replays');
   const overlap = await trip();
   const parties = await collect([
-    reserve(overlap, 0, ['1A', '1B']),
-    reserve(overlap, 1, ['1B', '1C']),
+    reserve(overlap, 11, ['1A', '1B']),
+    reserve(overlap, 12, ['1B', '1C']),
   ]);
   assert.equal(parties.filter((r) => r.status === 201).length, 1);
   assert.equal(parties.filter((r) => r.status === 409).length, 1);
@@ -259,13 +261,13 @@ try {
   });
   console.log('PASS: overlapping parties stay atomic');
   const expired = await trip();
-  const old = await reserve(expired, 0, ['1A', '1B']);
+  const old = await reserve(expired, 13, ['1A', '1B']);
   assert.equal(old.status, 201);
   await client.query(
     `UPDATE bookings SET expires_at=clock_timestamp()-interval '1 second' WHERE id=$1`,
     [old.body.id],
   );
-  const replacement = await reserve(expired, 1);
+  const replacement = await reserve(expired, 14);
   assert.equal(replacement.status, 201);
   assert.equal(
     (
@@ -302,7 +304,7 @@ try {
   const deadline = await trip();
   await client.query('BEGIN');
   await client.query('SELECT id FROM trips WHERE id=$1 FOR UPDATE', [deadline]);
-  const waiting = reserve(deadline, 0);
+  const waiting = reserve(deadline, 15);
   try {
     await waitForLock();
     await client.query(
@@ -340,7 +342,7 @@ try {
     headers: {
       'Content-Type': 'application/json',
       Origin: origin,
-      Cookie: customers[0].cookie,
+      Cookie: customers[16].cookie,
       'Idempotency-Key': busyKey,
     },
     body: JSON.stringify({
@@ -356,7 +358,7 @@ try {
     ((await busyResponse.json()) as { code: string }).code,
     'RESOURCE_BUSY',
   );
-  const retried = await reserve(busyTrip, 0, ['1A'], busyKey);
+  const retried = await reserve(busyTrip, 16, ['1A'], busyKey);
   assert.equal(retried.status, 201);
   report.scenarios.push({
     name: 'Bounded lock timeout and safe same-key retry',
@@ -367,8 +369,8 @@ try {
   console.log('PASS: lock timeout rolls back and same-key retry succeeds');
   const sameUserTrip = await trip();
   const differentKeys = await collect([
-    reserve(sameUserTrip, 0, ['1A'], randomUUID(), 0),
-    reserve(sameUserTrip, 0, ['1B'], randomUUID(), 1),
+    reserve(sameUserTrip, 17, ['1A'], randomUUID(), 0),
+    reserve(sameUserTrip, 17, ['1B'], randomUUID(), 1),
   ]);
   assert.equal(differentKeys.filter((r) => r.status === 201).length, 1);
   assert.equal(
@@ -402,7 +404,7 @@ try {
     );
     const failed = await reserve(
       faultTrip,
-      0,
+      18,
       ['1A', '1B'],
       faultKey,
       0,
@@ -430,7 +432,7 @@ try {
     );
     await client.query(`DROP FUNCTION public.${faultName}()`);
   }
-  const recovered = await reserve(faultTrip, 0, ['1A', '1B'], faultKey);
+  const recovered = await reserve(faultTrip, 18, ['1A', '1B'], faultKey);
   assert.equal(recovered.status, 201);
   report.scenarios.push({
     name: 'Injected allocation failure after booking and items writes',
