@@ -91,6 +91,15 @@ cover these signals. Unknown refunds/orders are deliberately visible failures.
   paid cancellation is a later customer capability.
 - `RETRY_EXHAUSTED`: inspect bounded failure codes and the current provider state
   before explicitly requeuing the existing resource. There is no public admin API.
+  The job row stores only `RETRY_EXHAUSTED`; the `payment_job_exhausted` log event
+  records the underlying failure code, phase and HTTP status.
+
+Webhooks for payments made outside this app on the same Razorpay account are
+ignored without a case: the inbox row is marked processed and the
+`payment_inbox_foreign_ignored` log event is written. This applies when the
+provider's records aren't ours, or are unusable and have no local order or payment
+reference. Provider outages still retry, and unusable records for our own orders
+still fail visibly.
 
 Set the production admission flag false in a reviewed deployment to stop new
 checkout; retain all three provider credentials and the webhook for recovery.

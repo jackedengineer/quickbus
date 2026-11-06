@@ -50,6 +50,26 @@ test('a lost create response is ambiguous and never automatically retried', asyn
   expect(fetcher).toHaveBeenCalledTimes(1);
 });
 
+test('a null receipt is a valid order, and only a readable mismatch reports the shape phase', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi
+      .fn()
+      .mockResolvedValueOnce(Response.json({ ...order, receipt: null }))
+      .mockResolvedValueOnce(Response.json({ id: 'order_bad' }))
+      .mockResolvedValueOnce(new Response('not json')),
+  );
+  await expect(razorpay(config).order('order_fixture')).resolves.toMatchObject({
+    receipt: null,
+  });
+  await expect(razorpay(config).order('order_fixture')).rejects.toMatchObject({
+    phase: 'shape',
+  });
+  await expect(razorpay(config).order('order_fixture')).rejects.toMatchObject({
+    phase: 'parse',
+  });
+});
+
 test('Workers-compatible manual redirects never forward provider credentials', async () => {
   const fetcher = vi.fn().mockResolvedValue(
     new Response(null, {

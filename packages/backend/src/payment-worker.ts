@@ -38,17 +38,27 @@ export async function runPaymentJobs(
       processed++;
     } catch (error) {
       if (error instanceof StalePaymentLease) continue;
-      await failPaymentJob(
-        db,
-        job,
+      const code =
         error instanceof ProviderUnavailable
           ? 'PROVIDER_UNAVAILABLE'
-          : 'PROCESSING_FAILED',
-      );
-      if (job.attempts >= 8)
+          : 'PROCESSING_FAILED';
+      await failPaymentJob(db, job, code);
+      if (job.attempts >= 8) {
+        // The job row keeps only RETRY_EXHAUSTED, so record what actually failed.
+        console.error(
+          JSON.stringify({
+            event: 'payment_job_exhausted',
+            kind: job.kind,
+            failureCode: code,
+            ...(error instanceof ProviderUnavailable
+              ? { phase: error.phase, httpStatus: error.httpStatus }
+              : {}),
+          }),
+        );
         await db.transaction((tx) =>
           paymentCase(tx, `job:${job.id}`, 'RETRY_EXHAUSTED'),
         );
+      }
     }
   }
   // A repeatedly killed worker can reach the claim cap without executing catch.

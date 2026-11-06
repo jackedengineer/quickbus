@@ -13,7 +13,34 @@ import {
   checkoutRecord,
   paymentCase,
 } from './payment-state';
-import { type RazorpayEnvironment, razorpay } from './razorpay';
+import {
+  type ProviderOrder,
+  type ProviderPayment,
+  ProviderUnavailable,
+  type RazorpayEnvironment,
+  razorpay,
+} from './razorpay';
+
+// The provider answered, and the answer can't be used: an out-of-contract record,
+// or an ID it rejects. Timeouts and 5xx/429/401 remain retryable outages.
+function unusableRecord(error: unknown) {
+  return (
+    error instanceof ProviderUnavailable &&
+    (error.phase === 'shape' ||
+      (error.phase === 'http' &&
+        (error.httpStatus === 400 || error.httpStatus === 404)))
+  );
+}
+
+async function referencedLocally(
+  db: Database,
+  inbox: { orderId: string | null; paymentId: string | null },
+) {
+  const result = await db.execute<{ known: boolean }>(sql`SELECT
+    EXISTS(SELECT 1 FROM checkout_attempts WHERE order_id=${inbox.orderId})
+    OR EXISTS(SELECT 1 FROM provider_payments WHERE id=${inbox.paymentId}) AS known`);
+  return result.rows[0].known;
+}
 
 export async function processPaymentInbox(
   db: Database,
@@ -23,18 +50,34 @@ export async function processPaymentInbox(
   const inbox = (
     await db.execute<{
       id: string;
+      orderId: string | null;
       paymentId: string | null;
       processedAt: string | null;
     }>(
-      sql`SELECT id,payment_id AS "paymentId",processed_at AS "processedAt" FROM payment_inbox WHERE id=${job.resourceId}`,
+      sql`SELECT id,order_id AS "orderId",payment_id AS "paymentId",processed_at AS "processedAt" FROM payment_inbox WHERE id=${job.resourceId}`,
     )
   ).rows[0];
   if (!inbox) throw new Error('Webhook resource missing');
   const api = razorpay(env);
-  const payment = inbox.paymentId ? await api.payment(inbox.paymentId) : null;
-  // Resolve by a fetched order's exact local receipt even if the create response
-  // has not been saved yet. The signing secret alone cannot fulfill anything.
-  const order = payment ? await api.order(payment.order_id) : null;
+  let payment: ProviderPayment | null = null;
+  let order: ProviderOrder | null = null;
+  try {
+    payment = inbox.paymentId ? await api.payment(inbox.paymentId) : null;
+    // Resolve by a fetched order's exact local receipt even if the create response
+    // has not been saved yet. The signing secret alone cannot fulfill anything.
+    order = payment ? await api.order(payment.order_id) : null;
+  } catch (error) {
+    // The Razorpay account can carry payments from outside this app, and those
+    // need not fit our schemas. Retrying can never help, and exhausting the job
+    // would hold health red over money that isn't ours. Only ignore records we
+    // have no local reference to: a missed event for one of our own checkouts
+    // keeps failing visibly here, and its RECONCILE job still recovers it.
+    if (!unusableRecord(error) || (await referencedLocally(db, inbox)))
+      throw error;
+    payment = null;
+    order = null;
+    console.log(JSON.stringify({ event: 'payment_inbox_foreign_ignored' }));
+  }
   const receipt = z.uuid().safeParse(order?.receipt);
   const checkout = receipt.success
     ? await checkoutRecord(db, receipt.data)

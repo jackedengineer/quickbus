@@ -6,7 +6,8 @@ const providerId = (prefix: string) =>
   z.string().regex(new RegExp(`^${prefix}_[A-Za-z0-9]{1,40}$`));
 const orderSchema = z.object({
   id: providerId('order'),
-  receipt: z.string().max(40),
+  // Orders this app creates always have one; others on the account may not.
+  receipt: z.string().max(40).nullable(),
   amount: money,
   currency: z.string().length(3),
   status: z.enum(['created', 'attempted', 'paid']),
@@ -139,6 +140,7 @@ export function razorpay(environment: RazorpayEnvironment) {
     if (!reader) throw unavailable('shape');
     let size = 0;
     const chunks: Uint8Array[] = [];
+    let decoded: unknown;
     try {
       for (;;) {
         const { value, done } = await reader.read();
@@ -147,11 +149,16 @@ export function razorpay(environment: RazorpayEnvironment) {
         if (size > 262144) throw new Error('Response too large');
         chunks.push(value);
       }
-      return schema.parse(JSON.parse(Buffer.concat(chunks).toString('utf8')));
+      decoded = JSON.parse(Buffer.concat(chunks).toString('utf8'));
     } catch {
       await reader.cancel().catch(() => undefined);
       throw unavailable('parse');
     }
+    // A readable response this app cannot accept is not an outage: callers can
+    // tell it apart from a provider that failed to answer.
+    const parsed = schema.safeParse(decoded);
+    if (!parsed.success) throw unavailable('shape');
+    return parsed.data;
   }
   return {
     keyId: key,
